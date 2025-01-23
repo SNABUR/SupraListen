@@ -1,0 +1,4630 @@
+Directory structure:
+└── aptos-token/
+    ├── Move.toml
+    ├── doc/
+    │   ├── overview.md
+    │   ├── property_map.md
+    │   ├── token.md
+    │   ├── token_coin_swap.md
+    │   ├── token_event_store.md
+    │   └── token_transfers.md
+    ├── doc_template/
+    │   ├── overview.md
+    │   └── references.md
+    └── sources/
+        ├── property_map.move
+        ├── property_map.spec.move
+        ├── token.move
+        ├── token.spec.move
+        ├── token_coin_swap.move
+        ├── token_coin_swap.spec.move
+        ├── token_event_store.move
+        ├── token_event_store.spec.move
+        ├── token_transfers.move
+        └── token_transfers.spec.move
+
+================================================
+File: aptos-move/framework/aptos-token/Move.toml
+================================================
+[package]
+name = "AptosToken"
+version = "1.0.0"
+
+[addresses]
+std = "0x1"
+supra_framework = "0x1"
+aptos_token = "0x3"
+
+[dependencies]
+MoveStdlib = { local = "../move-stdlib" }
+SupraFramework = { local = "../supra-framework"}
+
+
+================================================
+File: aptos-move/framework/aptos-token/doc/overview.md
+================================================
+
+<a id="@Supra_Token_Framework_0"></a>
+
+# Supra Token Framework
+
+
+This is the reference documentation of the Supra Token framework.
+
+
+<a id="@Index_1"></a>
+
+## Index
+
+
+-  [`0x3::property_map`](property_map.md#0x3_property_map)
+-  [`0x3::token`](token.md#0x3_token)
+-  [`0x3::token_coin_swap`](token_coin_swap.md#0x3_token_coin_swap)
+-  [`0x3::token_event_store`](token_event_store.md#0x3_token_event_store)
+-  [`0x3::token_transfers`](token_transfers.md#0x3_token_transfers)
+
+
+[move-book]: https://aptos.dev/move/book/SUMMARY
+
+
+================================================
+File: aptos-move/framework/aptos-token/doc/token_coin_swap.md
+================================================
+
+<a id="0x3_token_coin_swap"></a>
+
+# Module `0x3::token_coin_swap`
+
+Deprecated module
+
+
+-  [Struct `TokenCoinSwap`](#0x3_token_coin_swap_TokenCoinSwap)
+-  [Resource `TokenListings`](#0x3_token_coin_swap_TokenListings)
+-  [Struct `TokenEscrow`](#0x3_token_coin_swap_TokenEscrow)
+-  [Resource `TokenStoreEscrow`](#0x3_token_coin_swap_TokenStoreEscrow)
+-  [Struct `TokenListingEvent`](#0x3_token_coin_swap_TokenListingEvent)
+-  [Struct `TokenSwapEvent`](#0x3_token_coin_swap_TokenSwapEvent)
+-  [Constants](#@Constants_0)
+-  [Function `does_listing_exist`](#0x3_token_coin_swap_does_listing_exist)
+-  [Function `exchange_coin_for_token`](#0x3_token_coin_swap_exchange_coin_for_token)
+-  [Function `list_token_for_swap`](#0x3_token_coin_swap_list_token_for_swap)
+-  [Function `initialize_token_listing`](#0x3_token_coin_swap_initialize_token_listing)
+-  [Function `initialize_token_store_escrow`](#0x3_token_coin_swap_initialize_token_store_escrow)
+-  [Function `deposit_token_to_escrow`](#0x3_token_coin_swap_deposit_token_to_escrow)
+-  [Function `withdraw_token_from_escrow_internal`](#0x3_token_coin_swap_withdraw_token_from_escrow_internal)
+-  [Function `withdraw_token_from_escrow`](#0x3_token_coin_swap_withdraw_token_from_escrow)
+-  [Function `cancel_token_listing`](#0x3_token_coin_swap_cancel_token_listing)
+-  [Specification](#@Specification_1)
+
+
+<pre><code><b>use</b> <a href="../../move-stdlib/doc/error.md#0x1_error">0x1::error</a>;
+<b>use</b> <a href="../../supra-framework/doc/event.md#0x1_event">0x1::event</a>;
+<b>use</b> <a href="../../move-stdlib/doc/string.md#0x1_string">0x1::string</a>;
+<b>use</b> <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table">0x1::table</a>;
+<b>use</b> <a href="../../supra-framework/../aptos-stdlib/doc/type_info.md#0x1_type_info">0x1::type_info</a>;
+<b>use</b> <a href="token.md#0x3_token">0x3::token</a>;
+</code></pre>
+
+
+
+<a id="0x3_token_coin_swap_TokenCoinSwap"></a>
+
+## Struct `TokenCoinSwap`
+
+TokenCoinSwap records a swap ask for swapping token_amount with CoinType with a minimal price per token
+
+
+<pre><code><b>struct</b> <a href="token_coin_swap.md#0x3_token_coin_swap_TokenCoinSwap">TokenCoinSwap</a>&lt;CoinType&gt; <b>has</b> drop, store
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>token_amount: u64</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>min_price_per_token: u64</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_coin_swap_TokenListings"></a>
+
+## Resource `TokenListings`
+
+The listing of all tokens for swapping stored at token owner's account
+
+
+<pre><code><b>struct</b> <a href="token_coin_swap.md#0x3_token_coin_swap_TokenListings">TokenListings</a>&lt;CoinType&gt; <b>has</b> key
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>listings: <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_Table">table::Table</a>&lt;<a href="token.md#0x3_token_TokenId">token::TokenId</a>, <a href="token_coin_swap.md#0x3_token_coin_swap_TokenCoinSwap">token_coin_swap::TokenCoinSwap</a>&lt;CoinType&gt;&gt;</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>listing_events: <a href="../../supra-framework/doc/event.md#0x1_event_EventHandle">event::EventHandle</a>&lt;<a href="token_coin_swap.md#0x3_token_coin_swap_TokenListingEvent">token_coin_swap::TokenListingEvent</a>&gt;</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>swap_events: <a href="../../supra-framework/doc/event.md#0x1_event_EventHandle">event::EventHandle</a>&lt;<a href="token_coin_swap.md#0x3_token_coin_swap_TokenSwapEvent">token_coin_swap::TokenSwapEvent</a>&gt;</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_coin_swap_TokenEscrow"></a>
+
+## Struct `TokenEscrow`
+
+TokenEscrow holds the tokens that cannot be withdrawn or transferred
+
+
+<pre><code><b>struct</b> <a href="token_coin_swap.md#0x3_token_coin_swap_TokenEscrow">TokenEscrow</a> <b>has</b> store
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code><a href="token.md#0x3_token">token</a>: <a href="token.md#0x3_token_Token">token::Token</a></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>locked_until_secs: u64</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_coin_swap_TokenStoreEscrow"></a>
+
+## Resource `TokenStoreEscrow`
+
+TokenStoreEscrow holds a map of token id to their tokenEscrow
+
+
+<pre><code><b>struct</b> <a href="token_coin_swap.md#0x3_token_coin_swap_TokenStoreEscrow">TokenStoreEscrow</a> <b>has</b> key
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>token_escrows: <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_Table">table::Table</a>&lt;<a href="token.md#0x3_token_TokenId">token::TokenId</a>, <a href="token_coin_swap.md#0x3_token_coin_swap_TokenEscrow">token_coin_swap::TokenEscrow</a>&gt;</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_coin_swap_TokenListingEvent"></a>
+
+## Struct `TokenListingEvent`
+
+
+
+<pre><code><b>struct</b> <a href="token_coin_swap.md#0x3_token_coin_swap_TokenListingEvent">TokenListingEvent</a> <b>has</b> drop, store
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>amount: u64</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>min_price: u64</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>locked_until_secs: u64</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>coin_type_info: <a href="../../supra-framework/../aptos-stdlib/doc/type_info.md#0x1_type_info_TypeInfo">type_info::TypeInfo</a></code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_coin_swap_TokenSwapEvent"></a>
+
+## Struct `TokenSwapEvent`
+
+
+
+<pre><code><b>struct</b> <a href="token_coin_swap.md#0x3_token_coin_swap_TokenSwapEvent">TokenSwapEvent</a> <b>has</b> drop, store
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>token_buyer: <b>address</b></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>token_amount: u64</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>coin_amount: u64</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>coin_type_info: <a href="../../supra-framework/../aptos-stdlib/doc/type_info.md#0x1_type_info_TypeInfo">type_info::TypeInfo</a></code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="@Constants_0"></a>
+
+## Constants
+
+
+<a id="0x3_token_coin_swap_EDEPRECATED_MODULE"></a>
+
+Deprecated module
+
+
+<pre><code><b>const</b> <a href="token_coin_swap.md#0x3_token_coin_swap_EDEPRECATED_MODULE">EDEPRECATED_MODULE</a>: u64 = 8;
+</code></pre>
+
+
+
+<a id="0x3_token_coin_swap_ENOT_ENOUGH_COIN"></a>
+
+Not enough coin to buy token
+
+
+<pre><code><b>const</b> <a href="token_coin_swap.md#0x3_token_coin_swap_ENOT_ENOUGH_COIN">ENOT_ENOUGH_COIN</a>: u64 = 7;
+</code></pre>
+
+
+
+<a id="0x3_token_coin_swap_ETOKEN_ALREADY_LISTED"></a>
+
+Token already listed
+
+
+<pre><code><b>const</b> <a href="token_coin_swap.md#0x3_token_coin_swap_ETOKEN_ALREADY_LISTED">ETOKEN_ALREADY_LISTED</a>: u64 = 1;
+</code></pre>
+
+
+
+<a id="0x3_token_coin_swap_ETOKEN_AMOUNT_NOT_MATCH"></a>
+
+Token buy amount doesn't match listing amount
+
+
+<pre><code><b>const</b> <a href="token_coin_swap.md#0x3_token_coin_swap_ETOKEN_AMOUNT_NOT_MATCH">ETOKEN_AMOUNT_NOT_MATCH</a>: u64 = 6;
+</code></pre>
+
+
+
+<a id="0x3_token_coin_swap_ETOKEN_CANNOT_MOVE_OUT_OF_ESCROW_BEFORE_LOCKUP_TIME"></a>
+
+Token cannot be moved out of escrow before the lockup time
+
+
+<pre><code><b>const</b> <a href="token_coin_swap.md#0x3_token_coin_swap_ETOKEN_CANNOT_MOVE_OUT_OF_ESCROW_BEFORE_LOCKUP_TIME">ETOKEN_CANNOT_MOVE_OUT_OF_ESCROW_BEFORE_LOCKUP_TIME</a>: u64 = 4;
+</code></pre>
+
+
+
+<a id="0x3_token_coin_swap_ETOKEN_LISTING_NOT_EXIST"></a>
+
+Token listing no longer exists
+
+
+<pre><code><b>const</b> <a href="token_coin_swap.md#0x3_token_coin_swap_ETOKEN_LISTING_NOT_EXIST">ETOKEN_LISTING_NOT_EXIST</a>: u64 = 2;
+</code></pre>
+
+
+
+<a id="0x3_token_coin_swap_ETOKEN_MIN_PRICE_NOT_MATCH"></a>
+
+Token buy price doesn't match listing price
+
+
+<pre><code><b>const</b> <a href="token_coin_swap.md#0x3_token_coin_swap_ETOKEN_MIN_PRICE_NOT_MATCH">ETOKEN_MIN_PRICE_NOT_MATCH</a>: u64 = 5;
+</code></pre>
+
+
+
+<a id="0x3_token_coin_swap_ETOKEN_NOT_IN_ESCROW"></a>
+
+Token is not in escrow
+
+
+<pre><code><b>const</b> <a href="token_coin_swap.md#0x3_token_coin_swap_ETOKEN_NOT_IN_ESCROW">ETOKEN_NOT_IN_ESCROW</a>: u64 = 3;
+</code></pre>
+
+
+
+<a id="0x3_token_coin_swap_does_listing_exist"></a>
+
+## Function `does_listing_exist`
+
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_does_listing_exist">does_listing_exist</a>&lt;CoinType&gt;(_token_owner: <b>address</b>, _token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_does_listing_exist">does_listing_exist</a>&lt;CoinType&gt;(
+    _token_owner: <b>address</b>,
+    _token_id: TokenId
+): bool {
+    <b>abort</b> <a href="../../move-stdlib/doc/error.md#0x1_error_invalid_argument">error::invalid_argument</a>(<a href="token_coin_swap.md#0x3_token_coin_swap_EDEPRECATED_MODULE">EDEPRECATED_MODULE</a>)
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_coin_swap_exchange_coin_for_token"></a>
+
+## Function `exchange_coin_for_token`
+
+Coin owner withdraw coin to swap with tokens listed for swapping at the token owner's address.
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_exchange_coin_for_token">exchange_coin_for_token</a>&lt;CoinType&gt;(_coin_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, _coin_amount: u64, _token_owner: <b>address</b>, _creators_address: <b>address</b>, _collection: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, _name: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, _property_version: u64, _token_amount: u64)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_exchange_coin_for_token">exchange_coin_for_token</a>&lt;CoinType&gt;(
+    _coin_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>,
+    _coin_amount: u64,
+    _token_owner: <b>address</b>,
+    _creators_address: <b>address</b>,
+    _collection: String,
+    _name: String,
+    _property_version: u64,
+    _token_amount: u64,
+) {
+    <b>abort</b> <a href="../../move-stdlib/doc/error.md#0x1_error_invalid_argument">error::invalid_argument</a>(<a href="token_coin_swap.md#0x3_token_coin_swap_EDEPRECATED_MODULE">EDEPRECATED_MODULE</a>)
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_coin_swap_list_token_for_swap"></a>
+
+## Function `list_token_for_swap`
+
+Token owner lists their token for swapping
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_list_token_for_swap">list_token_for_swap</a>&lt;CoinType&gt;(_token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, _creators_address: <b>address</b>, _collection: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, _name: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, _property_version: u64, _token_amount: u64, _min_coin_per_token: u64, _locked_until_secs: u64)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_list_token_for_swap">list_token_for_swap</a>&lt;CoinType&gt;(
+    _token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>,
+    _creators_address: <b>address</b>,
+    _collection: String,
+    _name: String,
+    _property_version: u64,
+    _token_amount: u64,
+    _min_coin_per_token: u64,
+    _locked_until_secs: u64
+) {
+    <b>abort</b> <a href="../../move-stdlib/doc/error.md#0x1_error_invalid_argument">error::invalid_argument</a>(<a href="token_coin_swap.md#0x3_token_coin_swap_EDEPRECATED_MODULE">EDEPRECATED_MODULE</a>)
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_coin_swap_initialize_token_listing"></a>
+
+## Function `initialize_token_listing`
+
+Initalize the token listing for a token owner
+
+
+<pre><code><b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_initialize_token_listing">initialize_token_listing</a>&lt;CoinType&gt;(_token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_initialize_token_listing">initialize_token_listing</a>&lt;CoinType&gt;(_token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>) {
+    <b>abort</b> <a href="../../move-stdlib/doc/error.md#0x1_error_invalid_argument">error::invalid_argument</a>(<a href="token_coin_swap.md#0x3_token_coin_swap_EDEPRECATED_MODULE">EDEPRECATED_MODULE</a>)
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_coin_swap_initialize_token_store_escrow"></a>
+
+## Function `initialize_token_store_escrow`
+
+Intialize the token escrow
+
+
+<pre><code><b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_initialize_token_store_escrow">initialize_token_store_escrow</a>(_token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_initialize_token_store_escrow">initialize_token_store_escrow</a>(_token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>) {
+    <b>abort</b> <a href="../../move-stdlib/doc/error.md#0x1_error_invalid_argument">error::invalid_argument</a>(<a href="token_coin_swap.md#0x3_token_coin_swap_EDEPRECATED_MODULE">EDEPRECATED_MODULE</a>)
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_coin_swap_deposit_token_to_escrow"></a>
+
+## Function `deposit_token_to_escrow`
+
+Put the token into escrow that cannot be transferred or withdrawed by the owner.
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_deposit_token_to_escrow">deposit_token_to_escrow</a>(_token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, _token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>, _tokens: <a href="token.md#0x3_token_Token">token::Token</a>, _locked_until_secs: u64)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_deposit_token_to_escrow">deposit_token_to_escrow</a>(
+    _token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>,
+    _token_id: TokenId,
+    _tokens: Token,
+    _locked_until_secs: u64
+) {
+    <b>abort</b> <a href="../../move-stdlib/doc/error.md#0x1_error_invalid_argument">error::invalid_argument</a>(<a href="token_coin_swap.md#0x3_token_coin_swap_EDEPRECATED_MODULE">EDEPRECATED_MODULE</a>)
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_coin_swap_withdraw_token_from_escrow_internal"></a>
+
+## Function `withdraw_token_from_escrow_internal`
+
+Private function for withdraw tokens from an escrow stored in token owner address
+
+
+<pre><code><b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_withdraw_token_from_escrow_internal">withdraw_token_from_escrow_internal</a>(_token_owner_addr: <b>address</b>, _token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>, _amount: u64): <a href="token.md#0x3_token_Token">token::Token</a>
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_withdraw_token_from_escrow_internal">withdraw_token_from_escrow_internal</a>(
+    _token_owner_addr: <b>address</b>,
+    _token_id: TokenId,
+    _amount: u64
+): Token {
+    <b>abort</b> <a href="../../move-stdlib/doc/error.md#0x1_error_invalid_argument">error::invalid_argument</a>(<a href="token_coin_swap.md#0x3_token_coin_swap_EDEPRECATED_MODULE">EDEPRECATED_MODULE</a>)
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_coin_swap_withdraw_token_from_escrow"></a>
+
+## Function `withdraw_token_from_escrow`
+
+Withdraw tokens from the token escrow. It needs a signer to authorize
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_withdraw_token_from_escrow">withdraw_token_from_escrow</a>(_token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, _token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>, _amount: u64): <a href="token.md#0x3_token_Token">token::Token</a>
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_withdraw_token_from_escrow">withdraw_token_from_escrow</a>(
+    _token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>,
+    _token_id: TokenId,
+    _amount: u64
+): Token {
+    <b>abort</b> <a href="../../move-stdlib/doc/error.md#0x1_error_invalid_argument">error::invalid_argument</a>(<a href="token_coin_swap.md#0x3_token_coin_swap_EDEPRECATED_MODULE">EDEPRECATED_MODULE</a>)
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_coin_swap_cancel_token_listing"></a>
+
+## Function `cancel_token_listing`
+
+Cancel token listing for a fixed amount
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_cancel_token_listing">cancel_token_listing</a>&lt;CoinType&gt;(_token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, _token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>, _token_amount: u64)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_coin_swap.md#0x3_token_coin_swap_cancel_token_listing">cancel_token_listing</a>&lt;CoinType&gt;(
+    _token_owner: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>,
+    _token_id: TokenId,
+    _token_amount: u64,
+) {
+    <b>abort</b> <a href="../../move-stdlib/doc/error.md#0x1_error_invalid_argument">error::invalid_argument</a>(<a href="token_coin_swap.md#0x3_token_coin_swap_EDEPRECATED_MODULE">EDEPRECATED_MODULE</a>)
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="@Specification_1"></a>
+
+## Specification
+
+
+
+<pre><code><b>pragma</b> verify = <b>false</b>;
+</code></pre>
+
+
+[move-book]: https://aptos.dev/move/book/SUMMARY
+
+
+================================================
+File: aptos-move/framework/aptos-token/doc/token_transfers.md
+================================================
+
+<a id="0x3_token_transfers"></a>
+
+# Module `0x3::token_transfers`
+
+This module provides the foundation for transferring of Tokens
+
+
+-  [Resource `PendingClaims`](#0x3_token_transfers_PendingClaims)
+-  [Struct `TokenOfferId`](#0x3_token_transfers_TokenOfferId)
+-  [Struct `TokenOffer`](#0x3_token_transfers_TokenOffer)
+-  [Struct `TokenOfferEvent`](#0x3_token_transfers_TokenOfferEvent)
+-  [Struct `TokenCancelOfferEvent`](#0x3_token_transfers_TokenCancelOfferEvent)
+-  [Struct `TokenCancelOffer`](#0x3_token_transfers_TokenCancelOffer)
+-  [Struct `TokenClaimEvent`](#0x3_token_transfers_TokenClaimEvent)
+-  [Struct `TokenClaim`](#0x3_token_transfers_TokenClaim)
+-  [Constants](#@Constants_0)
+-  [Function `initialize_token_transfers`](#0x3_token_transfers_initialize_token_transfers)
+-  [Function `create_token_offer_id`](#0x3_token_transfers_create_token_offer_id)
+-  [Function `offer_script`](#0x3_token_transfers_offer_script)
+-  [Function `offer`](#0x3_token_transfers_offer)
+-  [Function `claim_script`](#0x3_token_transfers_claim_script)
+-  [Function `claim`](#0x3_token_transfers_claim)
+-  [Function `cancel_offer_script`](#0x3_token_transfers_cancel_offer_script)
+-  [Function `cancel_offer`](#0x3_token_transfers_cancel_offer)
+-  [Specification](#@Specification_1)
+    -  [Function `initialize_token_transfers`](#@Specification_1_initialize_token_transfers)
+    -  [Function `create_token_offer_id`](#@Specification_1_create_token_offer_id)
+    -  [Function `offer_script`](#@Specification_1_offer_script)
+    -  [Function `offer`](#@Specification_1_offer)
+    -  [Function `claim_script`](#@Specification_1_claim_script)
+    -  [Function `claim`](#@Specification_1_claim)
+    -  [Function `cancel_offer_script`](#@Specification_1_cancel_offer_script)
+    -  [Function `cancel_offer`](#@Specification_1_cancel_offer)
+
+
+<pre><code><b>use</b> <a href="../../supra-framework/doc/account.md#0x1_account">0x1::account</a>;
+<b>use</b> <a href="../../move-stdlib/doc/error.md#0x1_error">0x1::error</a>;
+<b>use</b> <a href="../../supra-framework/doc/event.md#0x1_event">0x1::event</a>;
+<b>use</b> <a href="../../move-stdlib/doc/features.md#0x1_features">0x1::features</a>;
+<b>use</b> <a href="../../move-stdlib/doc/signer.md#0x1_signer">0x1::signer</a>;
+<b>use</b> <a href="../../move-stdlib/doc/string.md#0x1_string">0x1::string</a>;
+<b>use</b> <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table">0x1::table</a>;
+<b>use</b> <a href="token.md#0x3_token">0x3::token</a>;
+</code></pre>
+
+
+
+<a id="0x3_token_transfers_PendingClaims"></a>
+
+## Resource `PendingClaims`
+
+
+
+<pre><code><b>struct</b> <a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a> <b>has</b> key
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>pending_claims: <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_Table">table::Table</a>&lt;<a href="token_transfers.md#0x3_token_transfers_TokenOfferId">token_transfers::TokenOfferId</a>, <a href="token.md#0x3_token_Token">token::Token</a>&gt;</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>offer_events: <a href="../../supra-framework/doc/event.md#0x1_event_EventHandle">event::EventHandle</a>&lt;<a href="token_transfers.md#0x3_token_transfers_TokenOfferEvent">token_transfers::TokenOfferEvent</a>&gt;</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>cancel_offer_events: <a href="../../supra-framework/doc/event.md#0x1_event_EventHandle">event::EventHandle</a>&lt;<a href="token_transfers.md#0x3_token_transfers_TokenCancelOfferEvent">token_transfers::TokenCancelOfferEvent</a>&gt;</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>claim_events: <a href="../../supra-framework/doc/event.md#0x1_event_EventHandle">event::EventHandle</a>&lt;<a href="token_transfers.md#0x3_token_transfers_TokenClaimEvent">token_transfers::TokenClaimEvent</a>&gt;</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_transfers_TokenOfferId"></a>
+
+## Struct `TokenOfferId`
+
+
+
+<pre><code>#[<a href="../../supra-framework/doc/event.md#0x1_event">event</a>]
+<b>struct</b> <a href="token_transfers.md#0x3_token_transfers_TokenOfferId">TokenOfferId</a> <b>has</b> <b>copy</b>, drop, store
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>to_addr: <b>address</b></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a></code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_transfers_TokenOffer"></a>
+
+## Struct `TokenOffer`
+
+
+
+<pre><code>#[<a href="../../supra-framework/doc/event.md#0x1_event">event</a>]
+<b>struct</b> <a href="token_transfers.md#0x3_token_transfers_TokenOffer">TokenOffer</a> <b>has</b> drop, store
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>to_address: <b>address</b></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>amount: u64</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_transfers_TokenOfferEvent"></a>
+
+## Struct `TokenOfferEvent`
+
+
+
+<pre><code>#[<a href="../../supra-framework/doc/event.md#0x1_event">event</a>]
+<b>struct</b> <a href="token_transfers.md#0x3_token_transfers_TokenOfferEvent">TokenOfferEvent</a> <b>has</b> drop, store
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>to_address: <b>address</b></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>amount: u64</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_transfers_TokenCancelOfferEvent"></a>
+
+## Struct `TokenCancelOfferEvent`
+
+
+
+<pre><code>#[<a href="../../supra-framework/doc/event.md#0x1_event">event</a>]
+<b>struct</b> <a href="token_transfers.md#0x3_token_transfers_TokenCancelOfferEvent">TokenCancelOfferEvent</a> <b>has</b> drop, store
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>to_address: <b>address</b></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>amount: u64</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_transfers_TokenCancelOffer"></a>
+
+## Struct `TokenCancelOffer`
+
+
+
+<pre><code>#[<a href="../../supra-framework/doc/event.md#0x1_event">event</a>]
+<b>struct</b> <a href="token_transfers.md#0x3_token_transfers_TokenCancelOffer">TokenCancelOffer</a> <b>has</b> drop, store
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>to_address: <b>address</b></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>amount: u64</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_transfers_TokenClaimEvent"></a>
+
+## Struct `TokenClaimEvent`
+
+
+
+<pre><code>#[<a href="../../supra-framework/doc/event.md#0x1_event">event</a>]
+<b>struct</b> <a href="token_transfers.md#0x3_token_transfers_TokenClaimEvent">TokenClaimEvent</a> <b>has</b> drop, store
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>to_address: <b>address</b></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>amount: u64</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="0x3_token_transfers_TokenClaim"></a>
+
+## Struct `TokenClaim`
+
+
+
+<pre><code>#[<a href="../../supra-framework/doc/event.md#0x1_event">event</a>]
+<b>struct</b> <a href="token_transfers.md#0x3_token_transfers_TokenClaim">TokenClaim</a> <b>has</b> drop, store
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>to_address: <b>address</b></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>amount: u64</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+</details>
+
+<a id="@Constants_0"></a>
+
+## Constants
+
+
+<a id="0x3_token_transfers_ETOKEN_OFFER_NOT_EXIST"></a>
+
+Token offer doesn't exist
+
+
+<pre><code><b>const</b> <a href="token_transfers.md#0x3_token_transfers_ETOKEN_OFFER_NOT_EXIST">ETOKEN_OFFER_NOT_EXIST</a>: u64 = 1;
+</code></pre>
+
+
+
+<a id="0x3_token_transfers_initialize_token_transfers"></a>
+
+## Function `initialize_token_transfers`
+
+
+
+<pre><code><b>fun</b> <a href="token_transfers.md#0x3_token_transfers_initialize_token_transfers">initialize_token_transfers</a>(<a href="../../supra-framework/doc/account.md#0x1_account">account</a>: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>fun</b> <a href="token_transfers.md#0x3_token_transfers_initialize_token_transfers">initialize_token_transfers</a>(<a href="../../supra-framework/doc/account.md#0x1_account">account</a>: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>) {
+    <b>move_to</b>(
+        <a href="../../supra-framework/doc/account.md#0x1_account">account</a>,
+        <a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a> {
+            pending_claims: <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_new">table::new</a>&lt;<a href="token_transfers.md#0x3_token_transfers_TokenOfferId">TokenOfferId</a>, Token&gt;(),
+            offer_events: <a href="../../supra-framework/doc/account.md#0x1_account_new_event_handle">account::new_event_handle</a>&lt;<a href="token_transfers.md#0x3_token_transfers_TokenOfferEvent">TokenOfferEvent</a>&gt;(<a href="../../supra-framework/doc/account.md#0x1_account">account</a>),
+            cancel_offer_events: <a href="../../supra-framework/doc/account.md#0x1_account_new_event_handle">account::new_event_handle</a>&lt;<a href="token_transfers.md#0x3_token_transfers_TokenCancelOfferEvent">TokenCancelOfferEvent</a>&gt;(<a href="../../supra-framework/doc/account.md#0x1_account">account</a>),
+            claim_events: <a href="../../supra-framework/doc/account.md#0x1_account_new_event_handle">account::new_event_handle</a>&lt;<a href="token_transfers.md#0x3_token_transfers_TokenClaimEvent">TokenClaimEvent</a>&gt;(<a href="../../supra-framework/doc/account.md#0x1_account">account</a>),
+        }
+    )
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_transfers_create_token_offer_id"></a>
+
+## Function `create_token_offer_id`
+
+
+
+<pre><code><b>fun</b> <a href="token_transfers.md#0x3_token_transfers_create_token_offer_id">create_token_offer_id</a>(to_addr: <b>address</b>, token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>): <a href="token_transfers.md#0x3_token_transfers_TokenOfferId">token_transfers::TokenOfferId</a>
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>fun</b> <a href="token_transfers.md#0x3_token_transfers_create_token_offer_id">create_token_offer_id</a>(to_addr: <b>address</b>, token_id: TokenId): <a href="token_transfers.md#0x3_token_transfers_TokenOfferId">TokenOfferId</a> {
+    <a href="token_transfers.md#0x3_token_transfers_TokenOfferId">TokenOfferId</a> {
+        to_addr,
+        token_id
+    }
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_transfers_offer_script"></a>
+
+## Function `offer_script`
+
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_offer_script">offer_script</a>(sender: <a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, receiver: <b>address</b>, creator: <b>address</b>, collection: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, name: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, property_version: u64, amount: u64)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_offer_script">offer_script</a>(
+    sender: <a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>,
+    receiver: <b>address</b>,
+    creator: <b>address</b>,
+    collection: String,
+    name: String,
+    property_version: u64,
+    amount: u64,
+) <b>acquires</b> <a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a> {
+    <b>let</b> token_id = <a href="token.md#0x3_token_create_token_id_raw">token::create_token_id_raw</a>(creator, collection, name, property_version);
+    <a href="token_transfers.md#0x3_token_transfers_offer">offer</a>(&sender, receiver, token_id, amount);
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_transfers_offer"></a>
+
+## Function `offer`
+
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_offer">offer</a>(sender: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, receiver: <b>address</b>, token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>, amount: u64)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_offer">offer</a>(
+    sender: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>,
+    receiver: <b>address</b>,
+    token_id: TokenId,
+    amount: u64,
+) <b>acquires</b> <a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a> {
+    <b>let</b> sender_addr = <a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(sender);
+    <b>if</b> (!<b>exists</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr)) {
+        <a href="token_transfers.md#0x3_token_transfers_initialize_token_transfers">initialize_token_transfers</a>(sender)
+    };
+
+    <b>let</b> pending_claims =
+        &<b>mut</b> <b>borrow_global_mut</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr).pending_claims;
+    <b>let</b> token_offer_id = <a href="token_transfers.md#0x3_token_transfers_create_token_offer_id">create_token_offer_id</a>(receiver, token_id);
+    <b>let</b> <a href="token.md#0x3_token">token</a> = <a href="token.md#0x3_token_withdraw_token">token::withdraw_token</a>(sender, token_id, amount);
+    <b>if</b> (!<a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_contains">table::contains</a>(pending_claims, token_offer_id)) {
+        <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_add">table::add</a>(pending_claims, token_offer_id, <a href="token.md#0x3_token">token</a>);
+    } <b>else</b> {
+        <b>let</b> dst_token = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_borrow_mut">table::borrow_mut</a>(pending_claims, token_offer_id);
+        <a href="token.md#0x3_token_merge">token::merge</a>(dst_token, <a href="token.md#0x3_token">token</a>);
+    };
+
+    <b>if</b> (std::features::module_event_migration_enabled()) {
+        <a href="../../supra-framework/doc/event.md#0x1_event_emit">event::emit</a>(
+            <a href="token_transfers.md#0x3_token_transfers_TokenOffer">TokenOffer</a> {
+                to_address: receiver,
+                token_id,
+                amount,
+            }
+        )
+    };
+    <a href="../../supra-framework/doc/event.md#0x1_event_emit_event">event::emit_event</a>&lt;<a href="token_transfers.md#0x3_token_transfers_TokenOfferEvent">TokenOfferEvent</a>&gt;(
+        &<b>mut</b> <b>borrow_global_mut</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr).offer_events,
+        <a href="token_transfers.md#0x3_token_transfers_TokenOfferEvent">TokenOfferEvent</a> {
+            to_address: receiver,
+            token_id,
+            amount,
+        },
+    );
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_transfers_claim_script"></a>
+
+## Function `claim_script`
+
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_claim_script">claim_script</a>(receiver: <a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, sender: <b>address</b>, creator: <b>address</b>, collection: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, name: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, property_version: u64)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_claim_script">claim_script</a>(
+    receiver: <a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>,
+    sender: <b>address</b>,
+    creator: <b>address</b>,
+    collection: String,
+    name: String,
+    property_version: u64,
+) <b>acquires</b> <a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a> {
+    <b>let</b> token_id = <a href="token.md#0x3_token_create_token_id_raw">token::create_token_id_raw</a>(creator, collection, name, property_version);
+    <a href="token_transfers.md#0x3_token_transfers_claim">claim</a>(&receiver, sender, token_id);
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_transfers_claim"></a>
+
+## Function `claim`
+
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_claim">claim</a>(receiver: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, sender: <b>address</b>, token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_claim">claim</a>(
+    receiver: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>,
+    sender: <b>address</b>,
+    token_id: TokenId,
+) <b>acquires</b> <a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a> {
+    <b>assert</b>!(<b>exists</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender), <a href="token_transfers.md#0x3_token_transfers_ETOKEN_OFFER_NOT_EXIST">ETOKEN_OFFER_NOT_EXIST</a>);
+    <b>let</b> pending_claims =
+        &<b>mut</b> <b>borrow_global_mut</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender).pending_claims;
+    <b>let</b> token_offer_id = <a href="token_transfers.md#0x3_token_transfers_create_token_offer_id">create_token_offer_id</a>(<a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(receiver), token_id);
+    <b>assert</b>!(<a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_contains">table::contains</a>(pending_claims, token_offer_id), <a href="../../move-stdlib/doc/error.md#0x1_error_not_found">error::not_found</a>(<a href="token_transfers.md#0x3_token_transfers_ETOKEN_OFFER_NOT_EXIST">ETOKEN_OFFER_NOT_EXIST</a>));
+    <b>let</b> tokens = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_remove">table::remove</a>(pending_claims, token_offer_id);
+    <b>let</b> amount = <a href="token.md#0x3_token_get_token_amount">token::get_token_amount</a>(&tokens);
+    <a href="token.md#0x3_token_deposit_token">token::deposit_token</a>(receiver, tokens);
+
+    <b>if</b> (std::features::module_event_migration_enabled()) {
+        <a href="../../supra-framework/doc/event.md#0x1_event_emit">event::emit</a>(
+            <a href="token_transfers.md#0x3_token_transfers_TokenClaim">TokenClaim</a> {
+                to_address: <a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(receiver),
+                token_id,
+                amount,
+            }
+        )
+    };
+    <a href="../../supra-framework/doc/event.md#0x1_event_emit_event">event::emit_event</a>&lt;<a href="token_transfers.md#0x3_token_transfers_TokenClaimEvent">TokenClaimEvent</a>&gt;(
+        &<b>mut</b> <b>borrow_global_mut</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender).claim_events,
+        <a href="token_transfers.md#0x3_token_transfers_TokenClaimEvent">TokenClaimEvent</a> {
+            to_address: <a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(receiver),
+            token_id,
+            amount,
+        },
+    );
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_transfers_cancel_offer_script"></a>
+
+## Function `cancel_offer_script`
+
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_cancel_offer_script">cancel_offer_script</a>(sender: <a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, receiver: <b>address</b>, creator: <b>address</b>, collection: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, name: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, property_version: u64)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_cancel_offer_script">cancel_offer_script</a>(
+    sender: <a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>,
+    receiver: <b>address</b>,
+    creator: <b>address</b>,
+    collection: String,
+    name: String,
+    property_version: u64,
+) <b>acquires</b> <a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a> {
+    <b>let</b> token_id = <a href="token.md#0x3_token_create_token_id_raw">token::create_token_id_raw</a>(creator, collection, name, property_version);
+    <a href="token_transfers.md#0x3_token_transfers_cancel_offer">cancel_offer</a>(&sender, receiver, token_id);
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="0x3_token_transfers_cancel_offer"></a>
+
+## Function `cancel_offer`
+
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_cancel_offer">cancel_offer</a>(sender: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, receiver: <b>address</b>, token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_cancel_offer">cancel_offer</a>(
+    sender: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>,
+    receiver: <b>address</b>,
+    token_id: TokenId,
+) <b>acquires</b> <a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a> {
+    <b>let</b> sender_addr = <a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(sender);
+    <b>let</b> token_offer_id = <a href="token_transfers.md#0x3_token_transfers_create_token_offer_id">create_token_offer_id</a>(receiver, token_id);
+    <b>assert</b>!(<b>exists</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr), <a href="token_transfers.md#0x3_token_transfers_ETOKEN_OFFER_NOT_EXIST">ETOKEN_OFFER_NOT_EXIST</a>);
+    <b>let</b> pending_claims =
+        &<b>mut</b> <b>borrow_global_mut</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr).pending_claims;
+    <b>let</b> <a href="token.md#0x3_token">token</a> = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_remove">table::remove</a>(pending_claims, token_offer_id);
+    <b>let</b> amount = <a href="token.md#0x3_token_get_token_amount">token::get_token_amount</a>(&<a href="token.md#0x3_token">token</a>);
+    <a href="token.md#0x3_token_deposit_token">token::deposit_token</a>(sender, <a href="token.md#0x3_token">token</a>);
+
+    <b>if</b> (std::features::module_event_migration_enabled()) {
+        <a href="../../supra-framework/doc/event.md#0x1_event_emit">event::emit</a>(
+            <a href="token_transfers.md#0x3_token_transfers_TokenCancelOffer">TokenCancelOffer</a> {
+                to_address: receiver,
+                token_id,
+                amount,
+            },
+        )
+    };
+    <a href="../../supra-framework/doc/event.md#0x1_event_emit_event">event::emit_event</a>&lt;<a href="token_transfers.md#0x3_token_transfers_TokenCancelOfferEvent">TokenCancelOfferEvent</a>&gt;(
+        &<b>mut</b> <b>borrow_global_mut</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr).cancel_offer_events,
+        <a href="token_transfers.md#0x3_token_transfers_TokenCancelOfferEvent">TokenCancelOfferEvent</a> {
+            to_address: receiver,
+            token_id,
+            amount,
+        },
+    );
+}
+</code></pre>
+
+
+
+</details>
+
+<a id="@Specification_1"></a>
+
+## Specification
+
+
+
+<pre><code><b>pragma</b> verify = <b>true</b>;
+<b>pragma</b> aborts_if_is_strict;
+</code></pre>
+
+
+
+<a id="@Specification_1_initialize_token_transfers"></a>
+
+### Function `initialize_token_transfers`
+
+
+<pre><code><b>fun</b> <a href="token_transfers.md#0x3_token_transfers_initialize_token_transfers">initialize_token_transfers</a>(<a href="../../supra-framework/doc/account.md#0x1_account">account</a>: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>)
+</code></pre>
+
+
+
+
+<pre><code><b>include</b> <a href="token_transfers.md#0x3_token_transfers_InitializeTokenTransfersAbortsIf">InitializeTokenTransfersAbortsIf</a>;
+</code></pre>
+
+
+Abort according to the code
+
+
+<a id="0x3_token_transfers_InitializeTokenTransfersAbortsIf"></a>
+
+
+<pre><code><b>schema</b> <a href="token_transfers.md#0x3_token_transfers_InitializeTokenTransfersAbortsIf">InitializeTokenTransfersAbortsIf</a> {
+    <a href="../../supra-framework/doc/account.md#0x1_account">account</a>: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>;
+    <b>let</b> addr = <a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(<a href="../../supra-framework/doc/account.md#0x1_account">account</a>);
+    <b>aborts_if</b> <b>exists</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(addr);
+    <b>let</b> <a href="../../supra-framework/doc/account.md#0x1_account">account</a> = <b>global</b>&lt;Account&gt;(addr);
+    <b>aborts_if</b> !<b>exists</b>&lt;Account&gt;(addr);
+    <b>aborts_if</b> <a href="../../supra-framework/doc/account.md#0x1_account">account</a>.guid_creation_num + 3 &gt;= <a href="../../supra-framework/doc/account.md#0x1_account_MAX_GUID_CREATION_NUM">account::MAX_GUID_CREATION_NUM</a>;
+    <b>aborts_if</b> <a href="../../supra-framework/doc/account.md#0x1_account">account</a>.guid_creation_num + 3 &gt; MAX_U64;
+}
+</code></pre>
+
+
+
+<a id="@Specification_1_create_token_offer_id"></a>
+
+### Function `create_token_offer_id`
+
+
+<pre><code><b>fun</b> <a href="token_transfers.md#0x3_token_transfers_create_token_offer_id">create_token_offer_id</a>(to_addr: <b>address</b>, token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>): <a href="token_transfers.md#0x3_token_transfers_TokenOfferId">token_transfers::TokenOfferId</a>
+</code></pre>
+
+
+
+
+<pre><code><b>aborts_if</b> <b>false</b>;
+</code></pre>
+
+
+
+<a id="@Specification_1_offer_script"></a>
+
+### Function `offer_script`
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_offer_script">offer_script</a>(sender: <a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, receiver: <b>address</b>, creator: <b>address</b>, collection: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, name: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, property_version: u64, amount: u64)
+</code></pre>
+
+
+
+
+<pre><code><b>pragma</b> verify = <b>false</b>;
+<b>let</b> token_id = <a href="token.md#0x3_token_create_token_id_raw">token::create_token_id_raw</a>(creator, collection, name, property_version);
+</code></pre>
+
+
+
+<a id="@Specification_1_offer"></a>
+
+### Function `offer`
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_offer">offer</a>(sender: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, receiver: <b>address</b>, token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>, amount: u64)
+</code></pre>
+
+
+
+
+<pre><code><b>pragma</b> verify = <b>false</b>;
+<b>let</b> sender_addr = <a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(sender);
+<b>include</b> !<b>exists</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr) ==&gt; <a href="token_transfers.md#0x3_token_transfers_InitializeTokenTransfersAbortsIf">InitializeTokenTransfersAbortsIf</a>{<a href="../../supra-framework/doc/account.md#0x1_account">account</a> : sender};
+<b>let</b> pending_claims = <b>global</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr).pending_claims;
+<b>let</b> token_offer_id = <a href="token_transfers.md#0x3_token_transfers_create_token_offer_id">create_token_offer_id</a>(receiver, token_id);
+<b>let</b> tokens = <b>global</b>&lt;TokenStore&gt;(sender_addr).tokens;
+<b>aborts_if</b> amount &lt;= 0;
+<b>aborts_if</b> <a href="token.md#0x3_token_spec_balance_of">token::spec_balance_of</a>(sender_addr, token_id) &lt; amount;
+<b>aborts_if</b> !<b>exists</b>&lt;TokenStore&gt;(sender_addr);
+<b>aborts_if</b> !<a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_contains">table::spec_contains</a>(tokens, token_id);
+<b>aborts_if</b> !<a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_contains">table::spec_contains</a>(pending_claims, token_offer_id);
+<b>let</b> a = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_contains">table::spec_contains</a>(pending_claims, token_offer_id);
+<b>let</b> dst_token = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_get">table::spec_get</a>(pending_claims, token_offer_id);
+<b>aborts_if</b> dst_token.amount + <a href="token_transfers.md#0x3_token_transfers_spce_get">spce_get</a>(<a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(sender), token_id, amount) &gt; MAX_U64;
+</code></pre>
+
+
+Get the amount from sender token
+
+
+<a id="0x3_token_transfers_spce_get"></a>
+
+
+<pre><code><b>fun</b> <a href="token_transfers.md#0x3_token_transfers_spce_get">spce_get</a>(
+   account_addr: <b>address</b>,
+   id: TokenId,
+   amount: u64
+): u64 {
+   <b>use</b> aptos_token::token::{TokenStore};
+   <b>use</b> aptos_std::table::{<b>Self</b>};
+   <b>let</b> tokens = <b>global</b>&lt;TokenStore&gt;(account_addr).tokens;
+   <b>let</b> balance = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_get">table::spec_get</a>(tokens, id).amount;
+   <b>if</b> (balance &gt; amount) {
+       amount
+   } <b>else</b> {
+       <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_get">table::spec_get</a>(tokens, id).amount
+   }
+}
+</code></pre>
+
+
+
+<a id="@Specification_1_claim_script"></a>
+
+### Function `claim_script`
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_claim_script">claim_script</a>(receiver: <a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, sender: <b>address</b>, creator: <b>address</b>, collection: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, name: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, property_version: u64)
+</code></pre>
+
+
+
+
+<pre><code><b>pragma</b> aborts_if_is_partial;
+<b>let</b> token_id = <a href="token.md#0x3_token_create_token_id_raw">token::create_token_id_raw</a>(creator, collection, name, property_version);
+<b>aborts_if</b> !<b>exists</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender);
+<b>let</b> pending_claims = <b>global</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender).pending_claims;
+<b>let</b> token_offer_id = <a href="token_transfers.md#0x3_token_transfers_create_token_offer_id">create_token_offer_id</a>(<a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(receiver), token_id);
+<b>aborts_if</b> !<a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_contains">table::spec_contains</a>(pending_claims, token_offer_id);
+<b>let</b> tokens = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_get">table::spec_get</a>(pending_claims, token_offer_id);
+<b>include</b> <a href="token.md#0x3_token_InitializeTokenStore">token::InitializeTokenStore</a>{<a href="../../supra-framework/doc/account.md#0x1_account">account</a>: receiver };
+<b>let</b> account_addr = <a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(receiver);
+<b>let</b> <a href="token.md#0x3_token">token</a> = tokens;
+<b>let</b> token_store = <b>global</b>&lt;TokenStore&gt;(account_addr);
+<b>let</b> recipient_token = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_get">table::spec_get</a>(token_store.tokens, <a href="token.md#0x3_token">token</a>.id);
+<b>let</b> b = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_contains">table::spec_contains</a>(token_store.tokens, <a href="token.md#0x3_token">token</a>.id);
+<b>aborts_if</b> <a href="token.md#0x3_token">token</a>.amount &lt;= 0;
+</code></pre>
+
+
+
+<a id="@Specification_1_claim"></a>
+
+### Function `claim`
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_claim">claim</a>(receiver: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, sender: <b>address</b>, token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>)
+</code></pre>
+
+
+
+
+<pre><code><b>pragma</b> aborts_if_is_partial;
+<b>aborts_if</b> !<b>exists</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender);
+<b>let</b> pending_claims = <b>global</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender).pending_claims;
+<b>let</b> token_offer_id = <a href="token_transfers.md#0x3_token_transfers_create_token_offer_id">create_token_offer_id</a>(<a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(receiver), token_id);
+<b>aborts_if</b> !<a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_contains">table::spec_contains</a>(pending_claims, token_offer_id);
+<b>let</b> tokens = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_get">table::spec_get</a>(pending_claims, token_offer_id);
+<b>include</b> <a href="token.md#0x3_token_InitializeTokenStore">token::InitializeTokenStore</a>{<a href="../../supra-framework/doc/account.md#0x1_account">account</a>: receiver };
+<b>let</b> account_addr = <a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(receiver);
+<b>let</b> <a href="token.md#0x3_token">token</a> = tokens;
+<b>let</b> token_store = <b>global</b>&lt;TokenStore&gt;(account_addr);
+<b>let</b> recipient_token = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_get">table::spec_get</a>(token_store.tokens, <a href="token.md#0x3_token">token</a>.id);
+<b>let</b> b = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_contains">table::spec_contains</a>(token_store.tokens, <a href="token.md#0x3_token">token</a>.id);
+<b>aborts_if</b> <a href="token.md#0x3_token">token</a>.amount &lt;= 0;
+</code></pre>
+
+
+
+<a id="@Specification_1_cancel_offer_script"></a>
+
+### Function `cancel_offer_script`
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_cancel_offer_script">cancel_offer_script</a>(sender: <a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, receiver: <b>address</b>, creator: <b>address</b>, collection: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, name: <a href="../../move-stdlib/doc/string.md#0x1_string_String">string::String</a>, property_version: u64)
+</code></pre>
+
+
+
+
+<pre><code><b>pragma</b> aborts_if_is_partial;
+<b>let</b> token_id = <a href="token.md#0x3_token_create_token_id_raw">token::create_token_id_raw</a>(creator, collection, name, property_version);
+<b>let</b> sender_addr = <a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(sender);
+<b>aborts_if</b> !<b>exists</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr);
+<b>let</b> pending_claims = <b>global</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr).pending_claims;
+<b>let</b> token_offer_id = <a href="token_transfers.md#0x3_token_transfers_create_token_offer_id">create_token_offer_id</a>(receiver, token_id);
+<b>aborts_if</b> !<a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_contains">table::spec_contains</a>(pending_claims, token_offer_id);
+<b>include</b> <a href="token.md#0x3_token_InitializeTokenStore">token::InitializeTokenStore</a>{<a href="../../supra-framework/doc/account.md#0x1_account">account</a>: sender };
+<b>let</b> dst_token = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_get">table::spec_get</a>(pending_claims, token_offer_id);
+<b>let</b> account_addr = sender_addr;
+<b>let</b> <a href="token.md#0x3_token">token</a> = dst_token;
+<b>let</b> token_store = <b>global</b>&lt;TokenStore&gt;(account_addr);
+<b>let</b> recipient_token = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_get">table::spec_get</a>(token_store.tokens, <a href="token.md#0x3_token">token</a>.id);
+<b>let</b> b = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_contains">table::spec_contains</a>(token_store.tokens, <a href="token.md#0x3_token">token</a>.id);
+<b>aborts_if</b> <a href="token.md#0x3_token">token</a>.amount &lt;= 0;
+</code></pre>
+
+
+
+<a id="@Specification_1_cancel_offer"></a>
+
+### Function `cancel_offer`
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="token_transfers.md#0x3_token_transfers_cancel_offer">cancel_offer</a>(sender: &<a href="../../move-stdlib/doc/signer.md#0x1_signer">signer</a>, receiver: <b>address</b>, token_id: <a href="token.md#0x3_token_TokenId">token::TokenId</a>)
+</code></pre>
+
+
+
+
+<pre><code><b>pragma</b> aborts_if_is_partial;
+<b>let</b> sender_addr = <a href="../../move-stdlib/doc/signer.md#0x1_signer_address_of">signer::address_of</a>(sender);
+<b>aborts_if</b> !<b>exists</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr);
+<b>let</b> pending_claims = <b>global</b>&lt;<a href="token_transfers.md#0x3_token_transfers_PendingClaims">PendingClaims</a>&gt;(sender_addr).pending_claims;
+<b>let</b> token_offer_id = <a href="token_transfers.md#0x3_token_transfers_create_token_offer_id">create_token_offer_id</a>(receiver, token_id);
+<b>aborts_if</b> !<a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_contains">table::spec_contains</a>(pending_claims, token_offer_id);
+<b>include</b> <a href="token.md#0x3_token_InitializeTokenStore">token::InitializeTokenStore</a>{<a href="../../supra-framework/doc/account.md#0x1_account">account</a>: sender };
+<b>let</b> dst_token = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_get">table::spec_get</a>(pending_claims, token_offer_id);
+<b>let</b> account_addr = sender_addr;
+<b>let</b> <a href="token.md#0x3_token">token</a> = dst_token;
+<b>let</b> token_store = <b>global</b>&lt;TokenStore&gt;(account_addr);
+<b>let</b> recipient_token = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_get">table::spec_get</a>(token_store.tokens, <a href="token.md#0x3_token">token</a>.id);
+<b>let</b> b = <a href="../../supra-framework/../aptos-stdlib/doc/table.md#0x1_table_spec_contains">table::spec_contains</a>(token_store.tokens, <a href="token.md#0x3_token">token</a>.id);
+<b>aborts_if</b> <a href="token.md#0x3_token">token</a>.amount &lt;= 0;
+</code></pre>
+
+
+[move-book]: https://aptos.dev/move/book/SUMMARY
+
+
+================================================
+File: aptos-move/framework/aptos-token/doc_template/overview.md
+================================================
+# Supra Token Framework
+
+This is the reference documentation of the Supra Token framework.
+
+## Index
+
+> {{move-index}}
+
+
+================================================
+File: aptos-move/framework/aptos-token/doc_template/references.md
+================================================
+[move-book]: https://aptos.dev/move/book/SUMMARY
+
+
+================================================
+File: aptos-move/framework/aptos-token/sources/property_map.move
+================================================
+/// PropertyMap is a specialization of SimpleMap for Tokens.
+/// It maps a String key to a PropertyValue that consists of type (string) and value (vector<u8>)
+/// It provides basic on-chain serialization of primitive and string to property value with type information
+/// It also supports deserializing property value to it original type.
+module aptos_token::property_map {
+    use std::bcs;
+    use std::vector;
+    use std::error;
+    use std::string::{Self, String};
+    use aptos_std::from_bcs;
+    use aptos_std::simple_map::{Self, SimpleMap};
+    use aptos_std::type_info::type_name;
+
+    //
+    // Constants
+    //
+    /// The maximal number of property that can be stored in property map
+    const MAX_PROPERTY_MAP_SIZE: u64 = 1000;
+    const MAX_PROPERTY_NAME_LENGTH: u64 = 128;
+
+
+    //
+    // Errors.
+    //
+    /// The property key already exists
+    const EKEY_AREADY_EXIST_IN_PROPERTY_MAP: u64 = 1;
+
+    /// The number of property exceeds the limit
+    const EPROPERTY_NUMBER_EXCEED_LIMIT: u64 = 2;
+
+    /// The property doesn't exist
+    const EPROPERTY_NOT_EXIST: u64 = 3;
+
+    /// Property key and value count don't match
+    const EKEY_COUNT_NOT_MATCH_VALUE_COUNT: u64 = 4;
+
+    /// Property key and type count don't match
+    const EKEY_COUNT_NOT_MATCH_TYPE_COUNT: u64 = 5;
+
+    /// Property type doesn't match
+    const ETYPE_NOT_MATCH: u64 = 6;
+
+    /// The name (key) of the property is too long
+    const EPROPERTY_MAP_NAME_TOO_LONG: u64 = 7;
+
+
+    //
+    // Structs
+    //
+
+    struct PropertyMap has copy, drop, store {
+        map: SimpleMap<String, PropertyValue>,
+    }
+
+    struct PropertyValue has store, copy, drop {
+        value: vector<u8>,
+        type: String,
+    }
+
+    public fun new(
+        keys: vector<String>,
+        values: vector<vector<u8>>,
+        types: vector<String>
+    ): PropertyMap {
+        let length = vector::length(&keys);
+        assert!(length <= MAX_PROPERTY_MAP_SIZE, error::invalid_argument(EPROPERTY_NUMBER_EXCEED_LIMIT));
+        assert!(length == vector::length(&values), error::invalid_argument(EKEY_COUNT_NOT_MATCH_VALUE_COUNT));
+        assert!(length == vector::length(&types), error::invalid_argument(EKEY_COUNT_NOT_MATCH_TYPE_COUNT));
+
+        let properties = empty();
+
+        let i = 0;
+        while (i < length) {
+            let key = *vector::borrow(&keys, i);
+            assert!(string::length(&key) <= MAX_PROPERTY_NAME_LENGTH, error::invalid_argument(EPROPERTY_MAP_NAME_TOO_LONG));
+            simple_map::add(
+                &mut properties.map,
+                key,
+                PropertyValue { value: *vector::borrow(&values, i), type: *vector::borrow(&types, i) }
+            );
+            i = i + 1;
+        };
+        properties
+    }
+
+    /// Create property map directly from key and property value
+    public fun new_with_key_and_property_value(
+        keys: vector<String>,
+        values: vector<PropertyValue>
+    ): PropertyMap {
+        let length = vector::length(&keys);
+        assert!(length <= MAX_PROPERTY_MAP_SIZE, error::invalid_argument(EPROPERTY_NUMBER_EXCEED_LIMIT));
+        assert!(length == vector::length(&values), error::invalid_argument(EKEY_COUNT_NOT_MATCH_VALUE_COUNT));
+
+        let properties = empty();
+
+        let i = 0;
+        while (i < length) {
+            let key = *vector::borrow(&keys, i);
+            let val = *vector::borrow(&values, i);
+            assert!(string::length(&key) <= MAX_PROPERTY_NAME_LENGTH, error::invalid_argument(EPROPERTY_MAP_NAME_TOO_LONG));
+            add(&mut properties, key, val);
+            i = i + 1;
+        };
+        properties
+    }
+
+    public fun empty(): PropertyMap {
+        PropertyMap {
+            map: simple_map::create<String, PropertyValue>(),
+        }
+    }
+
+    public fun contains_key(map: &PropertyMap, key: &String): bool {
+        simple_map::contains_key(&map.map, key)
+    }
+
+    public fun add(map: &mut PropertyMap, key: String, value: PropertyValue) {
+        assert!(string::length(&key) <= MAX_PROPERTY_NAME_LENGTH, error::invalid_argument(EPROPERTY_MAP_NAME_TOO_LONG));
+        assert!(simple_map::length(&map.map) < MAX_PROPERTY_MAP_SIZE, error::invalid_state(EPROPERTY_NUMBER_EXCEED_LIMIT));
+        simple_map::add(&mut map.map, key, value);
+    }
+
+    public fun length(map: &PropertyMap): u64 {
+        simple_map::length(&map.map)
+    }
+
+    public fun borrow(map: &PropertyMap, key: &String): &PropertyValue {
+        let found = contains_key(map, key);
+        assert!(found, EPROPERTY_NOT_EXIST);
+        simple_map::borrow(&map.map, key)
+    }
+
+    /// Return all the keys in the property map in the order they are added.
+    public fun keys(map: &PropertyMap): vector<String> {
+        simple_map::keys(&map.map)
+    }
+
+    /// Return the types of all properties in the property map in the order they are added.
+    public fun types(map: &PropertyMap): vector<String> {
+        vector::map_ref(&simple_map::values(&map.map), |v| {
+            let v: &PropertyValue = v;
+            v.type
+        })
+    }
+
+    /// Return the values of all properties in the property map in the order they are added.
+    public fun values(map: &PropertyMap): vector<vector<u8>> {
+        vector::map_ref(&simple_map::values(&map.map), |v| {
+            let v: &PropertyValue = v;
+            v.value
+        })
+    }
+
+    public fun read_string(map: &PropertyMap, key: &String): String {
+        let prop = borrow(map, key);
+        assert!(prop.type == string::utf8(b"0x1::string::String"), error::invalid_state(ETYPE_NOT_MATCH));
+        from_bcs::to_string(prop.value)
+    }
+
+    public fun read_u8(map: &PropertyMap, key: &String): u8 {
+        let prop = borrow(map, key);
+        assert!(prop.type == string::utf8(b"u8"), error::invalid_state(ETYPE_NOT_MATCH));
+        from_bcs::to_u8(prop.value)
+    }
+
+    public fun read_u64(map: &PropertyMap, key: &String): u64 {
+        let prop = borrow(map, key);
+        assert!(prop.type == string::utf8(b"u64"), error::invalid_state(ETYPE_NOT_MATCH));
+        from_bcs::to_u64(prop.value)
+    }
+
+    public fun read_address(map: &PropertyMap, key: &String): address {
+        let prop = borrow(map, key);
+        assert!(prop.type == string::utf8(b"address"), error::invalid_state(ETYPE_NOT_MATCH));
+        from_bcs::to_address(prop.value)
+    }
+
+    public fun read_u128(map: &PropertyMap, key: &String): u128 {
+        let prop = borrow(map, key);
+        assert!(prop.type == string::utf8(b"u128"), error::invalid_state(ETYPE_NOT_MATCH));
+        from_bcs::to_u128(prop.value)
+    }
+
+    public fun read_bool(map: &PropertyMap, key: &String): bool {
+        let prop = borrow(map, key);
+        assert!(prop.type == string::utf8(b"bool"), error::invalid_state(ETYPE_NOT_MATCH));
+        from_bcs::to_bool(prop.value)
+    }
+
+    public fun borrow_value(property: &PropertyValue): vector<u8> {
+        property.value
+    }
+
+    public fun borrow_type(property: &PropertyValue): String {
+        property.type
+    }
+
+    public fun remove(
+        map: &mut PropertyMap,
+        key: &String
+    ): (String, PropertyValue) {
+        let found = contains_key(map, key);
+        assert!(found, error::not_found(EPROPERTY_NOT_EXIST));
+        simple_map::remove(&mut map.map, key)
+    }
+
+    /// Update the property in the existing property map
+    /// Allow updating existing keys' value and add new key-value pairs
+    public fun update_property_map(
+        map: &mut PropertyMap,
+        keys: vector<String>,
+        values: vector<vector<u8>>,
+        types: vector<String>,
+    ) {
+        let key_len = vector::length(&keys);
+        let val_len = vector::length(&values);
+        let typ_len = vector::length(&types);
+        assert!(key_len == val_len, error::invalid_state(EKEY_COUNT_NOT_MATCH_VALUE_COUNT));
+        assert!(key_len == typ_len, error::invalid_state(EKEY_COUNT_NOT_MATCH_TYPE_COUNT));
+
+        let i = 0;
+        while (i < key_len) {
+            let key = vector::borrow(&keys, i);
+            let prop_val = PropertyValue {
+                value: *vector::borrow(&values, i),
+                type: *vector::borrow(&types, i),
+            };
+            if (contains_key(map, key)) {
+                update_property_value(map, key, prop_val);
+            } else {
+                add(map, *key, prop_val);
+            };
+            i = i + 1;
+        }
+    }
+
+    public fun update_property_value(
+        map: &mut PropertyMap,
+        key: &String,
+        value: PropertyValue
+    ) {
+        let property_val = simple_map::borrow_mut(&mut map.map, key);
+        *property_val = value;
+    }
+
+    public fun create_property_value_raw(
+        value: vector<u8>,
+        type: String
+    ): PropertyValue {
+        PropertyValue {
+            value,
+            type,
+        }
+    }
+
+    /// create a property value from generic type data
+    public fun create_property_value<T: copy>(data: &T): PropertyValue {
+        let name = type_name<T>();
+        if (
+            name == string::utf8(b"bool") ||
+                name == string::utf8(b"u8") ||
+                name == string::utf8(b"u64") ||
+                name == string::utf8(b"u128") ||
+                name == string::utf8(b"address") ||
+                name == string::utf8(b"0x1::string::String")
+        ) {
+            create_property_value_raw(bcs::to_bytes<T>(data), name)
+        } else {
+            create_property_value_raw(bcs::to_bytes<T>(data), string::utf8(b"vector<u8>"))
+        }
+    }
+
+    #[test_only]
+    use std::string::utf8;
+
+    #[test_only]
+    fun test_keys(): vector<String> {
+        vector[ utf8(b"attack"), utf8(b"durability"), utf8(b"type") ]
+    }
+
+    #[test_only]
+    fun test_values(): vector<vector<u8>> {
+        vector[ b"10", b"5", b"weapon" ]
+    }
+
+    #[test_only]
+    fun test_types(): vector<String> {
+        vector[ utf8(b"integer"), utf8(b"integer"), utf8(b"String") ]
+    }
+
+    #[test_only]
+    fun create_property_list(): PropertyMap {
+        new(test_keys(), test_values(), test_types())
+    }
+
+    #[test]
+    fun test_add_property(): PropertyMap {
+        let properties = create_property_list();
+        add(
+            &mut properties, utf8(b"level"),
+            PropertyValue {
+                value: b"1",
+                type: utf8(b"integer")
+            });
+        assert!(
+            borrow(&properties, &utf8(b"level")).value == b"1",
+            EPROPERTY_NOT_EXIST);
+        properties
+    }
+
+    #[test]
+    fun test_get_property_keys() {
+        assert!(keys(&create_property_list()) == test_keys(), 0);
+    }
+
+    #[test]
+    fun test_get_property_types() {
+        assert!(types(&create_property_list()) == test_types(), 0);
+    }
+
+    #[test]
+    fun test_get_property_values() {
+        assert!(values(&create_property_list()) == test_values(), 0);
+    }
+
+    #[test]
+    fun test_update_property(): PropertyMap {
+        let properties = create_property_list();
+        update_property_value(&mut properties, &utf8(b"attack"), PropertyValue { value: b"7", type: utf8(b"integer") });
+        assert!(
+            borrow(&properties, &utf8(b"attack")).value == b"7",
+            1
+        );
+        properties
+    }
+
+    #[test]
+    fun test_remove_property(): PropertyMap {
+        let properties = create_property_list();
+        assert!(length(&mut properties) == 3, 1);
+        let (_, _) = remove(&mut properties, &utf8(b"attack"));
+        assert!(length(&properties) == 2, 1);
+        properties
+    }
+
+    #[test_only]
+    public fun test_create_property_value(type: String, value: vector<u8>): PropertyValue {
+        PropertyValue {
+            type,
+            value
+        }
+    }
+
+    #[test]
+    fun test_read_value_with_type() {
+        let keys = vector<String>[ utf8(b"attack"), utf8(b"mutable")];
+        let values = vector<vector<u8>>[ bcs::to_bytes<u8>(&10), bcs::to_bytes<bool>(&false) ];
+        let types = vector<String>[ utf8(b"u8"), utf8(b"bool")];
+        let plist = new(keys, values, types);
+        assert!(!read_bool(&plist, &utf8(b"mutable")), 1);
+        assert!(read_u8(&plist, &utf8(b"attack")) == 10, 1);
+    }
+
+    #[test]
+    fun test_generate_property_value_convert_back() {
+        let data: address = @0xcafe;
+        let pv = create_property_value(&data);
+        let pm = create_property_list();
+        add(&mut pm, string::utf8(b"addr"), pv);
+        assert!(read_address(&pm, &string::utf8(b"addr")) == data, 1)
+    }
+
+    #[test]
+    fun test_create_property_map_from_key_value_pairs() {
+        let data1: address = @0xcafe;
+        let data2: bool = false;
+        let pvs = vector<PropertyValue>[create_property_value(&data1), create_property_value(&data2)];
+        let keys = vector<String>[string::utf8(b"addr"), string::utf8(b"flag")];
+        let pm = new_with_key_and_property_value(keys, pvs);
+        assert!(length(&pm) == 2, 1);
+    }
+}
+
+
+================================================
+File: aptos-move/framework/aptos-token/sources/property_map.spec.move
+================================================
+spec aptos_token::property_map {
+    spec module {
+        pragma verify = true;
+        pragma aborts_if_is_strict;
+
+        let MAX_PROPERTY_MAP_SIZE = 1000;
+        let MAX_PROPERTY_NAME_LENGTH  = 128;
+    }
+
+    spec new (
+        keys: vector<String>,
+        values: vector<vector<u8>>,
+        types: vector<String>
+    ): PropertyMap {
+        // TODO: Can't handle abort in loop.
+        pragma aborts_if_is_partial;
+        let length = len(keys);
+
+        aborts_if !(length <= MAX_PROPERTY_MAP_SIZE);
+        aborts_if !(length == vector::length(values));
+        aborts_if !(length == vector::length(types));
+    }
+
+    spec new_with_key_and_property_value (
+        keys: vector<String>,
+        values: vector<PropertyValue>
+    ): PropertyMap {
+        // TODO: Can't handle abort in loop.
+        pragma aborts_if_is_partial;
+        let length = vector::length(keys);
+        aborts_if !(length <= MAX_PROPERTY_MAP_SIZE);
+        aborts_if !(length == len(values));
+    }
+
+    spec empty(): PropertyMap {
+        aborts_if false;
+    }
+
+    spec contains_key(map: &PropertyMap, key: &String): bool {
+        aborts_if false;
+    }
+
+    spec add(map: &mut PropertyMap, key: String, value: PropertyValue) {
+        use supra_framework::simple_map;
+
+        aborts_if !(string::length(key) <= MAX_PROPERTY_NAME_LENGTH);
+        aborts_if !(!simple_map::spec_contains_key(map.map, key));
+        aborts_if !(simple_map::spec_len(map.map) < MAX_PROPERTY_MAP_SIZE);
+    }
+
+    spec length(map: &PropertyMap): u64 {
+        aborts_if false;
+    }
+
+    spec keys(map: &PropertyMap): vector<String> {
+        pragma verify = false;
+    }
+
+    spec types(map: &PropertyMap): vector<String> {
+        pragma verify = false;
+    }
+
+    spec values(map: &PropertyMap): vector<vector<u8>> {
+        pragma verify = false;
+    }
+
+    spec borrow(map: &PropertyMap, key: &String): &PropertyValue {
+        use supra_framework::simple_map;
+        aborts_if !simple_map::spec_contains_key(map.map, key);
+    }
+
+    /// Check utf8 for correctness and whether equal
+    /// to `prop.type`
+    spec read_string(map: &PropertyMap, key: &String): String {
+        use std::string;
+        use supra_framework::simple_map;
+        pragma aborts_if_is_partial;
+
+        // TODO: Unable to handle abort from `from_bcs::to_string` because there is a function call at assert.
+        aborts_if !simple_map::spec_contains_key(map.map, key);
+        aborts_if !string::spec_internal_check_utf8(b"0x1::string::String");
+        let prop = simple_map::spec_get(map.map, key);
+        aborts_if prop.type != spec_utf8(b"0x1::string::String");
+        aborts_if !aptos_std::from_bcs::deserializable<String>(prop.value);
+    }
+
+    spec fun spec_utf8(bytes: vector<u8>): String {
+        String{bytes}
+    }
+
+    spec read_u8(map: &PropertyMap, key: &String): u8 {
+        use std::string;
+        use supra_framework::simple_map;
+
+        let str = b"u8";
+        aborts_if !simple_map::spec_contains_key(map.map, key);
+        aborts_if !string::spec_internal_check_utf8(str);
+        let prop = simple_map::spec_get(map.map, key);
+        aborts_if prop.type != spec_utf8(str);
+        aborts_if !aptos_std::from_bcs::deserializable<u8>(prop.value);
+    }
+
+    spec read_u64(map: &PropertyMap, key: &String): u64 {
+        use std::string;
+        use supra_framework::simple_map;
+
+        let str = b"u64";
+        aborts_if !simple_map::spec_contains_key(map.map, key);
+        aborts_if !string::spec_internal_check_utf8(str);
+        let prop = simple_map::spec_get(map.map, key);
+        aborts_if prop.type != spec_utf8(str);
+        aborts_if !aptos_std::from_bcs::deserializable<u64>(prop.value);
+    }
+
+    spec read_address(map: &PropertyMap, key: &String): address {
+        use std::string;
+        use supra_framework::simple_map;
+
+        let str = b"address";
+        aborts_if !simple_map::spec_contains_key(map.map, key);
+        aborts_if !string::spec_internal_check_utf8(str);
+        let prop = simple_map::spec_get(map.map, key);
+        aborts_if prop.type != spec_utf8(str);
+        aborts_if !aptos_std::from_bcs::deserializable<address>(prop.value);
+    }
+
+    spec read_u128(map: &PropertyMap, key: &String): u128 {
+        use std::string;
+        use supra_framework::simple_map;
+
+        let str = b"u128";
+        aborts_if !simple_map::spec_contains_key(map.map, key);
+        aborts_if !string::spec_internal_check_utf8(str);
+        let prop = simple_map::spec_get(map.map, key);
+        aborts_if prop.type != spec_utf8(str);
+        aborts_if !aptos_std::from_bcs::deserializable<u128>(prop.value);
+    }
+
+    spec read_bool(map: &PropertyMap, key: &String): bool {
+        use std::string;
+        use supra_framework::simple_map;
+
+        let str = b"bool";
+        aborts_if !simple_map::spec_contains_key(map.map, key);
+        aborts_if !string::spec_internal_check_utf8(str);
+        let prop = simple_map::spec_get(map.map, key);
+        aborts_if prop.type != spec_utf8(str);
+        aborts_if !aptos_std::from_bcs::deserializable<bool>(prop.value);
+    }
+
+    spec borrow_value(property: &PropertyValue): vector<u8> {
+        aborts_if false;
+    }
+
+    spec borrow_type(property: &PropertyValue): String {
+        aborts_if false;
+    }
+
+    spec remove (
+        map: &mut PropertyMap,
+        key: &String
+    ): (String, PropertyValue) {
+        aborts_if !simple_map::spec_contains_key(map.map, key);
+    }
+
+    spec update_property_map (
+        map: &mut PropertyMap,
+        keys: vector<String>,
+        values: vector<vector<u8>>,
+        types: vector<String>,
+    ) {
+        // TODO: Can't handle abort in loop.
+        pragma aborts_if_is_partial;
+        let key_len = len(keys);
+        let val_len = len(values);
+        let typ_len = len(types);
+        aborts_if !(key_len == val_len);
+        aborts_if !(key_len == typ_len);
+    }
+
+    spec update_property_value (
+        map: &mut PropertyMap,
+        key: &String,
+        value: PropertyValue
+    ) {
+        aborts_if !simple_map::spec_contains_key(map.map, key);
+    }
+
+    spec create_property_value_raw (
+        value: vector<u8>,
+        type: String
+    ): PropertyValue {
+        aborts_if false;
+    }
+
+    /// Abort according to the code
+    spec create_property_value<T: copy>(data: &T): PropertyValue {
+        use aptos_std::type_info::{type_name};
+
+        let name = type_name<T>();
+        aborts_if !string::spec_internal_check_utf8(b"bool");
+
+        aborts_if name != spec_utf8(b"bool") &&
+            !string::spec_internal_check_utf8(b"u8");
+
+        aborts_if name != spec_utf8(b"bool") &&
+            name != spec_utf8(b"u8") &&
+            !string::spec_internal_check_utf8(b"u64");
+
+        aborts_if name != spec_utf8(b"bool") &&
+            name != spec_utf8(b"u8") &&
+            name != spec_utf8(b"u64") &&
+            !string::spec_internal_check_utf8(b"u128");
+
+        aborts_if name != spec_utf8(b"bool") &&
+            name != spec_utf8(b"u8") &&
+            name != spec_utf8(b"u64") &&
+            name != spec_utf8(b"u128") &&
+            !string::spec_internal_check_utf8(b"address");
+
+        aborts_if name != spec_utf8(b"bool") &&
+            name != spec_utf8(b"u8") &&
+            name != spec_utf8(b"u64") &&
+            name != spec_utf8(b"u128") &&
+            name != spec_utf8(b"address") &&
+            !string::spec_internal_check_utf8(b"0x1::string::String");
+
+        aborts_if name != spec_utf8(b"bool") &&
+            name != spec_utf8(b"u8") &&
+            name != spec_utf8(b"u64") &&
+            name != spec_utf8(b"u128") &&
+            name != spec_utf8(b"address") &&
+            name != spec_utf8(b"0x1::string::String") &&
+            !string::spec_internal_check_utf8(b"vector<u8>");
+    }
+}
+
+
+================================================
+File: aptos-move/framework/aptos-token/sources/token.spec.move
+================================================
+spec aptos_token::token {
+    spec module {
+        pragma verify = true;
+        pragma aborts_if_is_strict;
+    }
+
+    /// The length of the name is up to MAX_COLLECTION_NAME_LENGTH;
+    /// The length of the uri is up to MAX_URI_LENGTH;
+    spec create_collection_script (
+        creator: &signer,
+        name: String,
+        description: String,
+        uri: String,
+        maximum: u64,
+        mutate_setting: vector<bool>,
+    ) {
+        // TODO: `create_collection` cannot cover all aborts.
+        pragma aborts_if_is_partial;
+        include CreateCollectionAbortsIf;
+    }
+
+    /// the length of 'mutate_setting' should maore than five.
+    /// The creator of the TokenDataId is signer.
+    /// The token_data_id should exist in the creator's collections..
+    /// The sum of supply and mint Token is less than maximum.
+    spec create_token_script(
+        account: &signer,
+        collection: String,
+        name: String,
+        description: String,
+        balance: u64,
+        maximum: u64,
+        uri: String,
+        royalty_payee_address: address,
+        royalty_points_denominator: u64,
+        royalty_points_numerator: u64,
+        mutate_setting: vector<bool>,
+        property_keys: vector<String>,
+        property_values: vector<vector<u8>>,
+        property_types: vector<String>
+    ) {
+        // TODO: Complex abort condition in "create_tokendata".
+        pragma aborts_if_is_partial;
+        let addr = signer::address_of(account);
+        let token_data_id = spec_create_tokendata(addr, collection, name);
+        let creator_addr = token_data_id.creator;
+        let all_token_data = global<Collections>(creator_addr).token_data;
+        let token_data = table::spec_get(all_token_data, token_data_id);
+        aborts_if token_data_id.creator != addr;
+        // aborts_if !table::spec_contains(all_token_data, token_data_id);
+        // aborts_if token_data.maximum > 0 && token_data.supply + balance > token_data.maximum;
+        aborts_if !exists<Collections>(creator_addr);
+        aborts_if balance <= 0;
+        include CreateTokenMutabilityConfigAbortsIf;
+
+        include CreateTokenMutabilityConfigAbortsIf;
+    }
+
+    spec fun spec_create_tokendata(
+        creator: address,
+        collection: String,
+        name: String): TokenDataId {
+        TokenDataId { creator, collection, name }
+    }
+
+    /// only creator of the tokendata can mint tokens
+    spec mint_script(
+        account: &signer,
+        token_data_address: address,
+        collection: String,
+        name: String,
+        amount: u64,
+    ) {
+        //TODO: Complex abort condition in mint_token.
+        pragma aborts_if_is_partial;
+        let token_data_id = spec_create_token_data_id(
+            token_data_address,
+            collection,
+            name,
+        );
+        let addr = signer::address_of(account);
+        let creator_addr = token_data_id.creator;
+        let all_token_data = global<Collections>(creator_addr).token_data;
+        let token_data = table::spec_get(all_token_data, token_data_id);
+        aborts_if token_data_id.creator != signer::address_of(account);
+
+        include CreateTokenDataIdAbortsIf{
+        creator: token_data_address,
+        collection: collection,
+        name: name
+        };
+
+        include MintTokenAbortsIf {
+        token_data_id: token_data_id
+        };
+    }
+
+    /// The signer is creator.
+    spec mutate_token_properties(
+        account: &signer,
+        token_owner: address,
+        creator: address,
+        collection_name: String,
+        token_name: String,
+        token_property_version: u64,
+        amount: u64,
+        keys: vector<String>,
+        values: vector<vector<u8>>,
+        types: vector<String>,
+    ) {
+        //TODO: Abort condition is complex in mutate_one_token function.
+        pragma aborts_if_is_partial;
+        let addr = signer::address_of(account);
+        aborts_if addr != creator;
+        include CreateTokenDataIdAbortsIf {
+            creator: creator,
+            collection: collection_name,
+            name: token_name
+        };
+    }
+
+    spec direct_transfer_script (
+        sender: &signer,
+        receiver: &signer,
+        creators_address: address,
+        collection: String,
+        name: String,
+        property_version: u64,
+        amount: u64,
+    ) {
+        // TODO: Unknown error message in direct_transfer function.
+        pragma aborts_if_is_partial;
+        include CreateTokenDataIdAbortsIf{
+            creator: creators_address,
+            collection: collection,
+            name: name
+        };
+    }
+
+    spec opt_in_direct_transfer(account: &signer, opt_in: bool) {
+        // TODO: Unknown abort condition.
+        pragma aborts_if_is_partial;
+        let addr = signer::address_of(account);
+        let account_addr = global<account::Account>(addr);
+        aborts_if !exists<TokenStore>(addr) && !exists<account::Account>(addr);
+        aborts_if !exists<TokenStore>(addr) && account_addr.guid_creation_num + 4 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if !exists<TokenStore>(addr) && account_addr.guid_creation_num + 4 > MAX_U64;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account_addr.guid_creation_num + 9 > account::MAX_GUID_CREATION_NUM;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account_addr.guid_creation_num + 9 > MAX_U64;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && !exists<account::Account>(addr);
+    }
+
+    spec transfer_with_opt_in(
+        from: &signer,
+        creator: address,
+        collection_name: String,
+        token_name: String,
+        token_property_version: u64,
+        to: address,
+        amount: u64,
+    ) {
+        //TODO: Abort condition is complex because of transfer function.
+        pragma aborts_if_is_partial;
+        include CreateTokenDataIdAbortsIf{
+            creator: creator,
+            collection: collection_name,
+            name: token_name
+        };
+    }
+
+    spec burn_by_creator(
+        creator: &signer,
+        owner: address,
+        collection: String,
+        name: String,
+        property_version: u64,
+        amount: u64,
+    ) {
+        use aptos_std::simple_map;
+        //TODO: Abort condition is complex because of the read_bool in the property_map module.
+        pragma aborts_if_is_partial;
+        let creator_address = signer::address_of(creator);
+        let token_id = spec_create_token_id_raw(creator_address, collection, name, property_version);
+        let creator_addr = token_id.token_data_id.creator;
+        let collections = borrow_global_mut<Collections>(creator_address);
+        let token_data = table::spec_get(
+            collections.token_data,
+            token_id.token_data_id,
+        );
+        aborts_if amount <= 0;
+        aborts_if !exists<Collections>(creator_addr);
+        aborts_if !table::spec_contains(collections.token_data, token_id.token_data_id);
+        aborts_if !simple_map::spec_contains_key(token_data.default_properties.map, std::string::spec_utf8(BURNABLE_BY_CREATOR));
+    }
+
+    /// The token_data_id should exist in token_data.
+    spec burn(
+        owner: &signer,
+        creators_address: address,
+        collection: String,
+        name: String,
+        property_version: u64,
+        amount: u64
+    ) {
+        use aptos_std::simple_map;
+        //TODO: Abort condition is complex because of the read_bool in the property_map module.
+        pragma aborts_if_is_partial;
+        let token_id = spec_create_token_id_raw(creators_address, collection, name, property_version);
+        let creator_addr = token_id.token_data_id.creator;
+        let collections = borrow_global_mut<Collections>(creator_addr);
+        let token_data = table::spec_get(
+            collections.token_data,
+            token_id.token_data_id,
+        );
+        include CreateTokenDataIdAbortsIf {
+        creator: creators_address
+        };
+        aborts_if amount <= 0;
+        aborts_if !exists<Collections>(creator_addr);
+        aborts_if !table::spec_contains(collections.token_data, token_id.token_data_id);
+        aborts_if !simple_map::spec_contains_key(token_data.default_properties.map, std::string::spec_utf8(BURNABLE_BY_OWNER));
+        aborts_if !string::spec_internal_check_utf8(BURNABLE_BY_OWNER);
+
+    }
+
+    spec fun spec_create_token_id_raw(
+        creator: address,
+        collection: String,
+        name: String,
+        property_version: u64,
+    ): TokenId {
+        let token_data_id = TokenDataId { creator, collection, name };
+        TokenId {
+            token_data_id,
+            property_version
+        }
+    }
+
+    /// The description of Collection is mutable.
+    spec mutate_collection_description(creator: &signer, collection_name: String, description: String) {
+        let addr = signer::address_of(creator);
+        let account = global<account::Account>(addr);
+        let collection_data = table::spec_get(global<Collections>(addr).collection_data, collection_name);
+        include AssertCollectionExistsAbortsIf {
+            creator_address: addr,
+            collection_name: collection_name
+        };
+        aborts_if !collection_data.mutability_config.description;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && !exists<account::Account>(addr);
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 > MAX_U64;
+    }
+
+    /// The uri of Collection is mutable.
+    spec mutate_collection_uri(creator: &signer, collection_name: String, uri: String) {
+        let addr = signer::address_of(creator);
+        let account = global<account::Account>(addr);
+        let collection_data = table::spec_get(global<Collections>(addr).collection_data, collection_name);
+        aborts_if len(uri.bytes) > MAX_URI_LENGTH;
+        include AssertCollectionExistsAbortsIf {
+            creator_address: addr,
+            collection_name: collection_name
+        };
+        aborts_if !collection_data.mutability_config.uri;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && !exists<account::Account>(addr);
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 > MAX_U64;
+    }
+
+    /// Cannot change maximum from 0 and cannot change maximum to 0.
+    /// The maximum should more than suply.
+    /// The maxium of Collection is mutable.
+    spec mutate_collection_maximum(creator: &signer, collection_name: String, maximum: u64) {
+        let addr = signer::address_of(creator);
+        let account = global<account::Account>(addr);
+        let collection_data = table::spec_get(global<Collections>(addr).collection_data, collection_name);
+        include AssertCollectionExistsAbortsIf {
+            creator_address: addr,
+            collection_name: collection_name
+        };
+        aborts_if collection_data.maximum == 0 || maximum == 0;
+        aborts_if maximum < collection_data.supply;
+        aborts_if !collection_data.mutability_config.maximum;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && !exists<account::Account>(addr);
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 > MAX_U64;
+    }
+
+    /// Cannot change maximum from 0 and cannot change maximum to 0.
+    /// The maximum should more than suply.
+    /// The token maximum is mutable
+    spec mutate_tokendata_maximum(creator: &signer, token_data_id: TokenDataId, maximum: u64) {
+        let addr = signer::address_of(creator);
+        let account = global<account::Account>(addr);
+        let all_token_data = global<Collections>(token_data_id.creator).token_data;
+        let token_data = table::spec_get(all_token_data, token_data_id);
+        include AssertTokendataExistsAbortsIf;
+        aborts_if token_data.maximum == 0 || maximum == 0;
+        aborts_if maximum < token_data.supply;
+        aborts_if !token_data.mutability_config.maximum;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && !exists<account::Account>(addr);
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 > MAX_U64;
+    }
+
+    /// The length of uri should less than MAX_URI_LENGTH.
+    /// The  creator of token_data_id should exist in Collections.
+    /// The token uri is mutable
+    spec mutate_tokendata_uri(
+        creator: &signer,
+        token_data_id: TokenDataId,
+        uri: String
+    ) {
+        let addr = signer::address_of(creator);
+        let account = global<account::Account>(addr);
+        let all_token_data = global<Collections>(token_data_id.creator).token_data;
+        let token_data = table::spec_get(all_token_data, token_data_id);
+        include AssertTokendataExistsAbortsIf;
+        aborts_if len(uri.bytes) > MAX_URI_LENGTH;
+        aborts_if !token_data.mutability_config.uri;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && !exists<account::Account>(addr);
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 > MAX_U64;
+    }
+
+   /// The token royalty is mutable
+    spec mutate_tokendata_royalty(creator: &signer, token_data_id: TokenDataId, royalty: Royalty) {
+        include AssertTokendataExistsAbortsIf;
+        let addr = signer::address_of(creator);
+        let account = global<account::Account>(addr);
+        let all_token_data = global<Collections>(token_data_id.creator).token_data;
+        let token_data = table::spec_get(all_token_data, token_data_id);
+        aborts_if !token_data.mutability_config.royalty;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && !exists<account::Account>(addr);
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 > MAX_U64;
+    }
+
+    /// The token description is mutable
+    spec mutate_tokendata_description(creator: &signer, token_data_id: TokenDataId, description: String) {
+        include AssertTokendataExistsAbortsIf;
+        let addr = signer::address_of(creator);
+        let account = global<account::Account>(addr);
+        let all_token_data = global<Collections>(token_data_id.creator).token_data;
+        let token_data = table::spec_get(all_token_data, token_data_id);
+        aborts_if !token_data.mutability_config.description;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && !exists<account::Account>(addr);
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if !exists<token_event_store::TokenEventStoreV1>(addr) && account.guid_creation_num + 9 > MAX_U64;
+    }
+
+    /// The property map is mutable
+    spec mutate_tokendata_property(
+        creator: &signer,
+        token_data_id: TokenDataId,
+        keys: vector<String>,
+        values: vector<vector<u8>>,
+        types: vector<String>,
+    ) {
+        // TODO: Can't handle abort in loop.
+        pragma aborts_if_is_partial;
+        let all_token_data = global<Collections>(token_data_id.creator).token_data;
+        let token_data = table::spec_get(all_token_data, token_data_id);
+        include AssertTokendataExistsAbortsIf;
+        aborts_if len(keys) != len(values);
+        aborts_if len(keys) != len(types);
+        aborts_if !token_data.mutability_config.properties;
+    }
+
+    /// The signer is creator.
+    /// The token_data_id should exist in token_data.
+    /// The property map is mutable.
+    spec mutate_one_token(
+        account: &signer,
+        token_owner: address,
+        token_id: TokenId,
+        keys: vector<String>,
+        values: vector<vector<u8>>,
+        types: vector<String>,
+    ): TokenId {
+        use aptos_std::simple_map;
+        //TODO: Abort condition is complex because of the read_bool funtion in the property_map module.
+        pragma aborts_if_is_partial;
+        let creator = token_id.token_data_id.creator;
+        let addr = signer::address_of(account);
+        let all_token_data = global<Collections>(creator).token_data;
+        let token_data = table::spec_get(all_token_data, token_id.token_data_id);
+        aborts_if addr != creator;
+        aborts_if !exists<Collections>(creator);
+        aborts_if !table::spec_contains(all_token_data, token_id.token_data_id);
+        aborts_if !token_data.mutability_config.properties && !simple_map::spec_contains_key(token_data.default_properties.map, std::string::spec_utf8(TOKEN_PROPERTY_MUTABLE));
+    }
+
+    spec create_royalty(royalty_points_numerator: u64, royalty_points_denominator: u64, payee_address: address): Royalty {
+        include CreateRoyaltyAbortsIf;
+    }
+
+    /// The royalty_points_numerator should less than royalty_points_denominator.
+    spec schema CreateRoyaltyAbortsIf {
+        royalty_points_numerator: u64;
+        royalty_points_denominator: u64;
+        payee_address: address;
+        aborts_if royalty_points_numerator > royalty_points_denominator;
+        aborts_if !exists<account::Account>(payee_address);
+    }
+
+    spec deposit_token(account: &signer, token: Token) {
+        // TODO: boogie error: invalid type for argument 1 in application of $ResourceExists: $1_account_Account (expected: int)
+        pragma verify = false;
+        pragma aborts_if_is_partial;
+        let account_addr = signer::address_of(account);
+        include !exists<TokenStore>(account_addr) ==> InitializeTokenStore;
+        let token_id = token.id;
+        let token_amount = token.amount;
+        include DirectDepositAbortsIf;
+    }
+
+    /// The token can direct_transfer.
+    spec direct_deposit_with_opt_in(account_addr: address, token: Token) {
+        let opt_in_transfer = global<TokenStore>(account_addr).direct_transfer;
+        aborts_if !exists<TokenStore>(account_addr);
+        aborts_if !opt_in_transfer;
+        let token_id = token.id;
+        let token_amount = token.amount;
+        include DirectDepositAbortsIf;
+    }
+
+    /// Cannot withdraw 0 tokens.
+    /// Make sure the account has sufficient tokens to withdraw.
+    spec direct_transfer(
+        sender: &signer,
+        receiver: &signer,
+        token_id: TokenId,
+        amount: u64,
+    ) {
+        //TODO: Unable to get thef value of token.
+        pragma verify = false;
+    }
+
+    spec initialize_token_store(account: &signer) {
+        include InitializeTokenStore;
+    }
+
+    spec schema InitializeTokenStore {
+        account: signer;
+
+        let addr = signer::address_of(account);
+        let account_addr = global<account::Account>(addr);
+        aborts_if !exists<TokenStore>(addr) && !exists<account::Account>(addr);
+        aborts_if !exists<TokenStore>(addr) && account_addr.guid_creation_num + 4 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if !exists<TokenStore>(addr) && account_addr.guid_creation_num + 4 > MAX_U64;
+    }
+
+    spec merge(dst_token: &mut Token, source_token: Token) {
+        aborts_if dst_token.id != source_token.id;
+        aborts_if dst_token.amount + source_token.amount > MAX_U64;
+    }
+
+    spec split(dst_token: &mut Token, amount: u64): Token {
+        aborts_if dst_token.id.property_version != 0;
+        aborts_if dst_token.amount <= amount;
+        aborts_if amount <= 0;
+    }
+
+    spec transfer(
+        from: &signer,
+        id: TokenId,
+        to: address,
+        amount: u64,
+    ) {
+        let opt_in_transfer = global<TokenStore>(to).direct_transfer;
+        let account_addr = signer::address_of(from);
+        aborts_if !opt_in_transfer;
+        // TODO: Unable to get token value through spec fun.
+        pragma aborts_if_is_partial;
+        include WithdrawWithEventInternalAbortsIf;
+    }
+
+    spec withdraw_with_capability(
+        withdraw_proof: WithdrawCapability,
+    ): Token {
+        let now_seconds = global<timestamp::CurrentTimeMicroseconds>(@supra_framework).microseconds;
+        aborts_if !exists<timestamp::CurrentTimeMicroseconds>(@supra_framework);
+        aborts_if now_seconds / timestamp::MICRO_CONVERSION_FACTOR > withdraw_proof.expiration_sec;
+        include WithdrawWithEventInternalAbortsIf{
+        account_addr: withdraw_proof.token_owner,
+        id: withdraw_proof.token_id,
+        amount: withdraw_proof.amount};
+    }
+
+    spec partial_withdraw_with_capability(
+        withdraw_proof: WithdrawCapability,
+        withdraw_amount: u64,
+    ): (Token, Option<WithdrawCapability>) {
+        let now_seconds = global<timestamp::CurrentTimeMicroseconds>(@supra_framework).microseconds;
+        aborts_if !exists<timestamp::CurrentTimeMicroseconds>(@supra_framework);
+        aborts_if now_seconds / timestamp::MICRO_CONVERSION_FACTOR > withdraw_proof.expiration_sec;
+        aborts_if withdraw_amount > withdraw_proof.amount;
+        include WithdrawWithEventInternalAbortsIf{
+            account_addr: withdraw_proof.token_owner,
+            id: withdraw_proof.token_id,
+            amount: withdraw_amount
+        };
+    }
+
+    /// Cannot withdraw 0 tokens.
+    /// Make sure the account has sufficient tokens to withdraw.
+    spec withdraw_token(
+        account: &signer,
+        id: TokenId,
+        amount: u64,
+    ): Token {
+        let account_addr = signer::address_of(account);
+        include WithdrawWithEventInternalAbortsIf;
+    }
+
+    /// The length of the name is up to MAX_COLLECTION_NAME_LENGTH;
+    /// The length of the uri is up to MAX_URI_LENGTH;
+    /// The collection_data should not exist before you create it.
+    spec create_collection(
+        creator: &signer,
+        name: String,
+        description: String,
+        uri: String,
+        maximum: u64,
+        mutate_setting: vector<bool>
+    ) {
+        // TODO: Complex abort condition.
+        pragma aborts_if_is_partial;
+        let account_addr = signer::address_of(creator);
+        aborts_if len(name.bytes) > 128;
+        aborts_if len(uri.bytes) > 512;
+        include CreateCollectionAbortsIf;
+    }
+
+    spec schema CreateCollectionAbortsIf {
+        creator: signer;
+        name: String;
+        description: String;
+        uri: String;
+        maximum: u64;
+        mutate_setting: vector<bool>;
+
+        let addr = signer::address_of(creator);
+        let account = global<account::Account>(addr);
+        let collection = global<Collections>(addr);
+        let b = !exists<Collections>(addr);
+        let collection_data = global<Collections>(addr).collection_data;
+        // TODO: The collection_data should not exist before you create it.
+        // aborts_if table::spec_contains(collection_data, name);
+        aborts_if b && !exists<account::Account>(addr);
+        aborts_if len(name.bytes) > MAX_COLLECTION_NAME_LENGTH;
+        aborts_if len(uri.bytes) > MAX_URI_LENGTH;
+        aborts_if b && account.guid_creation_num + 3 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if b && account.guid_creation_num + 3 > MAX_U64;
+        include CreateCollectionMutabilityConfigAbortsIf;
+    }
+
+    spec check_collection_exists(creator: address, name: String): bool {
+        aborts_if !exists<Collections>(creator);
+    }
+
+    /// The length of collection should less than MAX_COLLECTION_NAME_LENGTH
+    /// The length of name should less than MAX_NFT_NAME_LENGTH
+    spec check_tokendata_exists(creator: address, collection_name: String, token_name: String): bool {
+        aborts_if !exists<Collections>(creator);
+        include CreateTokenDataIdAbortsIf {
+            creator: creator,
+            collection: collection_name,
+            name: token_name
+        };
+    }
+
+    /// The length of collection should less than MAX_COLLECTION_NAME_LENGTH
+    /// The length of name should less than MAX_NFT_NAME_LENGTH
+    spec create_tokendata(
+        account: &signer,
+        collection: String,
+        name: String,
+        description: String,
+        maximum: u64,
+        uri: String,
+        royalty_payee_address: address,
+        royalty_points_denominator: u64,
+        royalty_points_numerator: u64,
+        token_mutate_config: TokenMutabilityConfig,
+        property_keys: vector<String>,
+        property_values: vector<vector<u8>>,
+        property_types: vector<String>
+    ): TokenDataId {
+        // TODO: Complex abort condition in "roperty_map::new".
+        pragma verify = false;
+        pragma aborts_if_is_partial;
+        let account_addr = signer::address_of(account);
+        let collections = global<Collections>(account_addr);
+        let token_data_id = spec_create_token_data_id(account_addr, collection, name);
+        let Collection = table::spec_get(collections.collection_data, token_data_id.collection);
+        let length = len(property_keys);
+        aborts_if len(name.bytes) > MAX_NFT_NAME_LENGTH;
+        aborts_if len(collection.bytes) > MAX_COLLECTION_NAME_LENGTH;
+        aborts_if len(uri.bytes) > MAX_URI_LENGTH;
+        aborts_if royalty_points_numerator > royalty_points_denominator;
+        aborts_if !exists<Collections>(account_addr);
+        include CreateTokenDataIdAbortsIf {
+            creator: account_addr,
+            collection: collection,
+            name: name
+        };
+        aborts_if !table::spec_contains(collections.collection_data, collection);
+        aborts_if table::spec_contains(collections.token_data, token_data_id);
+        aborts_if Collection.maximum > 0 && Collection.supply + 1 > MAX_U64;
+        aborts_if Collection.maximum > 0 && Collection.maximum < Collection.supply + 1;
+        include CreateRoyaltyAbortsIf {
+            payee_address: royalty_payee_address
+        };
+        aborts_if length > property_map::MAX_PROPERTY_MAP_SIZE;
+        aborts_if length != len(property_values);
+        aborts_if length != len(property_types);
+    }
+
+    spec fun spec_create_token_data_id(
+        creator: address,
+        collection: String,
+        name: String,
+    ): TokenDataId {
+        TokenDataId { creator, collection, name }
+    }
+
+    spec get_collection_supply(creator_address: address, collection_name: String): Option<u64> {
+        include AssertCollectionExistsAbortsIf;
+    }
+
+    spec get_collection_description(creator_address: address, collection_name: String): String {
+        include AssertCollectionExistsAbortsIf;
+    }
+
+    spec get_collection_uri(creator_address: address, collection_name: String): String {
+        include AssertCollectionExistsAbortsIf;
+    }
+
+    spec get_collection_maximum(creator_address: address, collection_name: String): u64 {
+        include AssertCollectionExistsAbortsIf;
+    }
+
+    spec get_token_supply(creator_address: address, token_data_id: TokenDataId): Option<u64> {
+        aborts_if !exists<Collections>(creator_address);
+        let all_token_data = global<Collections>(creator_address).token_data;
+        aborts_if !table::spec_contains(all_token_data, token_data_id);
+    }
+
+    spec get_tokendata_largest_property_version(creator_address: address, token_data_id: TokenDataId): u64 {
+        aborts_if !exists<Collections>(creator_address);
+        let all_token_data = global<Collections>(creator_address).token_data;
+        aborts_if !table::spec_contains(all_token_data, token_data_id);
+    }
+
+    /// The length of 'mutate_setting' should more than five.
+    /// The mutate_setting shuold have a value.
+    spec create_token_mutability_config(mutate_setting: &vector<bool>): TokenMutabilityConfig  {
+        include CreateTokenMutabilityConfigAbortsIf;
+    }
+
+    spec schema CreateTokenMutabilityConfigAbortsIf {
+        mutate_setting: vector<bool>;
+        aborts_if len(mutate_setting) < 5;
+        aborts_if !vector::spec_contains(mutate_setting, mutate_setting[TOKEN_MAX_MUTABLE_IND]);
+        aborts_if !vector::spec_contains(mutate_setting, mutate_setting[TOKEN_URI_MUTABLE_IND]);
+        aborts_if !vector::spec_contains(mutate_setting, mutate_setting[TOKEN_ROYALTY_MUTABLE_IND]);
+        aborts_if !vector::spec_contains(mutate_setting, mutate_setting[TOKEN_DESCRIPTION_MUTABLE_IND]);
+        aborts_if !vector::spec_contains(mutate_setting, mutate_setting[TOKEN_PROPERTY_MUTABLE_IND]);
+    }
+
+    spec create_collection_mutability_config {
+        include CreateCollectionMutabilityConfigAbortsIf;
+    }
+
+    spec schema CreateCollectionMutabilityConfigAbortsIf {
+        mutate_setting: vector<bool>;
+        aborts_if len(mutate_setting) < 3;
+        aborts_if !vector::spec_contains(mutate_setting, mutate_setting[COLLECTION_DESCRIPTION_MUTABLE_IND]);
+        aborts_if !vector::spec_contains(mutate_setting, mutate_setting[COLLECTION_URI_MUTABLE_IND]);
+        aborts_if !vector::spec_contains(mutate_setting, mutate_setting[COLLECTION_MAX_MUTABLE_IND]);
+    }
+
+    /// The creator of the TokenDataId is signer.
+    /// The token_data_id should exist in the creator's collections..
+    /// The sum of supply and the amount of mint Token is less than maximum.
+    spec mint_token(
+        account: &signer,
+        token_data_id: TokenDataId,
+        amount: u64,
+    ): TokenId {
+        //TODO: Cannot get the value of Token for deposit_token function.
+        // pragma aborts_if_is_partial;
+        pragma verify = false;
+        // include MintTokenAbortsIf;
+        // let addr = signer::address_of(account);
+        // let creator_addr = token_data_id.creator;
+        // aborts_if token_data_id.creator != addr;
+        // aborts_if !table::spec_contains(all_token_data, token_data_id);
+        // let token_data = table::spec_get(all_token_data, token_data_id);
+        // let all_token_data = global<Collections>(creator_addr).token_data;
+        // aborts_if token_data.maximum > 0 ==> token_data.supply + amount > token_data.maximum;
+    }
+
+    spec schema MintTokenAbortsIf {
+        account: signer;
+        token_data_id: TokenDataId;
+        amount: u64;
+
+        let addr = signer::address_of(account);
+        let creator_addr = token_data_id.creator;
+        let all_token_data = global<Collections>(creator_addr).token_data;
+        let token_data = table::spec_get(all_token_data, token_data_id);
+        aborts_if token_data_id.creator != addr;
+        aborts_if !table::spec_contains(all_token_data, token_data_id);
+        aborts_if token_data.maximum > 0 && token_data.supply + amount > token_data.maximum;
+        aborts_if !exists<Collections>(creator_addr);
+        aborts_if amount <= 0;
+        include InitializeTokenStore;
+
+        let token_id = create_token_id(token_data_id, 0);
+        // aborts_if !exists<TokenStore>(addr);
+        // let token_store = global<TokenStore>(addr);
+        // let recipient_token = table::spec_get(token_store.tokens, token_id);
+        // let b = table::spec_contains(token_store.tokens, token_id);
+        // aborts_if amount <= 0;
+        // aborts_if b && recipient_token.id != token_id;
+        // aborts_if b && recipient_token.amount + amount > MAX_U64;
+    }
+
+    spec mint_token_to(
+        account: &signer,
+        receiver: address,
+        token_data_id: TokenDataId,
+        amount: u64,
+    ) {
+        let addr = signer::address_of(account);
+        let opt_in_transfer = global<TokenStore>(receiver).direct_transfer;
+        let creator_addr = token_data_id.creator;
+        let all_token_data = global<Collections>(creator_addr).token_data;
+        let token_data = table::spec_get(all_token_data, token_data_id);
+        aborts_if !exists<TokenStore>(receiver);
+        aborts_if !opt_in_transfer;
+        aborts_if token_data_id.creator != addr;
+        aborts_if !table::spec_contains(all_token_data, token_data_id);
+        aborts_if token_data.maximum > 0 && token_data.supply + amount > token_data.maximum;
+        aborts_if amount <= 0;
+        aborts_if !exists<Collections>(creator_addr);
+
+        let token_id = create_token_id(token_data_id, 0);
+
+        include DirectDepositAbortsIf {
+            account_addr: receiver,
+            token_id: token_id,
+            token_amount: amount,
+        };
+    }
+
+    /// The length of collection should less than MAX_COLLECTION_NAME_LENGTH
+    /// The length of name should less than MAX_NFT_NAME_LENGTH
+    spec create_token_data_id(
+        creator: address,
+        collection: String,
+        name: String,
+    ): TokenDataId {
+        include CreateTokenDataIdAbortsIf;
+    }
+
+    spec schema CreateTokenDataIdAbortsIf {
+        creator: address;
+        collection: String;
+        name: String;
+        aborts_if len(collection.bytes) > MAX_COLLECTION_NAME_LENGTH;
+        aborts_if len(name.bytes) > MAX_NFT_NAME_LENGTH;
+    }
+
+    /// The length of collection should less than MAX_COLLECTION_NAME_LENGTH
+    /// The length of name should less than MAX_NFT_NAME_LENGTH
+    spec create_token_id_raw(
+        creator: address,
+        collection: String,
+        name: String,
+        property_version: u64,
+    ): TokenId {
+        include CreateTokenDataIdAbortsIf;
+    }
+
+    spec fun spec_balance_of(owner: address, id: TokenId): u64 {
+        let token_store = borrow_global<TokenStore>(owner);
+        if (!exists<TokenStore>(owner)) {
+            0
+        }
+        else if (table::spec_contains(token_store.tokens, id)) {
+            table::spec_get(token_store.tokens, id).amount
+        } else {
+            0
+        }
+    }
+
+    spec get_royalty(token_id: TokenId): Royalty {
+        include GetTokendataRoyaltyAbortsIf {
+            token_data_id: token_id.token_data_id
+        };
+    }
+
+    spec get_property_map(owner: address, token_id: TokenId): PropertyMap {
+        let creator_addr = token_id.token_data_id.creator;
+        let all_token_data = global<Collections>(creator_addr).token_data;
+        aborts_if spec_balance_of(owner, token_id) <= 0;
+        aborts_if token_id.property_version == 0 && !table::spec_contains(all_token_data, token_id.token_data_id);
+        aborts_if token_id.property_version == 0 && !exists<Collections>(creator_addr);
+    }
+
+    spec get_tokendata_maximum(token_data_id: TokenDataId): u64 {
+        let creator_address = token_data_id.creator;
+        aborts_if !exists<Collections>(creator_address);
+        let all_token_data = global<Collections>(creator_address).token_data;
+        aborts_if !table::spec_contains(all_token_data, token_data_id);
+    }
+
+    spec get_tokendata_uri(creator: address, token_data_id: TokenDataId): String {
+        aborts_if !exists<Collections>(creator);
+        let all_token_data = global<Collections>(creator).token_data;
+        aborts_if !table::spec_contains(all_token_data, token_data_id);
+    }
+
+    spec get_tokendata_description(token_data_id: TokenDataId): String {
+        let creator_address = token_data_id.creator;
+        aborts_if !exists<Collections>(creator_address);
+        let all_token_data = global<Collections>(creator_address).token_data;
+        aborts_if !table::spec_contains(all_token_data, token_data_id);
+    }
+
+    spec get_tokendata_royalty(token_data_id: TokenDataId): Royalty {
+        include GetTokendataRoyaltyAbortsIf;
+    }
+
+    spec schema GetTokendataRoyaltyAbortsIf {
+        token_data_id: TokenDataId;
+        let creator_address = token_data_id.creator;
+        let all_token_data = global<Collections>(creator_address).token_data;
+        aborts_if !exists<Collections>(creator_address);
+        aborts_if !table::spec_contains(all_token_data, token_data_id);
+    }
+
+    spec get_tokendata_mutability_config(token_data_id: TokenDataId): TokenMutabilityConfig {
+        let creator_addr = token_data_id.creator;
+        let all_token_data = global<Collections>(creator_addr).token_data;
+        aborts_if !exists<Collections>(creator_addr);
+        aborts_if !table::spec_contains(all_token_data, token_data_id);
+    }
+
+    spec get_collection_mutability_config(
+        creator: address,
+        collection_name: String
+    ): CollectionMutabilityConfig {
+        let all_collection_data = global<Collections>(creator).collection_data;
+        aborts_if !exists<Collections>(creator);
+        aborts_if !table::spec_contains(all_collection_data, collection_name);
+    }
+
+    spec withdraw_with_event_internal(
+        account_addr: address,
+        id: TokenId,
+        amount: u64,
+    ): Token {
+        include WithdrawWithEventInternalAbortsIf;
+    }
+
+    spec schema WithdrawWithEventInternalAbortsIf {
+        account_addr: address;
+        id: TokenId;
+        amount: u64;
+        let tokens = global<TokenStore>(account_addr).tokens;
+        aborts_if amount <= 0;
+        aborts_if spec_balance_of(account_addr, id) < amount;
+        aborts_if !exists<TokenStore>(account_addr);
+        aborts_if !table::spec_contains(tokens, id);
+    }
+
+    spec update_token_property_internal (
+        token_owner: address,
+        token_id: TokenId,
+        keys: vector<String>,
+        values: vector<vector<u8>>,
+        types: vector<String>,
+    ) {
+        //TODO: Abort in `property_map::update_property_map` loop cannot be handled
+        pragma aborts_if_is_partial;
+        let tokens = global<TokenStore>(token_owner).tokens;
+        aborts_if !exists<TokenStore>(token_owner);
+        aborts_if !table::spec_contains(tokens, token_id);
+    }
+
+    spec direct_deposit(account_addr: address, token: Token) {
+        let token_id = token.id;
+        let token_amount = token.amount;
+        include DirectDepositAbortsIf;
+    }
+
+    spec schema DirectDepositAbortsIf {
+        account_addr: address;
+        token_id: TokenId;
+        token_amount: u64;
+        let token_store = global<TokenStore>(account_addr);
+        let recipient_token = table::spec_get(token_store.tokens, token_id);
+        let b = table::spec_contains(token_store.tokens, token_id);
+        aborts_if token_amount <= 0;
+        aborts_if !exists<TokenStore>(account_addr);
+        aborts_if b && recipient_token.id != token_id;
+        aborts_if b && recipient_token.amount + token_amount > MAX_U64;
+    }
+
+    /// The collection_name should exist in collection_data of the creator_address's Collections.
+    spec assert_collection_exists(creator_address: address, collection_name: String) {
+        include AssertCollectionExistsAbortsIf;
+    }
+
+    spec schema AssertCollectionExistsAbortsIf {
+        creator_address: address;
+        collection_name: String;
+        let all_collection_data = global<Collections>(creator_address).collection_data;
+        aborts_if !exists<Collections>(creator_address);
+        aborts_if !table::spec_contains(all_collection_data, collection_name);
+    }
+
+    /// The creator of token_data_id should be signer.
+    /// The  creator of token_data_id exists in Collections.
+    /// The token_data_id is in the all_token_data.
+    spec assert_tokendata_exists(creator: &signer, token_data_id: TokenDataId) {
+        include AssertTokendataExistsAbortsIf;
+    }
+
+    spec schema AssertTokendataExistsAbortsIf {
+        creator: signer;
+        token_data_id: TokenDataId;
+        let creator_addr = token_data_id.creator;
+        let addr = signer::address_of(creator);
+        aborts_if addr != creator_addr;
+        aborts_if !exists<Collections>(creator_addr);
+        let all_token_data = global<Collections>(creator_addr).token_data;
+        aborts_if !table::spec_contains(all_token_data, token_data_id);
+    }
+
+    spec assert_non_standard_reserved_property(keys: &vector<String>) {
+        // TODO: Can't handle abort in loop.
+        pragma verify = false;
+    }
+
+    /// Deprecated function
+    spec initialize_token_script(_account: &signer) {
+        pragma verify = false;
+    }
+
+    /// Deprecated function
+    spec initialize_token(_account: &signer, _token_id: TokenId) {
+        pragma verify = false;
+    }
+}
+
+
+================================================
+File: aptos-move/framework/aptos-token/sources/token_coin_swap.move
+================================================
+/// Deprecated module
+module aptos_token::token_coin_swap {
+    use std::string::String;
+    use std::error;
+    use aptos_std::table::Table;
+    use aptos_std::type_info::TypeInfo;
+    use supra_framework::event::EventHandle;
+    use aptos_token::token::{Token, TokenId};
+
+    //
+    // Errors.
+    //
+
+    /// Token already listed
+    const ETOKEN_ALREADY_LISTED: u64 = 1;
+
+    /// Token listing no longer exists
+    const ETOKEN_LISTING_NOT_EXIST: u64 = 2;
+
+    /// Token is not in escrow
+    const ETOKEN_NOT_IN_ESCROW: u64 = 3;
+
+    /// Token cannot be moved out of escrow before the lockup time
+    const ETOKEN_CANNOT_MOVE_OUT_OF_ESCROW_BEFORE_LOCKUP_TIME: u64 = 4;
+
+    /// Token buy price doesn't match listing price
+    const ETOKEN_MIN_PRICE_NOT_MATCH: u64 = 5;
+
+    /// Token buy amount doesn't match listing amount
+    const ETOKEN_AMOUNT_NOT_MATCH: u64 = 6;
+
+    /// Not enough coin to buy token
+    const ENOT_ENOUGH_COIN: u64 = 7;
+
+    /// Deprecated module
+    const EDEPRECATED_MODULE: u64 = 8;
+
+    /// TokenCoinSwap records a swap ask for swapping token_amount with CoinType with a minimal price per token
+    struct TokenCoinSwap<phantom CoinType> has store, drop {
+        token_amount: u64,
+        min_price_per_token: u64,
+    }
+
+    /// The listing of all tokens for swapping stored at token owner's account
+    struct TokenListings<phantom CoinType> has key {
+        // key is the token id for swapping and value is the min price of target coin type.
+        listings: Table<TokenId, TokenCoinSwap<CoinType>>,
+        listing_events: EventHandle<TokenListingEvent>,
+        swap_events: EventHandle<TokenSwapEvent>,
+    }
+
+    /// TokenEscrow holds the tokens that cannot be withdrawn or transferred
+    struct TokenEscrow has store {
+        token: Token,
+        // until the locked time runs out, the owner cannot move the token out of the escrow
+        // the default value is 0 meaning the owner can move the coin out anytime
+        locked_until_secs: u64,
+    }
+
+    /// TokenStoreEscrow holds a map of token id to their tokenEscrow
+    struct TokenStoreEscrow has key {
+        token_escrows: Table<TokenId, TokenEscrow>,
+    }
+
+    struct TokenListingEvent has drop, store {
+        token_id: TokenId,
+        amount: u64,
+        min_price: u64,
+        locked_until_secs: u64,
+        coin_type_info: TypeInfo,
+    }
+
+    struct TokenSwapEvent has drop, store {
+        token_id: TokenId,
+        token_buyer: address,
+        token_amount: u64,
+        coin_amount: u64,
+        coin_type_info: TypeInfo,
+    }
+
+    public fun does_listing_exist<CoinType>(
+        _token_owner: address,
+        _token_id: TokenId
+    ): bool {
+        abort error::invalid_argument(EDEPRECATED_MODULE)
+    }
+
+    /// Coin owner withdraw coin to swap with tokens listed for swapping at the token owner's address.
+    public fun exchange_coin_for_token<CoinType>(
+        _coin_owner: &signer,
+        _coin_amount: u64,
+        _token_owner: address,
+        _creators_address: address,
+        _collection: String,
+        _name: String,
+        _property_version: u64,
+        _token_amount: u64,
+    ) {
+        abort error::invalid_argument(EDEPRECATED_MODULE)
+    }
+
+    /// Token owner lists their token for swapping
+    public entry fun list_token_for_swap<CoinType>(
+        _token_owner: &signer,
+        _creators_address: address,
+        _collection: String,
+        _name: String,
+        _property_version: u64,
+        _token_amount: u64,
+        _min_coin_per_token: u64,
+        _locked_until_secs: u64
+    ) {
+        abort error::invalid_argument(EDEPRECATED_MODULE)
+    }
+
+    /// Initalize the token listing for a token owner
+    fun initialize_token_listing<CoinType>(_token_owner: &signer) {
+        abort error::invalid_argument(EDEPRECATED_MODULE)
+    }
+
+    /// Intialize the token escrow
+    fun initialize_token_store_escrow(_token_owner: &signer) {
+        abort error::invalid_argument(EDEPRECATED_MODULE)
+    }
+
+    /// Put the token into escrow that cannot be transferred or withdrawed by the owner.
+    public fun deposit_token_to_escrow(
+        _token_owner: &signer,
+        _token_id: TokenId,
+        _tokens: Token,
+        _locked_until_secs: u64
+    ) {
+        abort error::invalid_argument(EDEPRECATED_MODULE)
+    }
+
+    /// Private function for withdraw tokens from an escrow stored in token owner address
+    fun withdraw_token_from_escrow_internal(
+        _token_owner_addr: address,
+        _token_id: TokenId,
+        _amount: u64
+    ): Token {
+        abort error::invalid_argument(EDEPRECATED_MODULE)
+    }
+
+    /// Withdraw tokens from the token escrow. It needs a signer to authorize
+    public fun withdraw_token_from_escrow(
+        _token_owner: &signer,
+        _token_id: TokenId,
+        _amount: u64
+    ): Token {
+        abort error::invalid_argument(EDEPRECATED_MODULE)
+    }
+
+    /// Cancel token listing for a fixed amount
+    public fun cancel_token_listing<CoinType>(
+        _token_owner: &signer,
+        _token_id: TokenId,
+        _token_amount: u64,
+    ) {
+        abort error::invalid_argument(EDEPRECATED_MODULE)
+    }
+}
+
+
+================================================
+File: aptos-move/framework/aptos-token/sources/token_coin_swap.spec.move
+================================================
+spec aptos_token::token_coin_swap {
+    spec module {
+        pragma verify = false;
+    }
+}
+
+
+================================================
+File: aptos-move/framework/aptos-token/sources/token_event_store.move
+================================================
+/// This module provides utils to add and emit new token events that are not in token.move
+module aptos_token::token_event_store {
+    use std::string::String;
+    use std::signer;
+    use supra_framework::event::{Self, EventHandle};
+    use supra_framework::account;
+    use std::option::Option;
+    use aptos_std::any::Any;
+    use std::option;
+    use aptos_token::property_map::PropertyValue;
+
+    friend aptos_token::token;
+
+    //
+    // Collection mutation events
+    //
+
+    /// Event emitted when collection description is mutated
+    struct CollectionDescriptionMutateEvent has drop, store {
+        creator_addr: address,
+        collection_name: String,
+        old_description: String,
+        new_description: String,
+    }
+
+    #[event]
+    /// Event emitted when collection description is mutated
+    struct CollectionDescriptionMutate has drop, store {
+        creator_addr: address,
+        collection_name: String,
+        old_description: String,
+        new_description: String,
+    }
+
+    /// Event emitted when collection uri is mutated
+    struct CollectionUriMutateEvent has drop, store {
+        creator_addr: address,
+        collection_name: String,
+        old_uri: String,
+        new_uri: String,
+    }
+
+    #[event]
+    /// Event emitted when collection uri is mutated
+    struct CollectionUriMutate has drop, store {
+        creator_addr: address,
+        collection_name: String,
+        old_uri: String,
+        new_uri: String,
+    }
+
+    /// Event emitted when the collection maximum is mutated
+    struct CollectionMaxiumMutateEvent has drop, store {
+        creator_addr: address,
+        collection_name: String,
+        old_maximum: u64,
+        new_maximum: u64,
+    }
+
+    #[event]
+    /// Event emitted when the collection maximum is mutated
+    struct CollectionMaxiumMutate has drop, store {
+        creator_addr: address,
+        collection_name: String,
+        old_maximum: u64,
+        new_maximum: u64,
+    }
+
+    //
+    // Token transfer related events
+    //
+
+    /// Event emitted when an user opt-in the direct transfer
+    struct OptInTransferEvent has drop, store {
+        /// True if the user opt in, false if the user opt-out
+        opt_in: bool
+    }
+
+    #[event]
+    /// Event emitted when an user opt-in the direct transfer
+    struct OptInTransfer has drop, store {
+        account_address: address,
+        /// True if the user opt in, false if the user opt-out
+        opt_in: bool
+    }
+
+    //
+    // Token mutation events
+    //
+
+    /// Event emitted when the tokendata uri mutates
+    struct UriMutationEvent has drop, store {
+        creator: address,
+        collection: String,
+        token: String,
+        old_uri: String,
+        new_uri: String,
+    }
+
+    #[event]
+    /// Event emitted when the tokendata uri mutates
+    struct UriMutation has drop, store {
+        creator: address,
+        collection: String,
+        token: String,
+        old_uri: String,
+        new_uri: String,
+    }
+
+    /// Event emitted when mutating the default the token properties stored at tokendata
+    struct DefaultPropertyMutateEvent has drop, store {
+        creator: address,
+        collection: String,
+        token: String,
+        keys: vector<String>,
+        /// we allow upsert so the old values might be none
+        old_values: vector<Option<PropertyValue>>,
+        new_values: vector<PropertyValue>,
+    }
+
+    #[event]
+    /// Event emitted when mutating the default the token properties stored at tokendata
+    struct DefaultPropertyMutate has drop, store {
+        creator: address,
+        collection: String,
+        token: String,
+        keys: vector<String>,
+        /// we allow upsert so the old values might be none
+        old_values: vector<Option<PropertyValue>>,
+        new_values: vector<PropertyValue>,
+    }
+
+    /// Event emitted when the tokendata description is mutated
+    struct DescriptionMutateEvent has drop, store {
+        creator: address,
+        collection: String,
+        token: String,
+        old_description: String,
+        new_description: String,
+    }
+
+    #[event]
+    /// Event emitted when the tokendata description is mutated
+    struct DescriptionMutate has drop, store {
+        creator: address,
+        collection: String,
+        token: String,
+        old_description: String,
+        new_description: String,
+    }
+
+    /// Event emitted when the token royalty is mutated
+    struct RoyaltyMutateEvent has drop, store {
+        creator: address,
+        collection: String,
+        token: String,
+        old_royalty_numerator: u64,
+        old_royalty_denominator: u64,
+        old_royalty_payee_addr: address,
+        new_royalty_numerator: u64,
+        new_royalty_denominator: u64,
+        new_royalty_payee_addr: address,
+    }
+
+    #[event]
+    /// Event emitted when the token royalty is mutated
+    struct RoyaltyMutate has drop, store {
+        creator: address,
+        collection: String,
+        token: String,
+        old_royalty_numerator: u64,
+        old_royalty_denominator: u64,
+        old_royalty_payee_addr: address,
+        new_royalty_numerator: u64,
+        new_royalty_denominator: u64,
+        new_royalty_payee_addr: address,
+    }
+
+    /// Event emitted when the token maximum is mutated
+    struct MaxiumMutateEvent has drop, store {
+        creator: address,
+        collection: String,
+        token: String,
+        old_maximum: u64,
+        new_maximum: u64,
+    }
+
+    #[event]
+    /// Event emitted when the token maximum is mutated
+    struct MaximumMutate has drop, store {
+        creator: address,
+        collection: String,
+        token: String,
+        old_maximum: u64,
+        new_maximum: u64,
+    }
+
+    struct TokenEventStoreV1 has key {
+        /// collection mutation events
+        collection_uri_mutate_events: EventHandle<CollectionUriMutateEvent>,
+        collection_maximum_mutate_events: EventHandle<CollectionMaxiumMutateEvent>,
+        collection_description_mutate_events: EventHandle<CollectionDescriptionMutateEvent>,
+        /// token transfer opt-in event
+        opt_in_events: EventHandle<OptInTransferEvent>,
+        /// token mutation events
+        uri_mutate_events: EventHandle<UriMutationEvent>,
+        default_property_mutate_events: EventHandle<DefaultPropertyMutateEvent>,
+        description_mutate_events: EventHandle<DescriptionMutateEvent>,
+        royalty_mutate_events: EventHandle<RoyaltyMutateEvent>,
+        maximum_mutate_events: EventHandle<MaxiumMutateEvent>,
+        /// This is for adding new events in future
+        extension: Option<Any>,
+    }
+
+    fun initialize_token_event_store(acct: &signer){
+        if (!exists<TokenEventStoreV1>(signer::address_of(acct))) {
+            move_to(acct, TokenEventStoreV1 {
+                collection_uri_mutate_events: account::new_event_handle<CollectionUriMutateEvent>(acct),
+                collection_maximum_mutate_events: account::new_event_handle<CollectionMaxiumMutateEvent>(acct),
+                collection_description_mutate_events: account::new_event_handle<CollectionDescriptionMutateEvent>(acct),
+                opt_in_events: account::new_event_handle<OptInTransferEvent>(acct),
+                uri_mutate_events: account::new_event_handle<UriMutationEvent>(acct),
+                default_property_mutate_events: account::new_event_handle<DefaultPropertyMutateEvent>(acct),
+                description_mutate_events: account::new_event_handle<DescriptionMutateEvent>(acct),
+                royalty_mutate_events: account::new_event_handle<RoyaltyMutateEvent>(acct),
+                maximum_mutate_events: account::new_event_handle<MaxiumMutateEvent>(acct),
+                extension: option::none<Any>(),
+            });
+        };
+    }
+
+    /// Emit the collection uri mutation event
+    public(friend) fun emit_collection_uri_mutate_event(creator: &signer, collection: String, old_uri: String, new_uri: String) acquires TokenEventStoreV1 {
+        let event = CollectionUriMutateEvent {
+            creator_addr: signer::address_of(creator),
+            collection_name: collection,
+            old_uri,
+            new_uri,
+        };
+        initialize_token_event_store(creator);
+        let token_event_store = borrow_global_mut<TokenEventStoreV1>(signer::address_of(creator));
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                CollectionUriMutate {
+                    creator_addr: signer::address_of(creator),
+                    collection_name: collection,
+                    old_uri,
+                    new_uri,
+                }
+            );
+        };
+        event::emit_event<CollectionUriMutateEvent>(
+            &mut token_event_store.collection_uri_mutate_events,
+            event,
+        );
+    }
+
+    /// Emit the collection description mutation event
+    public(friend) fun emit_collection_description_mutate_event(creator: &signer, collection: String, old_description: String, new_description: String) acquires TokenEventStoreV1 {
+        let event = CollectionDescriptionMutateEvent {
+            creator_addr: signer::address_of(creator),
+            collection_name: collection,
+            old_description,
+            new_description,
+        };
+        initialize_token_event_store(creator);
+        let token_event_store = borrow_global_mut<TokenEventStoreV1>(signer::address_of(creator));
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                CollectionDescriptionMutate {
+                    creator_addr: signer::address_of(creator),
+                    collection_name: collection,
+                    old_description,
+                    new_description,
+                }
+            );
+        };
+        event::emit_event<CollectionDescriptionMutateEvent>(
+            &mut token_event_store.collection_description_mutate_events,
+            event,
+        );
+    }
+
+    /// Emit the collection maximum mutation event
+    public(friend) fun emit_collection_maximum_mutate_event(creator: &signer, collection: String, old_maximum: u64, new_maximum: u64) acquires TokenEventStoreV1 {
+        let event = CollectionMaxiumMutateEvent {
+            creator_addr: signer::address_of(creator),
+            collection_name: collection,
+            old_maximum,
+            new_maximum,
+        };
+        initialize_token_event_store(creator);
+        let token_event_store = borrow_global_mut<TokenEventStoreV1>(signer::address_of(creator));
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                CollectionMaxiumMutate {
+                    creator_addr: signer::address_of(creator),
+                    collection_name: collection,
+                    old_maximum,
+                    new_maximum,
+                }
+            );
+        };
+        event::emit_event<CollectionMaxiumMutateEvent>(
+            &mut token_event_store.collection_maximum_mutate_events,
+            event,
+        );
+    }
+
+    /// Emit the direct opt-in event
+    public(friend) fun emit_token_opt_in_event(account: &signer, opt_in: bool) acquires TokenEventStoreV1 {
+        let opt_in_event = OptInTransferEvent {
+          opt_in,
+        };
+        initialize_token_event_store(account);
+        let token_event_store = borrow_global_mut<TokenEventStoreV1>(signer::address_of(account));
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                OptInTransfer {
+                    account_address: signer::address_of(account),
+                    opt_in,
+                });
+        };
+        event::emit_event<OptInTransferEvent>(
+            &mut token_event_store.opt_in_events,
+            opt_in_event,
+        );
+    }
+
+    /// Emit URI mutation event
+    public(friend) fun emit_token_uri_mutate_event(
+        creator: &signer,
+        collection: String,
+        token: String,
+        old_uri: String,
+        new_uri: String,
+    ) acquires TokenEventStoreV1 {
+        let creator_addr = signer::address_of(creator);
+
+        let event = UriMutationEvent {
+            creator: creator_addr,
+            collection,
+            token,
+            old_uri,
+            new_uri,
+        };
+
+        initialize_token_event_store(creator);
+        let token_event_store = borrow_global_mut<TokenEventStoreV1>(creator_addr);
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                UriMutation {
+                    creator: creator_addr,
+                    collection,
+                    token,
+                    old_uri,
+                    new_uri,
+                });
+        };
+        event::emit_event<UriMutationEvent>(
+            &mut token_event_store.uri_mutate_events,
+            event,
+        );
+    }
+
+    /// Emit tokendata property map mutation event
+    public(friend) fun emit_default_property_mutate_event(
+        creator: &signer,
+        collection: String,
+        token: String,
+        keys: vector<String>,
+        old_values: vector<Option<PropertyValue>>,
+        new_values: vector<PropertyValue>,
+    ) acquires TokenEventStoreV1 {
+        let creator_addr = signer::address_of(creator);
+
+        let event = DefaultPropertyMutateEvent {
+            creator: creator_addr,
+            collection,
+            token,
+            keys,
+            old_values,
+            new_values,
+        };
+
+        initialize_token_event_store(creator);
+        let token_event_store = borrow_global_mut<TokenEventStoreV1>(creator_addr);
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                DefaultPropertyMutate {
+                    creator: creator_addr,
+                    collection,
+                    token,
+                    keys,
+                    old_values,
+                    new_values,
+                });
+        };
+        event::emit_event<DefaultPropertyMutateEvent>(
+            &mut token_event_store.default_property_mutate_events,
+            event,
+        );
+    }
+
+    /// Emit description mutation event
+    public(friend) fun emit_token_descrition_mutate_event(
+        creator: &signer,
+        collection: String,
+        token: String,
+        old_description: String,
+        new_description: String,
+    ) acquires TokenEventStoreV1 {
+        let creator_addr = signer::address_of(creator);
+
+        let event = DescriptionMutateEvent {
+            creator: creator_addr,
+            collection,
+            token,
+            old_description,
+            new_description,
+        };
+
+        initialize_token_event_store(creator);
+        let token_event_store = borrow_global_mut<TokenEventStoreV1>(creator_addr);
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                DescriptionMutate {
+                    creator: creator_addr,
+                    collection,
+                    token,
+                    old_description,
+                    new_description,
+                });
+        };
+        event::emit_event<DescriptionMutateEvent>(
+            &mut token_event_store.description_mutate_events,
+            event,
+        );
+    }
+
+    /// Emit royalty mutation event
+    public(friend) fun emit_token_royalty_mutate_event(
+        creator: &signer,
+        collection: String,
+        token: String,
+        old_royalty_numerator: u64,
+        old_royalty_denominator: u64,
+        old_royalty_payee_addr: address,
+        new_royalty_numerator: u64,
+        new_royalty_denominator: u64,
+        new_royalty_payee_addr: address,
+    ) acquires TokenEventStoreV1 {
+        let creator_addr = signer::address_of(creator);
+        let event = RoyaltyMutateEvent {
+            creator: creator_addr,
+            collection,
+            token,
+            old_royalty_numerator,
+            old_royalty_denominator,
+            old_royalty_payee_addr,
+            new_royalty_numerator,
+            new_royalty_denominator,
+            new_royalty_payee_addr,
+        };
+
+        initialize_token_event_store(creator);
+        let token_event_store = borrow_global_mut<TokenEventStoreV1>(creator_addr);
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                RoyaltyMutate {
+                    creator: creator_addr,
+                    collection,
+                    token,
+                    old_royalty_numerator,
+                    old_royalty_denominator,
+                    old_royalty_payee_addr,
+                    new_royalty_numerator,
+                    new_royalty_denominator,
+                    new_royalty_payee_addr,
+                });
+        };
+        event::emit_event<RoyaltyMutateEvent>(
+            &mut token_event_store.royalty_mutate_events,
+            event,
+        );
+    }
+
+    /// Emit maximum mutation event
+    public(friend) fun emit_token_maximum_mutate_event(
+        creator: &signer,
+        collection: String,
+        token: String,
+        old_maximum: u64,
+        new_maximum: u64,
+    ) acquires TokenEventStoreV1 {
+        let creator_addr = signer::address_of(creator);
+
+        let event = MaxiumMutateEvent {
+            creator: creator_addr,
+            collection,
+            token,
+            old_maximum,
+            new_maximum,
+        };
+
+        initialize_token_event_store(creator);
+        let token_event_store =  borrow_global_mut<TokenEventStoreV1>(creator_addr);
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                MaximumMutate {
+                    creator: creator_addr,
+                    collection,
+                    token,
+                    old_maximum,
+                    new_maximum,
+                });
+        };
+        event::emit_event<MaxiumMutateEvent>(
+            &mut token_event_store.maximum_mutate_events,
+            event,
+        );
+    }
+}
+
+
+================================================
+File: aptos-move/framework/aptos-token/sources/token_event_store.spec.move
+================================================
+spec aptos_token::token_event_store {
+    spec module {
+        pragma verify = true;
+        pragma aborts_if_is_strict;
+    }
+
+    spec initialize_token_event_store(acct: &signer) {
+        pragma verify = true;
+        let addr = signer::address_of(acct);
+        include InitializeTokenEventStoreAbortsIf {creator : acct};
+    }
+
+    /// Adjust the overflow value according to the
+    /// number of registered events
+    spec schema InitializeTokenEventStoreAbortsIf {
+        use supra_framework::account::{Account};
+        creator: &signer;
+        let addr = signer::address_of(creator);
+        let account = global<Account>(addr);
+        aborts_if !exists<TokenEventStoreV1>(addr) && !exists<Account>(addr);
+        aborts_if !exists<TokenEventStoreV1>(addr) && account.guid_creation_num + 9 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if !exists<TokenEventStoreV1>(addr) && account.guid_creation_num + 9 > MAX_U64;
+    }
+
+    spec schema TokenEventStoreAbortsIf {
+        use supra_framework::account::{Account};
+        creator: &signer;
+        let addr = signer::address_of(creator);
+        let account = global<Account>(addr);
+        aborts_if !exists<Account>(addr);
+        aborts_if account.guid_creation_num + 9 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if account.guid_creation_num + 9 > MAX_U64;
+    }
+
+    spec emit_collection_uri_mutate_event(creator: &signer, collection: String, old_uri: String, new_uri: String) {
+        include InitializeTokenEventStoreAbortsIf;
+    }
+
+    spec emit_collection_description_mutate_event(creator: &signer, collection: String, old_description: String, new_description: String) {
+        include InitializeTokenEventStoreAbortsIf;
+    }
+
+    spec emit_collection_maximum_mutate_event(creator: &signer, collection: String, old_maximum: u64, new_maximum: u64) {
+        include InitializeTokenEventStoreAbortsIf;
+    }
+
+    spec emit_token_opt_in_event(account: &signer, opt_in: bool) {
+        include InitializeTokenEventStoreAbortsIf {creator : account};
+    }
+
+    spec emit_token_uri_mutate_event(
+        creator: &signer,
+        collection: String,
+        token: String,
+        old_uri: String,
+        new_uri: String,
+    ) {
+        include InitializeTokenEventStoreAbortsIf;
+    }
+
+    spec emit_default_property_mutate_event(
+        creator: &signer,
+        collection: String,
+        token: String,
+        keys: vector<String>,
+        old_values: vector<Option<PropertyValue>>,
+        new_values: vector<PropertyValue>,
+    ) {
+        include InitializeTokenEventStoreAbortsIf;
+    }
+
+    spec emit_token_descrition_mutate_event(
+        creator: &signer,
+        collection: String,
+        token: String,
+        old_description: String,
+        new_description: String,
+    ) {
+        include InitializeTokenEventStoreAbortsIf;
+    }
+
+    spec emit_token_royalty_mutate_event(
+        creator: &signer,
+        collection: String,
+        token: String,
+        old_royalty_numerator: u64,
+        old_royalty_denominator: u64,
+        old_royalty_payee_addr: address,
+        new_royalty_numerator: u64,
+        new_royalty_denominator: u64,
+        new_royalty_payee_addr: address,
+    ) {
+        include InitializeTokenEventStoreAbortsIf;
+    }
+
+    spec emit_token_maximum_mutate_event(
+        creator: &signer,
+        collection: String,
+        token: String,
+        old_maximum: u64,
+        new_maximum: u64,
+    ) {
+        include InitializeTokenEventStoreAbortsIf;
+    }
+}
+
+
+================================================
+File: aptos-move/framework/aptos-token/sources/token_transfers.move
+================================================
+/// This module provides the foundation for transferring of Tokens
+module aptos_token::token_transfers {
+    use std::signer;
+    use std::string::String;
+    use std::error;
+    use aptos_std::table::{Self, Table};
+    use aptos_token::token::{Self, Token, TokenId};
+    use supra_framework::account;
+    use supra_framework::event::{Self, EventHandle};
+
+    //
+    // Errors.
+    //
+
+    /// Token offer doesn't exist
+    const ETOKEN_OFFER_NOT_EXIST: u64 = 1;
+
+    struct PendingClaims has key {
+        pending_claims: Table<TokenOfferId, Token>,
+        offer_events: EventHandle<TokenOfferEvent>,
+        cancel_offer_events: EventHandle<TokenCancelOfferEvent>,
+        claim_events: EventHandle<TokenClaimEvent>,
+    }
+
+    #[event]
+    struct TokenOfferId has copy, drop, store {
+        to_addr: address,
+        token_id: TokenId,
+    }
+
+    #[event]
+    struct TokenOffer has drop, store {
+        to_address: address,
+        token_id: TokenId,
+        amount: u64,
+    }
+
+    #[event]
+    struct TokenOfferEvent has drop, store {
+        to_address: address,
+        token_id: TokenId,
+        amount: u64,
+    }
+
+    #[event]
+    struct TokenCancelOfferEvent has drop, store {
+        to_address: address,
+        token_id: TokenId,
+        amount: u64,
+    }
+
+    #[event]
+    struct TokenCancelOffer has drop, store {
+        to_address: address,
+        token_id: TokenId,
+        amount: u64,
+    }
+
+    #[event]
+    struct TokenClaimEvent has drop, store {
+        to_address: address,
+        token_id: TokenId,
+        amount: u64,
+    }
+
+    #[event]
+    struct TokenClaim has drop, store {
+        to_address: address,
+        token_id: TokenId,
+        amount: u64,
+    }
+
+    fun initialize_token_transfers(account: &signer) {
+        move_to(
+            account,
+            PendingClaims {
+                pending_claims: table::new<TokenOfferId, Token>(),
+                offer_events: account::new_event_handle<TokenOfferEvent>(account),
+                cancel_offer_events: account::new_event_handle<TokenCancelOfferEvent>(account),
+                claim_events: account::new_event_handle<TokenClaimEvent>(account),
+            }
+        )
+    }
+
+    fun create_token_offer_id(to_addr: address, token_id: TokenId): TokenOfferId {
+        TokenOfferId {
+            to_addr,
+            token_id
+        }
+    }
+
+    public entry fun offer_script(
+        sender: signer,
+        receiver: address,
+        creator: address,
+        collection: String,
+        name: String,
+        property_version: u64,
+        amount: u64,
+    ) acquires PendingClaims {
+        let token_id = token::create_token_id_raw(creator, collection, name, property_version);
+        offer(&sender, receiver, token_id, amount);
+    }
+
+    public fun offer(
+        sender: &signer,
+        receiver: address,
+        token_id: TokenId,
+        amount: u64,
+    ) acquires PendingClaims {
+        let sender_addr = signer::address_of(sender);
+        if (!exists<PendingClaims>(sender_addr)) {
+            initialize_token_transfers(sender)
+        };
+
+        let pending_claims =
+            &mut borrow_global_mut<PendingClaims>(sender_addr).pending_claims;
+        let token_offer_id = create_token_offer_id(receiver, token_id);
+        let token = token::withdraw_token(sender, token_id, amount);
+        if (!table::contains(pending_claims, token_offer_id)) {
+            table::add(pending_claims, token_offer_id, token);
+        } else {
+            let dst_token = table::borrow_mut(pending_claims, token_offer_id);
+            token::merge(dst_token, token);
+        };
+
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                TokenOffer {
+                    to_address: receiver,
+                    token_id,
+                    amount,
+                }
+            )
+        };
+        event::emit_event<TokenOfferEvent>(
+            &mut borrow_global_mut<PendingClaims>(sender_addr).offer_events,
+            TokenOfferEvent {
+                to_address: receiver,
+                token_id,
+                amount,
+            },
+        );
+    }
+
+    public entry fun claim_script(
+        receiver: signer,
+        sender: address,
+        creator: address,
+        collection: String,
+        name: String,
+        property_version: u64,
+    ) acquires PendingClaims {
+        let token_id = token::create_token_id_raw(creator, collection, name, property_version);
+        claim(&receiver, sender, token_id);
+    }
+
+    public fun claim(
+        receiver: &signer,
+        sender: address,
+        token_id: TokenId,
+    ) acquires PendingClaims {
+        assert!(exists<PendingClaims>(sender), ETOKEN_OFFER_NOT_EXIST);
+        let pending_claims =
+            &mut borrow_global_mut<PendingClaims>(sender).pending_claims;
+        let token_offer_id = create_token_offer_id(signer::address_of(receiver), token_id);
+        assert!(table::contains(pending_claims, token_offer_id), error::not_found(ETOKEN_OFFER_NOT_EXIST));
+        let tokens = table::remove(pending_claims, token_offer_id);
+        let amount = token::get_token_amount(&tokens);
+        token::deposit_token(receiver, tokens);
+
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                TokenClaim {
+                    to_address: signer::address_of(receiver),
+                    token_id,
+                    amount,
+                }
+            )
+        };
+        event::emit_event<TokenClaimEvent>(
+            &mut borrow_global_mut<PendingClaims>(sender).claim_events,
+            TokenClaimEvent {
+                to_address: signer::address_of(receiver),
+                token_id,
+                amount,
+            },
+        );
+    }
+
+    public entry fun cancel_offer_script(
+        sender: signer,
+        receiver: address,
+        creator: address,
+        collection: String,
+        name: String,
+        property_version: u64,
+    ) acquires PendingClaims {
+        let token_id = token::create_token_id_raw(creator, collection, name, property_version);
+        cancel_offer(&sender, receiver, token_id);
+    }
+
+    // Extra from our pending_claims and return to gallery
+    public fun cancel_offer(
+        sender: &signer,
+        receiver: address,
+        token_id: TokenId,
+    ) acquires PendingClaims {
+        let sender_addr = signer::address_of(sender);
+        let token_offer_id = create_token_offer_id(receiver, token_id);
+        assert!(exists<PendingClaims>(sender_addr), ETOKEN_OFFER_NOT_EXIST);
+        let pending_claims =
+            &mut borrow_global_mut<PendingClaims>(sender_addr).pending_claims;
+        let token = table::remove(pending_claims, token_offer_id);
+        let amount = token::get_token_amount(&token);
+        token::deposit_token(sender, token);
+
+        if (std::features::module_event_migration_enabled()) {
+            event::emit(
+                TokenCancelOffer {
+                    to_address: receiver,
+                    token_id,
+                    amount,
+                },
+            )
+        };
+        event::emit_event<TokenCancelOfferEvent>(
+            &mut borrow_global_mut<PendingClaims>(sender_addr).cancel_offer_events,
+            TokenCancelOfferEvent {
+                to_address: receiver,
+                token_id,
+                amount,
+            },
+        );
+    }
+
+    #[test(creator = @0x1, owner = @0x2)]
+    public fun test_nft(creator: signer, owner: signer) acquires PendingClaims {
+        let token_id = create_token(&creator, 1);
+
+        let creator_addr = signer::address_of(&creator);
+        let owner_addr = signer::address_of(&owner);
+        supra_framework::account::create_account_for_test(owner_addr);
+        offer(&creator, owner_addr, token_id, 1);
+        claim(&owner, creator_addr, token_id);
+
+
+        offer(&owner, creator_addr, token_id, 1);
+        cancel_offer(&owner, creator_addr, token_id);
+    }
+
+    #[test(creator = @0x1, owner0 = @0x2, owner1 = @0x3)]
+    public fun test_editions(
+        creator: signer,
+        owner0: signer,
+        owner1: signer,
+    ) acquires PendingClaims {
+        let token_id = create_token(&creator, 2);
+
+        let creator_addr = signer::address_of(&creator);
+        let owner0_addr = signer::address_of(&owner0);
+        supra_framework::account::create_account_for_test(owner0_addr);
+        let owner1_addr = signer::address_of(&owner1);
+        supra_framework::account::create_account_for_test(owner1_addr);
+
+        offer(&creator, owner0_addr, token_id, 1);
+        offer(&creator, owner1_addr, token_id, 1);
+
+        assert!(token::balance_of(signer::address_of(&creator), token_id) == 0, 1);
+        claim(&owner0, creator_addr, token_id);
+        assert!(token::balance_of(signer::address_of(&owner0), token_id) == 1, 1);
+        claim(&owner1, creator_addr, token_id);
+        assert!(token::balance_of(signer::address_of(&owner1), token_id) == 1, 1);
+
+        offer(&owner0, owner1_addr, token_id, 1);
+        claim(&owner1, owner0_addr, token_id);
+
+        offer(&owner1, creator_addr, token_id, 1);
+        offer(&owner1, creator_addr, token_id, 1);
+        claim(&creator, owner1_addr, token_id);
+    }
+
+    #[test_only]
+    public fun create_token(creator: &signer, amount: u64): TokenId {
+        use std::string::{Self, String};
+
+        let collection_name = string::utf8(b"Hello, World");
+        let collection_mutation_setting = vector<bool>[false, false, false];
+        supra_framework::account::create_account_for_test(signer::address_of(creator));
+
+        token::create_collection(
+            creator,
+            collection_name,
+            string::utf8(b"Collection: Hello, World"),
+            string::utf8(b"https://aptos.dev"),
+            1,
+            collection_mutation_setting,
+        );
+
+        let token_mutation_setting = vector<bool>[false, false, false, false, true];
+        let default_keys = vector<String>[string::utf8(b"attack"), string::utf8(b"num_of_use")];
+        let default_vals = vector<vector<u8>>[b"10", b"5"];
+        let default_types = vector<String>[string::utf8(b"integer"), string::utf8(b"integer")];
+        token::create_token_script(
+            creator,
+            collection_name,
+            string::utf8(b"Token: Hello, Token"),
+            string::utf8(b"Hello, Token"),
+            amount,
+            amount,
+            string::utf8(b"https://aptos.dev"),
+            signer::address_of(creator),
+            100,
+            0,
+            token_mutation_setting,
+            default_keys,
+            default_vals,
+            default_types,
+        );
+        token::create_token_id_raw(
+            signer::address_of(creator),
+            collection_name,
+            string::utf8(b"Token: Hello, Token"),
+            0
+        )
+    }
+}
+
+
+================================================
+File: aptos-move/framework/aptos-token/sources/token_transfers.spec.move
+================================================
+spec aptos_token::token_transfers {
+    spec module {
+        pragma verify = true;
+        pragma aborts_if_is_strict;
+    }
+
+    spec initialize_token_transfers(account: &signer) {
+        include InitializeTokenTransfersAbortsIf;
+    }
+
+    /// Abort according to the code
+    spec schema InitializeTokenTransfersAbortsIf {
+        use supra_framework::account::{Account};
+        account: &signer;
+
+        let addr = signer::address_of(account);
+        aborts_if exists<PendingClaims>(addr);
+        let account = global<Account>(addr);
+        aborts_if !exists<Account>(addr);
+        aborts_if account.guid_creation_num + 3 >= account::MAX_GUID_CREATION_NUM;
+        aborts_if account.guid_creation_num + 3 > MAX_U64;
+    }
+
+    spec create_token_offer_id(to_addr: address, token_id: TokenId): TokenOfferId {
+        aborts_if false;
+    }
+
+    spec offer_script(
+        sender: signer,
+        receiver: address,
+        creator: address,
+        collection: String,
+        name: String,
+        property_version: u64,
+        amount: u64,
+    ){
+        pragma verify = false;
+        let token_id = token::create_token_id_raw(creator, collection, name, property_version);
+    }
+
+    spec offer(
+        sender: &signer,
+        receiver: address,
+        token_id: TokenId,
+        amount: u64,
+    ){
+        use aptos_token::token::{TokenStore,Self};
+
+        // TODO: Can't get the return from `withdraw_token`.
+        pragma verify = false;
+
+        let sender_addr = signer::address_of(sender);
+        include !exists<PendingClaims>(sender_addr) ==> InitializeTokenTransfersAbortsIf{account : sender};
+        let pending_claims = global<PendingClaims>(sender_addr).pending_claims;
+        let token_offer_id = create_token_offer_id(receiver, token_id);
+
+        let tokens = global<TokenStore>(sender_addr).tokens;
+        aborts_if amount <= 0;
+        aborts_if token::spec_balance_of(sender_addr, token_id) < amount;
+        aborts_if !exists<TokenStore>(sender_addr);
+        aborts_if !table::spec_contains(tokens, token_id);
+
+        aborts_if !table::spec_contains(pending_claims, token_offer_id);
+        let a = table::spec_contains(pending_claims, token_offer_id);
+        let dst_token = table::spec_get(pending_claims, token_offer_id);
+
+        aborts_if dst_token.amount + spce_get(signer::address_of(sender), token_id, amount) > MAX_U64;
+    }
+
+    /// Get the amount from sender token
+    spec fun spce_get(
+        account_addr: address,
+        id: TokenId,
+        amount: u64
+    ): u64 {
+        use aptos_token::token::{TokenStore};
+        use aptos_std::table::{Self};
+        let tokens = global<TokenStore>(account_addr).tokens;
+        let balance = table::spec_get(tokens, id).amount;
+        if (balance > amount) {
+            amount
+        } else {
+            table::spec_get(tokens, id).amount
+        }
+    }
+
+    spec claim_script(
+        receiver: signer,
+        sender: address,
+        creator: address,
+        collection: String,
+        name: String,
+        property_version: u64,
+    ){
+        use aptos_token::token::{TokenStore};
+
+        // TODO: deposit_token has pending issues
+        pragma aborts_if_is_partial;
+
+        let token_id = token::create_token_id_raw(creator, collection, name, property_version);
+        aborts_if !exists<PendingClaims>(sender);
+        let pending_claims = global<PendingClaims>(sender).pending_claims;
+        let token_offer_id = create_token_offer_id(signer::address_of(receiver), token_id);
+        aborts_if !table::spec_contains(pending_claims, token_offer_id);
+        let tokens = table::spec_get(pending_claims, token_offer_id);
+
+        include token::InitializeTokenStore{account: receiver };
+
+        let account_addr = signer::address_of(receiver);
+        let token = tokens;
+        let token_store = global<TokenStore>(account_addr);
+        let recipient_token = table::spec_get(token_store.tokens, token.id);
+        let b = table::spec_contains(token_store.tokens, token.id);
+        aborts_if token.amount <= 0;
+
+    }
+
+    spec claim(
+        receiver: &signer,
+        sender: address,
+        token_id: TokenId,
+    ){
+        use aptos_token::token::{TokenStore};
+        // TODO: deposit_token has pending issues
+        pragma aborts_if_is_partial;
+
+        aborts_if !exists<PendingClaims>(sender);
+        let pending_claims = global<PendingClaims>(sender).pending_claims;
+        let token_offer_id = create_token_offer_id(signer::address_of(receiver), token_id);
+        aborts_if !table::spec_contains(pending_claims, token_offer_id);
+        let tokens = table::spec_get(pending_claims, token_offer_id);
+
+        include token::InitializeTokenStore{account: receiver };
+
+        let account_addr = signer::address_of(receiver);
+        let token = tokens;
+        let token_store = global<TokenStore>(account_addr);
+        let recipient_token = table::spec_get(token_store.tokens, token.id);
+        let b = table::spec_contains(token_store.tokens, token.id);
+        aborts_if token.amount <= 0;
+    }
+
+    spec cancel_offer_script(
+        sender: signer,
+        receiver: address,
+        creator: address,
+        collection: String,
+        name: String,
+        property_version: u64,
+    ){
+        use aptos_token::token::{TokenStore};
+
+        // TODO: deposit_token has pending issues.
+        pragma aborts_if_is_partial;
+
+        let token_id = token::create_token_id_raw(creator, collection, name, property_version);
+
+        let sender_addr = signer::address_of(sender);
+        aborts_if !exists<PendingClaims>(sender_addr);
+        let pending_claims = global<PendingClaims>(sender_addr).pending_claims;
+        let token_offer_id = create_token_offer_id(receiver, token_id);
+        aborts_if !table::spec_contains(pending_claims, token_offer_id);
+
+        include token::InitializeTokenStore{account: sender };
+        let dst_token = table::spec_get(pending_claims, token_offer_id);
+
+        let account_addr = sender_addr;
+        let token = dst_token;
+        let token_store = global<TokenStore>(account_addr);
+        let recipient_token = table::spec_get(token_store.tokens, token.id);
+        let b = table::spec_contains(token_store.tokens, token.id);
+        aborts_if token.amount <= 0;
+    }
+
+    spec cancel_offer(
+        sender: &signer,
+        receiver: address,
+        token_id: TokenId,
+    ){
+        use aptos_token::token::{TokenStore};
+
+        // TODO: deposit_token has pending issues.
+        pragma aborts_if_is_partial;
+
+        let sender_addr = signer::address_of(sender);
+        aborts_if !exists<PendingClaims>(sender_addr);
+        let pending_claims = global<PendingClaims>(sender_addr).pending_claims;
+        let token_offer_id = create_token_offer_id(receiver, token_id);
+        aborts_if !table::spec_contains(pending_claims, token_offer_id);
+
+        include token::InitializeTokenStore{account: sender };
+        let dst_token = table::spec_get(pending_claims, token_offer_id);
+
+        let account_addr = sender_addr;
+        let token = dst_token;
+        let token_store = global<TokenStore>(account_addr);
+        let recipient_token = table::spec_get(token_store.tokens, token.id);
+        let b = table::spec_contains(token_store.tokens, token.id);
+        aborts_if token.amount <= 0;
+    }
+}
+
+

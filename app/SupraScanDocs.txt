@@ -1,0 +1,2804 @@
+
+https://rpc-testnet.supra.com - RPC For Supra Scan and Faucet
+Accounts
+Accounts Api
+
+
+
+GET
+/rpc/v1/accounts/{address}
+Fetch account info
+contains auth key & sequence number for the account
+
+Parameters
+Try it out
+Name	Description
+address *
+string
+(path)
+address of the account to lookup
+
+address
+Responses
+Code	Description	Links
+200	
+account information
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "sequence_number": 0,
+  "authentication_key": "string"
+}
+No links
+
+GET
+/rpc/v1/accounts/{address}/coin_transactions
+List of finalized coin withdraw/deposit transactions relevant to the move account. Return max 100 transactions per request.
+It includes both transactions sent from and received by the account.
+
+Parameters
+Try it out
+Name	Description
+count
+integer
+(query)
+Maximum number of items to return. Default is 20.
+
+count
+start
+integer($uint64)
+(query)
+The cursor that the search should start from. The cursor for a given transaction can be derived by adding its index (where indexes start from zero) in the block in which it became finalized to the timestamp of the block.
+
+During a paginated query, the cursor returned in the previous page should be used as the starting cursor of the next page.
+
+If provided, return :count of transactions starting from this cursor in ascending order. If not provided, return :count of most recent transactions in descending order.
+
+start
+address *
+string
+(path)
+Hex encoded move address for the account
+
+address
+Responses
+Code	Description	Links
+200	
+List of transactions sent from and received by the move account.
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "record": [
+    {
+      "authenticator": {},
+      "block_header": {
+        "hash": "string",
+        "height": 0,
+        "timestamp": {
+          "timestamp": 0
+        }
+      },
+      "hash": "string",
+      "header": {
+        "chain_id": 0,
+        "expiration_timestamp": {
+          "timestamp": 0
+        },
+        "sender": "string",
+        "sequence_number": 0,
+        "gas_unit_price": 0,
+        "max_gas_amount": 0
+      },
+      "payload": {},
+      "output": {
+        "Dkg": "Success"
+      },
+      "status": "Success"
+    }
+  ]
+}
+No links
+
+GET
+/rpc/v1/accounts/{address}/modules
+Get account modules by address
+Parameters
+Try it out
+Name	Description
+count
+integer
+(query)
+Maximum number of items to return. Default is 20.
+
+count
+start
+string
+(query)
+Cursor specifying where to start for pagination use the curser returned by the API
+
+start
+address *
+string
+(path)
+account address to lookup
+
+address
+Responses
+Code	Description	Links
+200	
+account module list
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "Resources": {}
+}
+No links
+
+GET
+/rpc/v1/accounts/{address}/modules/{module_name}
+Parameters
+Try it out
+Name	Description
+address *
+string
+(path)
+account address to lookup
+
+address
+module_name *
+string
+(path)
+Move module identifier
+
+module_name
+Responses
+Code	Description	Links
+200	
+View account module by Move module name
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "result": [
+    {
+      "U8": 0
+    },
+    {
+      "U16": 0
+    },
+    {
+      "U32": 0
+    },
+    {
+      "U64": "string"
+    },
+    {
+      "U128": "string"
+    },
+    {
+      "U256": "string"
+    },
+    {
+      "Bool": true
+    },
+    {
+      "Address": "string"
+    },
+    {
+      "Vector": [
+        "string"
+      ]
+    },
+    {
+      "Bytes": "string"
+    },
+    {
+      "Struct": {}
+    },
+    {
+      "String": "string"
+    }
+  ]
+}
+No links
+
+GET
+/rpc/v1/accounts/{address}/resources
+Get account resources by address
+Parameters
+Try it out
+Name	Description
+count
+integer
+(query)
+Maximum number of items to return. Default is 20.
+
+count
+start
+string
+(query)
+Cursor specifying where to start for pagination use the curser returned by the API
+
+start
+address *
+string
+(path)
+account address to lookup
+
+address
+Responses
+Code	Description	Links
+200	
+account resource list
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "Resources": {}
+}
+No links
+
+GET
+/rpc/v1/accounts/{address}/resources/{struct_tag}
+View account resource by Move type
+Parameters
+Try it out
+Name	Description
+address *
+string
+(path)
+account address to lookup
+
+address
+struct_tag *
+string
+(path)
+Move struct tag
+
+Example : 0x1::coin::CoinStore<0x1::supra_coin::SupraCoin>
+
+0x1::coin::CoinStore<0x1::supra_coin::SupraCoin>
+Responses
+Code	Description	Links
+200	
+View account resource by Move Struct type
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "result": [
+    {
+      "U8": 0
+    },
+    {
+      "U16": 0
+    },
+    {
+      "U32": 0
+    },
+    {
+      "U64": "string"
+    },
+    {
+      "U128": "string"
+    },
+    {
+      "U256": "string"
+    },
+    {
+      "Bool": true
+    },
+    {
+      "Address": "string"
+    },
+    {
+      "Vector": [
+        "string"
+      ]
+    },
+    {
+      "Bytes": "string"
+    },
+    {
+      "Struct": {}
+    },
+    {
+      "String": "string"
+    }
+  ]
+}
+No links
+
+GET
+/rpc/v1/accounts/{address}/transactions
+List of finalized transactions sent by the move account. Return max 100 transactions per request.
+Parameters
+Try it out
+Name	Description
+count
+integer
+(query)
+Maximum number of items to return. Default is 20.
+
+count
+start
+integer($uint64)
+(query)
+Starting sequence number. If provided, return :count of transactions starting from this sequence number in ascending order. If not provided, return :count of most recent transactions in descending order.
+
+start
+address *
+string
+(path)
+Hex encoded move address for the account
+
+address
+Responses
+Code	Description	Links
+200	
+List of transactions from the move account.
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "record": [
+    {
+      "authenticator": {},
+      "block_header": {
+        "hash": "string",
+        "height": 0,
+        "timestamp": {
+          "timestamp": 0
+        }
+      },
+      "hash": "string",
+      "header": {
+        "chain_id": 0,
+        "expiration_timestamp": {
+          "timestamp": 0
+        },
+        "sender": "string",
+        "sequence_number": 0,
+        "gas_unit_price": 0,
+        "max_gas_amount": 0
+      },
+      "payload": {},
+      "output": {
+        "Dkg": "Success"
+      },
+      "status": "Success"
+    }
+  ]
+}
+No links
+Faucet
+Faucet Api
+
+
+
+GET
+/rpc/v1/wallet/faucet/transactions/{hash}
+Get information about a faucet transaction by its hash.
+Parameters
+Try it out
+Name	Description
+hash *
+string
+(path)
+Hash of the faucet transaction to lookup
+
+hash
+Responses
+Code	Description	Links
+200	
+Faucet transaction data of the given transaction hash
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "authenticator": {},
+  "block_header": {
+    "hash": "string",
+    "height": 0,
+    "timestamp": {
+      "timestamp": 0
+    }
+  },
+  "hash": "string",
+  "header": {
+    "chain_id": 0,
+    "expiration_timestamp": {
+      "timestamp": 0
+    },
+    "sender": "string",
+    "sequence_number": 0,
+    "gas_unit_price": 0,
+    "max_gas_amount": 0
+  },
+  "payload": {},
+  "output": {
+    "Dkg": "Success"
+  },
+  "status": "Success"
+}
+No links
+
+GET
+/rpc/v1/wallet/faucet/{address}
+Faucet endpoint
+funds account with [FUND_AMOUNT] coins
+
+Parameters
+Try it out
+Name	Description
+address *
+string
+(path)
+account address to fund
+
+address
+Responses
+Code	Description	Links
+200	
+list of associated transactions created
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "Accepted": "string"
+}
+No links
+Transactions
+Transactions Api
+
+
+
+GET
+/rpc/v1/transactions/chain_id
+Fetch chain id
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+current chain id
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+0
+No links
+
+GET
+/rpc/v1/transactions/estimate_gas_price
+Fetch current recommended gas price
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+current maximum and average gas price
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "mean_gas_price": 0,
+  "max_gas_price": 0
+}
+No links
+
+POST
+/rpc/v1/transactions/simulate
+Simulate a transaction in scope of RPC node. Simulated transaction must not have a valid signature.
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "Smr": {
+    "signer_data": {},
+    "transaction": {}
+  }
+}
+Responses
+Code	Description	Links
+200	
+Simulation is ready
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "authenticator": {},
+  "block_header": {
+    "hash": "string",
+    "height": 0,
+    "timestamp": {
+      "timestamp": 0
+    }
+  },
+  "hash": "string",
+  "header": {
+    "chain_id": 0,
+    "expiration_timestamp": {
+      "timestamp": 0
+    },
+    "sender": "string",
+    "sequence_number": 0,
+    "gas_unit_price": 0,
+    "max_gas_amount": 0
+  },
+  "payload": {},
+  "output": {
+    "Dkg": "Success"
+  },
+  "status": "Success"
+}
+No links
+
+POST
+/rpc/v1/transactions/submit
+Submit a transaction to Supra.
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "Smr": {
+    "signer_data": {},
+    "transaction": {}
+  }
+}
+Responses
+Code	Description	Links
+200	
+transaction submitted
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+"string"
+No links
+
+GET
+/rpc/v1/transactions/{hash}
+Get information about a transaction by its hash.
+Parameters
+Try it out
+Name	Description
+hash *
+string
+(path)
+Hash of the transaction to lookup
+
+hash
+Responses
+Code	Description	Links
+200	
+Transaction data of the given transaction hash
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "authenticator": {},
+  "block_header": {
+    "hash": "string",
+    "height": 0,
+    "timestamp": {
+      "timestamp": 0
+    }
+  },
+  "hash": "string",
+  "header": {
+    "chain_id": 0,
+    "expiration_timestamp": {
+      "timestamp": 0
+    },
+    "sender": "string",
+    "sequence_number": 0,
+    "gas_unit_price": 0,
+    "max_gas_amount": 0
+  },
+  "payload": {},
+  "output": {
+    "Dkg": "Success"
+  },
+  "status": "Success"
+}
+No links
+Block
+Block Api
+
+
+
+GET
+/rpc/v1/block
+Get the header of the most recently finalized block.
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+Returns the header of the most recently finalized block.
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "author": "string",
+  "hash": "string",
+  "height": 0,
+  "parent": "string",
+  "timestamp": {
+    "timestamp": 0
+  },
+  "view": {
+    "epoch_id": {
+      "chain_id": 0,
+      "epoch": 0
+    },
+    "round": 0
+  }
+}
+No links
+
+GET
+/rpc/v1/block/height/{height}
+Get information about the block that has been finalized at the given height.
+Parameters
+Try it out
+Name	Description
+height *
+integer($uint64)
+(path)
+Block height
+
+height
+with_finalized_transactions *
+boolean
+(query)
+If true, returns all transactions that were finalized by this block in the order that they were executed.
+
+
+--
+Responses
+Code	Description	Links
+200	
+Information about the block that has been finalized at the given height.
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "header": {
+    "author": "string",
+    "hash": "string",
+    "height": 0,
+    "parent": "string",
+    "timestamp": {
+      "timestamp": 0
+    },
+    "view": {
+      "epoch_id": {
+        "chain_id": 0,
+        "epoch": 0
+      },
+      "round": 0
+    }
+  },
+  "transactions": [
+    {
+      "authenticator": {},
+      "block_header": {
+        "hash": "string",
+        "height": 0,
+        "timestamp": {
+          "timestamp": 0
+        }
+      },
+      "hash": "string",
+      "header": {
+        "chain_id": 0,
+        "expiration_timestamp": {
+          "timestamp": 0
+        },
+        "sender": "string",
+        "sequence_number": 0,
+        "gas_unit_price": 0,
+        "max_gas_amount": 0
+      },
+      "payload": {},
+      "output": {
+        "Dkg": "Success"
+      },
+      "status": "Success"
+    }
+  ]
+}
+No links
+
+GET
+/rpc/v1/block/{block_hash}
+Get the header of the block with the given hash.
+Parameters
+Try it out
+Name	Description
+block_hash *
+string
+(path)
+Hex encoded block hash
+
+block_hash
+Responses
+Code	Description	Links
+200	
+The header of the block with the given hash.
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "author": "string",
+  "hash": "string",
+  "height": 0,
+  "parent": "string",
+  "timestamp": {
+    "timestamp": 0
+  },
+  "view": {
+    "epoch_id": {
+      "chain_id": 0,
+      "epoch": 0
+    },
+    "round": 0
+  }
+}
+No links
+
+GET
+/rpc/v1/block/{block_hash}/transactions
+Get a list containing the hashes of the transactions that were finalized in the block with
+the given hash in the order that they were executed.
+
+Parameters
+Try it out
+Name	Description
+block_hash *
+string
+(path)
+Hex encoded block hash
+
+block_hash
+Responses
+Code	Description	Links
+200	
+List of the hashes of the transactions contained in the block.
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+[
+  "string"
+]
+No links
+View
+View Api
+
+
+
+POST
+/rpc/v1/view
+Execute view function of a module
+Example
+{
+"function": "0x1::timestamp::now_microseconds",
+"type_arguments": [],
+"arguments": []
+}
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "function": "string",
+  "type_arguments": [
+    "string"
+  ],
+  "arguments": [
+    "string"
+  ]
+}
+Responses
+Code	Description	Links
+200	
+Result of view function
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "result": [
+    {
+      "U8": 0
+    },
+    {
+      "U16": 0
+    },
+    {
+      "U32": 0
+    },
+    {
+      "U64": "string"
+    },
+    {
+      "U128": "string"
+    },
+    {
+      "U256": "string"
+    },
+    {
+      "Bool": true
+    },
+    {
+      "Address": "string"
+    },
+    {
+      "Vector": [
+        "string"
+      ]
+    },
+    {
+      "Bytes": "string"
+    },
+    {
+      "Struct": {}
+    },
+    {
+      "String": "string"
+    }
+  ]
+}
+No links
+Consensus
+Consensus Api
+
+
+
+GET
+/rpc/v1/consensus/block/height/{height}
+Get a block at the requested height possibly together with all the batches of the transactions
+that were finalized in the block in the order that they were executed.
+
+Parameters
+Try it out
+Name	Description
+height *
+integer($uint64)
+(path)
+Block height
+
+height
+with_batches *
+boolean
+(query)
+If true, returns all batches of transactions that were finalized by this block in the order that they were executed.
+
+
+--
+Responses
+Code	Description	Links
+200	
+Consensus block with certificates and possibly block batches finalized in this block.
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "block": {
+    "block": {
+      "digest": "string",
+      "header": {
+        "author": "string",
+        "height": 0,
+        "parent": "string",
+        "timestamp": {
+          "timestamp": 0
+        },
+        "view": {
+          "epoch_id": {
+            "chain_id": 0,
+            "epoch": 0
+          },
+          "round": 0
+        }
+      },
+      "payload": {}
+    },
+    "qc": {
+      "certificate": {
+        "certifying_committee": "string",
+        "data": {},
+        "kind": "Validity",
+        "signature": {},
+        "voters": [
+          true
+        ]
+      }
+    }
+  },
+  "batches": {}
+}
+No links
+Events
+Events Api
+
+
+
+GET
+/rpc/v1/events/{event_type}
+Get events by type.
+Parameters
+Try it out
+Name	Description
+start *
+integer($uint64)
+(query)
+Starting block height (inclusive).
+
+start
+end *
+integer($uint64)
+(query)
+Ending block height (exclusive). The max range is 10 blocks, a.k.a. end - start <= 10.
+
+end
+event_type *
+string
+(path)
+Canonical string representation of event type. E.g. 0000000000000000000000000000000a::module_name::type_name
+
+event_type
+Responses
+Code	Description	Links
+200	
+List of Events contained in blocks
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "data": [
+    {
+      "guid": "string",
+      "sequence_number": 0,
+      "type": "string",
+      "data": "string"
+    }
+  ]
+}
+No links
+Tables
+Tables Api
+
+
+
+POST
+/rpc/v1/tables/{table_handle}/item
+Get table items by key.
+Example of body
+{
+"key_type": "u64",
+"value_type": "0x1::multisig_voting::Proposal<0x1::governance_proposal::GovernanceProposal>",
+"key": "12"
+}
+{
+"key_type": "u64",
+"value_type": "0x1::string::String",
+"key": "42"
+}
+Parameters
+Try it out
+Name	Description
+table_handle *
+string
+(path)
+Table handle to lookup. Should be retrieved using account resources API.
+
+table_handle
+Request body
+
+application/json
+Request containing item key and value types and item key itself
+
+Example Value
+Schema
+{
+  "key_type": "string",
+  "value_type": "string",
+  "key": "string"
+}
+Responses
+Code	Description	Links
+200	
+Item of the table
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "U8": 0
+}
+No links
+
+Schemas
+AccountAddressstring
+Hex encoded address for the account
+
+AccountInfo{
+description:	
+Datatype that holds the sequence number and account authentication key.
+
+sequence_number*	integer($uint64)
+minimum: 0
+authentication_key*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+}
+AccountStatement{
+record*	[TransactionInfo{
+description:	
+Information about a Supra transaction.
+
+authenticator*	{
+description:	
+The cryptographic material that was submitted with the transaction, according to its type.
+
+}
+block_header	{
+description:	
+Metadata about the block that finalized a particular [SmrTransaction].
+
+hash*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+height*	integer($uint64)
+minimum: 0
+The height of the related block.
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+}
+nullable: true
+hash*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+header*	SmrTransactionHeader{...}
+payload*	{
+description:	
+The deserialized payload of the transaction according to its type.
+
+}
+output	{
+description:	
+[TransactionOutput] with all fields in human-readable format.
+
+oneOf ->	
+{
+Dkg*	TxExecutionStatus[...]
+}
+string
+Enum:
+[ Empty ]
+{
+Move*	MoveTransactionOutput{
+description:	
+The execution output of a Move transaction.
+
+gas_used*	integer($uint64)
+minimum: 0
+The gas used by the transaction.
+
+events*	[
+The events emitted by the transaction in human-readable form.
+
+Event{
+guid*	string
+The globally unique identifier of this event stream.
+
+sequence_number*	[...]
+type*	string
+The MoveType of the event
+
+data*	{
+description:	
+The JSON representation of the event
+
+}
+}]
+vm_status*	string
+A message summarizing the execution result produced by the MoveVM.
+
+}
+}
+{
+Oracle*	TxExecutionStatusstring
+The execution summary status for a Supra transaction.
+
+Enum:
+[ Success, Fail, Invalid, PendingAfterExecution, Pending ]
+}
+}
+nullable: true
+status*	TxExecutionStatusstring
+The execution summary status for a Supra transaction.
+
+Enum:
+[ Success, Fail, Invalid, PendingAfterExecution, Pending ]
+}]
+}
+BatchHeader{
+description:	
+Batch metadata.
+
+author*	Identitystring($binary)
+Represents abstract identity in the application layer.
+
+epoch_id*	EpochId{
+description:	
+Unique identifier for a single epoch across multiple runs of the protocol.
+
+chain_id*	integer($uint8)
+minimum: 0
+Unique identifier for this instance of the SMR.
+
+epoch*	integer($uint64)
+minimum: 0
+Identifier of the epoch within the context of chain_id.
+
+}
+protocol*	SmrTransactionProtocol{
+oneOf ->	
+string
+Enum:
+[ Move ]
+{
+Dkg*	SmrDkgCommitteeType{
+description:	
+Defines supported committee types for which distributed key generation can be conducted.
+
+oneOf ->	
+string
+Enum:
+[ Smr ]
+{
+OracleCommittee*	integer($uint64)
+minimum: 0
+}
+}
+}
+{
+Oracle*	integer($uint64)
+minimum: 0
+}
+}
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+aggregated_gas_price*	integer($uint64)
+minimum: 0
+Aggregated gas unit price of the enclosed transactions.
+
+}
+Block{
+description:	
+The API representation of a Supra block.
+
+header*	BlockHeaderInfo{
+description:	
+Metadata about a Supra block.
+
+author*	Identity[...]
+hash*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+height*	integer($uint64)
+minimum: 0
+Number of blocks before this block in the chain (including the genesis block).
+
+parent*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+view*	View{
+description:	
+Unique identifier for a single view across multiple runs of the protocol.
+
+epoch_id*	EpochId{
+description:	
+Unique identifier for a single epoch across multiple runs of the protocol.
+
+chain_id*	integer($uint8)
+minimum: 0
+Unique identifier for this instance of the SMR.
+
+epoch*	integer($uint64)
+minimum: 0
+Identifier of the epoch within the context of chain_id.
+
+}
+round*	integer($uint64)
+minimum: 0
+Identifier of the consensus round.
+
+}
+}
+transactions	[
+nullable: true
+The API representations of all transactions contained in the block, in the order that they were executed.
+
+TransactionInfo{
+description:	
+Information about a Supra transaction.
+
+authenticator*	{
+description:	
+The cryptographic material that was submitted with the transaction, according to its type.
+
+}
+block_header	{
+description:	
+Metadata about the block that finalized a particular [SmrTransaction].
+
+hash*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+height*	integer($uint64)
+minimum: 0
+The height of the related block.
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+}
+nullable: true
+hash*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+header*	SmrTransactionHeader{
+description:	
+A Supra transaction header. Contains properties common to all types of Supra transactions.
+
+chain_id*	integer($uint8)
+minimum: 0
+The unique identifier for the instance of the Supra chain that this transaction should be executed upon.
+
+expiration_timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+sender*	AccountAddressstring
+Hex encoded address for the account
+
+sequence_number*	integer($uint64)
+minimum: 0
+The sequence number of the sender's account in the target VM.
+
+gas_unit_price*	integer($uint64)
+minimum: 0
+The amount of Supra that the sender is willing to pay per unit of gas.
+
+max_gas_amount*	integer($uint64)
+minimum: 0
+The maximum amount of gas that the sender is willing to spend.
+
+}
+payload*	{
+description:	
+The deserialized payload of the transaction according to its type.
+
+}
+output	{
+description:	
+[TransactionOutput] with all fields in human-readable format.
+
+oneOf ->	
+{
+Dkg*	TxExecutionStatusstring
+The execution summary status for a Supra transaction.
+
+Enum:
+[ Success, Fail, Invalid, PendingAfterExecution, Pending ]
+}
+string
+Enum:
+[ Empty ]
+{
+Move*	MoveTransactionOutput{
+description:	
+The execution output of a Move transaction.
+
+gas_used*	integer($uint64)
+minimum: 0
+The gas used by the transaction.
+
+events*	[
+The events emitted by the transaction in human-readable form.
+
+Event{
+guid*	string
+The globally unique identifier of this event stream.
+
+sequence_number*	integer($uint64)
+minimum: 0
+type*	string
+The MoveType of the event
+
+data*	{
+description:	
+The JSON representation of the event
+
+}
+}]
+vm_status*	string
+A message summarizing the execution result produced by the MoveVM.
+
+}
+}
+{
+Oracle*	TxExecutionStatusstring
+The execution summary status for a Supra transaction.
+
+Enum:
+[ Success, Fail, Invalid, PendingAfterExecution, Pending ]
+}
+}
+nullable: true
+status*	TxExecutionStatusstring
+The execution summary status for a Supra transaction.
+
+Enum:
+[ Success, Fail, Invalid, PendingAfterExecution, Pending ]
+}]
+}
+BlockHeader{
+description:	
+Block metadata.
+
+author*	Identitystring($binary)
+Represents abstract identity in the application layer.
+
+height*	integer($uint64)
+minimum: 0
+Number of blocks before this block in the chain (including the genesis block).
+
+parent*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+view*	View{
+description:	
+Unique identifier for a single view across multiple runs of the protocol.
+
+epoch_id*	EpochId{
+description:	
+Unique identifier for a single epoch across multiple runs of the protocol.
+
+chain_id*	integer($uint8)
+minimum: 0
+Unique identifier for this instance of the SMR.
+
+epoch*	integer($uint64)
+minimum: 0
+Identifier of the epoch within the context of chain_id.
+
+}
+round*	integer($uint64)
+minimum: 0
+Identifier of the consensus round.
+
+}
+}
+BlockHeaderInfo{
+description:	
+Metadata about a Supra block.
+
+author*	Identitystring($binary)
+Represents abstract identity in the application layer.
+
+hash*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+height*	integer($uint64)
+minimum: 0
+Number of blocks before this block in the chain (including the genesis block).
+
+parent*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+view*	View{
+description:	
+Unique identifier for a single view across multiple runs of the protocol.
+
+epoch_id*	EpochId{
+description:	
+Unique identifier for a single epoch across multiple runs of the protocol.
+
+chain_id*	integer($uint8)
+minimum: 0
+Unique identifier for this instance of the SMR.
+
+epoch*	integer($uint64)
+minimum: 0
+Identifier of the epoch within the context of chain_id.
+
+}
+round*	integer($uint64)
+minimum: 0
+Identifier of the consensus round.
+
+}
+}
+BlockInfo{
+description:	
+Metadata of a block including its digest. This type is primarily used to improve readability.
+
+hash*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+header*	BlockHeader{
+description:	
+Block metadata.
+
+author*	Identitystring($binary)
+Represents abstract identity in the application layer.
+
+height*	integer($uint64)
+minimum: 0
+Number of blocks before this block in the chain (including the genesis block).
+
+parent*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+view*	View{
+description:	
+Unique identifier for a single view across multiple runs of the protocol.
+
+epoch_id*	EpochId{
+description:	
+Unique identifier for a single epoch across multiple runs of the protocol.
+
+chain_id*	integer($uint8)
+minimum: 0
+Unique identifier for this instance of the SMR.
+
+epoch*	integer($uint64)
+minimum: 0
+Identifier of the epoch within the context of chain_id.
+
+}
+round*	integer($uint64)
+minimum: 0
+Identifier of the consensus round.
+
+}
+}
+}
+BlockVoteInfo{
+description:	
+Metadata of a Moonshot consensus vote.
+
+block*	BlockInfo{
+description:	
+Metadata of a block including its digest. This type is primarily used to improve readability.
+
+hash*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+header*	BlockHeader{
+description:	
+Block metadata.
+
+author*	Identitystring($binary)
+Represents abstract identity in the application layer.
+
+height*	integer($uint64)
+minimum: 0
+Number of blocks before this block in the chain (including the genesis block).
+
+parent*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+view*	View{
+description:	
+Unique identifier for a single view across multiple runs of the protocol.
+
+epoch_id*	EpochId{
+description:	
+Unique identifier for a single epoch across multiple runs of the protocol.
+
+chain_id*	integer($uint8)
+minimum: 0
+Unique identifier for this instance of the SMR.
+
+epoch*	integer($uint64)
+minimum: 0
+Identifier of the epoch within the context of chain_id.
+
+}
+round*	integer($uint64)
+minimum: 0
+Identifier of the consensus round.
+
+}
+}
+}
+kind*	VoteTypestring
+The different types of valid vote messages in Moonshot.
+
+Enum:
+[ Commit, PrepareFallback, PrepareNormal, PrepareOptimistic ]
+}
+Certificate{
+certifying_committee*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+data*	{
+description:	
+The data from which signature is derived.
+
+}
+kind*	CertificateThresholdTypestring
+Enum:
+[ Validity, Quorum, Unanimous ]
+signature*	{
+description:	
+A signature on the [CertificateSignatureData] transformation of data.
+
+}
+voters*	[
+Identifies the nodes whose signatures were used to construct signature. Each index corresponds to an index in the vector of public keys of the participants in the corresponding committee, with its value being set to true if the participant's signature was included in signature.
+
+boolean]
+}
+CertificateThresholdTypestring
+Enum:
+[ Validity, Quorum, Unanimous ]
+CertifiedBlock{
+description:	
+An [SmrBlock] certified by an [SmrQC].
+
+block*	SmrBlock{
+description:	
+A Supra Moonshot block.
+
+digest*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+header*	BlockHeader{
+description:	
+Block metadata.
+
+author*	Identitystring($binary)
+Represents abstract identity in the application layer.
+
+height*	integer($uint64)
+minimum: 0
+Number of blocks before this block in the chain (including the genesis block).
+
+parent*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+view*	View{
+description:	
+Unique identifier for a single view across multiple runs of the protocol.
+
+epoch_id*	EpochId{
+description:	
+Unique identifier for a single epoch across multiple runs of the protocol.
+
+chain_id*	integer($uint8)
+minimum: 0
+Unique identifier for this instance of the SMR.
+
+epoch*	integer($uint64)
+minimum: 0
+Identifier of the epoch within the context of chain_id.
+
+}
+round*	integer($uint64)
+minimum: 0
+Identifier of the consensus round.
+
+}
+}
+payload*	{
+description:	
+Payload.
+
+}
+}
+qc*	SmrQC{
+certificate*	Certificate{
+certifying_committee*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+data*	{
+description:	
+The data from which signature is derived.
+
+}
+kind*	CertificateThresholdTypestring
+Enum:
+[ Validity, Quorum, Unanimous ]
+signature*	{
+description:	
+A signature on the [CertificateSignatureData] transformation of data.
+
+}
+voters*	[
+Identifies the nodes whose signatures were used to construct signature. Each index corresponds to an index in the vector of public keys of the participants in the corresponding committee, with its value being set to true if the participant's signature was included in signature.
+
+boolean]
+}
+}
+}
+ChainIdinteger($uint8)
+ConsensusBlock{
+description:	
+The API representation of a Supra Certified Consensus block.
+
+block*	CertifiedBlock{
+description:	
+An [SmrBlock] certified by an [SmrQC].
+
+block*	SmrBlock{
+description:	
+A Supra Moonshot block.
+
+digest*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+header*	BlockHeader{
+description:	
+Block metadata.
+
+author*	Identitystring($binary)
+Represents abstract identity in the application layer.
+
+height*	integer($uint64)
+minimum: 0
+Number of blocks before this block in the chain (including the genesis block).
+
+parent*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+view*	View{
+description:	
+Unique identifier for a single view across multiple runs of the protocol.
+
+epoch_id*	EpochId{
+description:	
+Unique identifier for a single epoch across multiple runs of the protocol.
+
+chain_id*	integer($uint8)
+minimum: 0
+Unique identifier for this instance of the SMR.
+
+epoch*	integer($uint64)
+minimum: 0
+Identifier of the epoch within the context of chain_id.
+
+}
+round*	integer($uint64)
+minimum: 0
+Identifier of the consensus round.
+
+}
+}
+payload*	{
+description:	
+Payload.
+
+}
+}
+qc*	SmrQC{
+certificate*	Certificate{
+certifying_committee*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+data*	{
+description:	
+The data from which signature is derived.
+
+}
+kind*	CertificateThresholdTypestring
+Enum:
+[ Validity, Quorum, Unanimous ]
+signature*	{
+description:	
+A signature on the [CertificateSignatureData] transformation of data.
+
+}
+voters*	[
+Identifies the nodes whose signatures were used to construct signature. Each index corresponds to an index in the vector of public keys of the participants in the corresponding committee, with its value being set to true if the participant's signature was included in signature.
+
+boolean]
+}
+}
+}
+batches*	{
+description:	
+The API representations of all batches of transactions that were finalized by this block in the order that they were executed.
+
+}
+}
+EpochId{
+description:	
+Unique identifier for a single epoch across multiple runs of the protocol.
+
+chain_id*	integer($uint8)
+minimum: 0
+Unique identifier for this instance of the SMR.
+
+epoch*	integer($uint64)
+minimum: 0
+Identifier of the epoch within the context of chain_id.
+
+}
+Event{
+guid*	string
+The globally unique identifier of this event stream.
+
+sequence_number*	integer($uint64)
+minimum: 0
+type*	string
+The MoveType of the event
+
+data*	{
+description:	
+The JSON representation of the event
+
+}
+}
+Events{
+data*	[Event{
+guid*	string
+The globally unique identifier of this event stream.
+
+sequence_number*	integer($uint64)
+minimum: 0
+type*	string
+The MoveType of the event
+
+data*	{
+description:	
+The JSON representation of the event
+
+}
+}]
+}
+FaucetStatus{
+description:	
+Faucet may immediately return a hash of a funding tx, or, when all minter accounts are busy, reject the request.
+
+oneOf ->	
+{
+Accepted*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+}
+string
+Enum:
+[ TryLater ]
+}
+GasPriceRes{
+mean_gas_price*	integer($uint64)
+minimum: 0
+max_gas_price*	integer($uint64)
+minimum: 0
+}
+Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+Identitystring($binary)
+Represents abstract identity in the application layer.
+
+MoveList{
+oneOf ->	
+{
+Resources*	{
+}
+}
+{
+Modules*	{
+}
+}
+}
+MoveTransactionOutput{
+description:	
+The execution output of a Move transaction.
+
+gas_used*	integer($uint64)
+minimum: 0
+The gas used by the transaction.
+
+events*	[
+The events emitted by the transaction in human-readable form.
+
+Event{
+guid*	string
+The globally unique identifier of this event stream.
+
+sequence_number*	integer($uint64)
+minimum: 0
+type*	string
+The MoveType of the event
+
+data*	{
+description:	
+The JSON representation of the event
+
+}
+}]
+vm_status*	string
+A message summarizing the execution result produced by the MoveVM.
+
+}
+MoveValue{
+oneOf ->	
+{
+U8*	integer($uint8)
+minimum: 0
+A u8 Move type
+
+}
+{
+U16*	integer($uint16)
+minimum: 0
+}
+{
+U32*	integer($uint32)
+minimum: 0
+}
+{
+U64*	string
+A string encoded U64.
+
+}
+{
+U128*	string
+A string encoded U128.
+
+}
+{
+U256*	string
+A string encoded U256.
+
+}
+{
+Bool*	boolean
+A bool Move type
+
+}
+{
+Address*	string
+The address of an account
+
+This is represented in a string as a 64 character hex string, sometimes shortened by stripping leading 0s, and adding a 0x.
+
+}
+{
+Vector*	[
+A vector Move type. May have any other [MoveValue] nested inside it
+
+string]
+}
+{
+Bytes*	string
+All bytes (Vec) data is represented as hex-encoded string prefixed with 0x and fulfilled with two hex digits per byte.
+
+Unlike the Address type, HexEncodedBytes will not trim any zeros.
+
+}
+{
+Struct*	{
+description:	
+This is a JSON representation of some data within an account resource. More specifically, it is a map of strings to arbitrary JSON values / objects, where the keys are top level fields within the given resource.
+
+To clarify, you might query for 0x1::account::Account and see the example data.
+
+Move bool type value is serialized into boolean.
+
+Move u8, u16 and u32 type value is serialized into integer.
+
+Move u64, u128 and u256 type value is serialized into string.
+
+Move address type value (32 byte Supra account address) is serialized into a HexEncodedBytes string. For example:
+
+0x1
+0x1668f6be25668c1a17cd8caf6b8d2f25
+Move vector type value is serialized into array, except vector<u8> which is serialized into a HexEncodedBytes string with 0x prefix. For example:
+
+vector<u64>{255, 255} => [\"255\", \"255\"]
+vector<u8>{255, 255} => 0xffff
+Move struct type value is serialized into object that looks like this (except some Move stdlib types, see the following section):
+
+{
+field1_name: field1_value,
+field2_name: field2_value,
+......
+}
+For example: { \"created\": \"0xa550c18\", \"role_id\": \"0\" }
+
+Special serialization for Move stdlib types:
+
+[0x1::string::String] is serialized into string. For example, struct value 0x1::string::String{bytes: b\"Hello World!\"} is serialized as \"Hello World!\" in JSON.
+}
+}
+{
+String*	string
+A string Move type
+
+}
+}
+MoveValueResponse{
+description:	
+Datatype for representing the MoveValue
+
+result*	[{
+oneOf ->	
+{
+U8*	integer($uint8)
+minimum: 0
+A u8 Move type
+
+}
+{
+U16*	integer($uint16)
+minimum: 0
+}
+{
+U32*	integer($uint32)
+minimum: 0
+}
+{
+U64*	string
+A string encoded U64.
+
+}
+{
+U128*	string
+A string encoded U128.
+
+}
+{
+U256*	string
+A string encoded U256.
+
+}
+{
+Bool*	boolean
+A bool Move type
+
+}
+{
+Address*	string
+The address of an account
+
+This is represented in a string as a 64 character hex string, sometimes shortened by stripping leading 0s, and adding a 0x.
+
+}
+{
+Vector*	[
+A vector Move type. May have any other [MoveValue] nested inside it
+
+string]
+}
+{
+Bytes*	string
+All bytes (Vec) data is represented as hex-encoded string prefixed with 0x and fulfilled with two hex digits per byte.
+
+Unlike the Address type, HexEncodedBytes will not trim any zeros.
+
+}
+{
+Struct*	{
+description:	
+This is a JSON representation of some data within an account resource. More specifically, it is a map of strings to arbitrary JSON values / objects, where the keys are top level fields within the given resource.
+
+To clarify, you might query for 0x1::account::Account and see the example data.
+
+Move bool type value is serialized into boolean.
+
+Move u8, u16 and u32 type value is serialized into integer.
+
+Move u64, u128 and u256 type value is serialized into string.
+
+Move address type value (32 byte Supra account address) is serialized into a HexEncodedBytes string. For example:
+
+0x1
+0x1668f6be25668c1a17cd8caf6b8d2f25
+Move vector type value is serialized into array, except vector<u8> which is serialized into a HexEncodedBytes string with 0x prefix. For example:
+
+vector<u64>{255, 255} => [\"255\", \"255\"]
+vector<u8>{255, 255} => 0xffff
+Move struct type value is serialized into object that looks like this (except some Move stdlib types, see the following section):
+
+{
+field1_name: field1_value,
+field2_name: field2_value,
+......
+}
+For example: { \"created\": \"0xa550c18\", \"role_id\": \"0\" }
+
+Special serialization for Move stdlib types:
+
+[0x1::string::String] is serialized into string. For example, struct value 0x1::string::String{bytes: b\"Hello World!\"} is serialized as \"Hello World!\" in JSON.
+}
+}
+{
+String*	string
+A string Move type
+
+}
+}
+nullable: true]
+}
+SignedSmrTransaction{
+description:	
+Defines internal transactions(DKG and Oracle) coupled with signer data.
+
+signer_data*	{
+description:	
+Signer data on the transaction.
+
+}
+transaction*	{
+description:	
+Unsigned internal transaction.
+
+}
+}
+SignedTransaction{
+raw_txn*	{
+description:	
+The raw transaction
+
+}
+authenticator*	{
+description:	
+Public key and signature to authenticate
+
+}
+}
+SmrBlock{
+description:	
+A Supra Moonshot block.
+
+digest*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+header*	BlockHeader{
+description:	
+Block metadata.
+
+author*	Identitystring($binary)
+Represents abstract identity in the application layer.
+
+height*	integer($uint64)
+minimum: 0
+Number of blocks before this block in the chain (including the genesis block).
+
+parent*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+view*	View{
+description:	
+Unique identifier for a single view across multiple runs of the protocol.
+
+epoch_id*	EpochId{
+description:	
+Unique identifier for a single epoch across multiple runs of the protocol.
+
+chain_id*	integer($uint8)
+minimum: 0
+Unique identifier for this instance of the SMR.
+
+epoch*	integer($uint64)
+minimum: 0
+Identifier of the epoch within the context of chain_id.
+
+}
+round*	integer($uint64)
+minimum: 0
+Identifier of the consensus round.
+
+}
+}
+payload*	{
+description:	
+Payload.
+
+}
+}
+SmrDkgCommitteeType{
+description:	
+Defines supported committee types for which distributed key generation can be conducted.
+
+oneOf ->	
+string
+Enum:
+[ Smr ]
+{
+OracleCommittee*	integer($uint64)
+minimum: 0
+}
+}
+SmrQC{
+certificate*	Certificate{
+certifying_committee*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+data*	{
+description:	
+The data from which signature is derived.
+
+}
+kind*	CertificateThresholdTypestring
+Enum:
+[ Validity, Quorum, Unanimous ]
+signature*	{
+description:	
+A signature on the [CertificateSignatureData] transformation of data.
+
+}
+voters*	[
+Identifies the nodes whose signatures were used to construct signature. Each index corresponds to an index in the vector of public keys of the participants in the corresponding committee, with its value being set to true if the participant's signature was included in signature.
+
+boolean]
+}
+}
+SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+SmrTransactionHeader{
+description:	
+A Supra transaction header. Contains properties common to all types of Supra transactions.
+
+chain_id*	integer($uint8)
+minimum: 0
+The unique identifier for the instance of the Supra chain that this transaction should be executed upon.
+
+expiration_timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+sender*	AccountAddressstring
+Hex encoded address for the account
+
+sequence_number*	integer($uint64)
+minimum: 0
+The sequence number of the sender's account in the target VM.
+
+gas_unit_price*	integer($uint64)
+minimum: 0
+The amount of Supra that the sender is willing to pay per unit of gas.
+
+max_gas_amount*	integer($uint64)
+minimum: 0
+The maximum amount of gas that the sender is willing to spend.
+
+}
+SmrTransactionProtocol{
+oneOf ->	
+string
+Enum:
+[ Move ]
+{
+Dkg*	SmrDkgCommitteeType{
+description:	
+Defines supported committee types for which distributed key generation can be conducted.
+
+oneOf ->	
+string
+Enum:
+[ Smr ]
+{
+OracleCommittee*	integer($uint64)
+minimum: 0
+}
+}
+}
+{
+Oracle*	integer($uint64)
+minimum: 0
+}
+}
+SupraTransaction{
+oneOf ->	
+{
+Smr*	SignedSmrTransaction{
+description:	
+Defines internal transactions(DKG and Oracle) coupled with signer data.
+
+signer_data*	{
+description:	
+Signer data on the transaction.
+
+}
+transaction*	{
+description:	
+Unsigned internal transaction.
+
+}
+}
+}
+{
+Move*	SignedTransaction{
+raw_txn*	{
+description:	
+The raw transaction
+
+}
+authenticator*	{
+description:	
+Public key and signature to authenticate
+
+}
+}
+}
+}
+TableItemRequest{
+description:	
+Describes body of the Table item request by item key.
+
+key_type*	string
+Move Type describing key.
+
+value_type*	string
+Move Type describing the pointing value type.
+
+key*	string
+Key of the item being queried.
+
+}
+TransactionBlockInfo{
+description:	
+Metadata about the block that finalized a particular [SmrTransaction].
+
+hash*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+height*	integer($uint64)
+minimum: 0
+The height of the related block.
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+}
+TransactionInfo{
+description:	
+Information about a Supra transaction.
+
+authenticator*	{
+description:	
+The cryptographic material that was submitted with the transaction, according to its type.
+
+}
+block_header	{
+description:	
+Metadata about the block that finalized a particular [SmrTransaction].
+
+hash*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+height*	integer($uint64)
+minimum: 0
+The height of the related block.
+
+timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+}
+nullable: true
+hash*	Hashstring($binary)
+Represents a hash digest (32 bytes).
+
+header*	SmrTransactionHeader{
+description:	
+A Supra transaction header. Contains properties common to all types of Supra transactions.
+
+chain_id*	integer($uint8)
+minimum: 0
+The unique identifier for the instance of the Supra chain that this transaction should be executed upon.
+
+expiration_timestamp*	SmrTimestamp{
+description:	
+Timestamps used by SMR-related types. Respects the bounds of [chrono::DateTime].
+
+timestamp*	integer($uint64)
+minimum: 0
+The timestamp as measured in the number of microseconds since the unix epoch.
+
+}
+sender*	AccountAddressstring
+Hex encoded address for the account
+
+sequence_number*	integer($uint64)
+minimum: 0
+The sequence number of the sender's account in the target VM.
+
+gas_unit_price*	integer($uint64)
+minimum: 0
+The amount of Supra that the sender is willing to pay per unit of gas.
+
+max_gas_amount*	integer($uint64)
+minimum: 0
+The maximum amount of gas that the sender is willing to spend.
+
+}
+payload*	{
+description:	
+The deserialized payload of the transaction according to its type.
+
+}
+output	{
+description:	
+[TransactionOutput] with all fields in human-readable format.
+
+oneOf ->	
+{
+Dkg*	TxExecutionStatusstring
+The execution summary status for a Supra transaction.
+
+Enum:
+[ Success, Fail, Invalid, PendingAfterExecution, Pending ]
+}
+string
+Enum:
+[ Empty ]
+{
+Move*	MoveTransactionOutput{
+description:	
+The execution output of a Move transaction.
+
+gas_used*	integer($uint64)
+minimum: 0
+The gas used by the transaction.
+
+events*	[
+The events emitted by the transaction in human-readable form.
+
+Event{
+guid*	string
+The globally unique identifier of this event stream.
+
+sequence_number*	integer($uint64)
+minimum: 0
+type*	string
+The MoveType of the event
+
+data*	{
+description:	
+The JSON representation of the event
+
+}
+}]
+vm_status*	string
+A message summarizing the execution result produced by the MoveVM.
+
+}
+}
+{
+Oracle*	TxExecutionStatusstring
+The execution summary status for a Supra transaction.
+
+Enum:
+[ Success, Fail, Invalid, PendingAfterExecution, Pending ]
+}
+}
+nullable: true
+status*	TxExecutionStatusstring
+The execution summary status for a Supra transaction.
+
+Enum:
+[ Success, Fail, Invalid, PendingAfterExecution, Pending ]
+}
+TransactionOutput{
+description:	
+[TransactionOutput] with all fields in human-readable format.
+
+oneOf ->	
+{
+Dkg*	TxExecutionStatusstring
+The execution summary status for a Supra transaction.
+
+Enum:
+[ Success, Fail, Invalid, PendingAfterExecution, Pending ]
+}
+string
+Enum:
+[ Empty ]
+{
+Move*	MoveTransactionOutput{
+description:	
+The execution output of a Move transaction.
+
+gas_used*	integer($uint64)
+minimum: 0
+The gas used by the transaction.
+
+events*	[
+The events emitted by the transaction in human-readable form.
+
+Event{
+guid*	string
+The globally unique identifier of this event stream.
+
+sequence_number*	integer($uint64)
+minimum: 0
+type*	string
+The MoveType of the event
+
+data*	{
+description:	
+The JSON representation of the event
+
+}
+}]
+vm_status*	string
+A message summarizing the execution result produced by the MoveVM.
+
+}
+}
+{
+Oracle*	TxExecutionStatusstring
+The execution summary status for a Supra transaction.
+
+Enum:
+[ Success, Fail, Invalid, PendingAfterExecution, Pending ]
+}
+}
+TxExecutionStatusstring
+The execution summary status for a Supra transaction.
+
+Enum:
+[ Success, Fail, Invalid, PendingAfterExecution, Pending ]
+VMStatus{
+oneOf ->	
+string
+The VM status corresponding to an EXECUTED status code
+
+Enum:
+[ Executed ]
+{
+Error*	{
+description:	
+Indicates an error from the VM, e.g. OUT_OF_GAS, INVALID_AUTH_KEY, RET_TYPE_MISMATCH_ERROR etc. The code will neither EXECUTED nor ABORTED
+
+status_code*	integer($uint16)
+minimum: 0
+sub_status	integer($uint64)
+nullable: true
+minimum: 0
+message	string
+nullable: true
+}
+}
+{
+MoveAbort*	[
+maxItems: 2
+minItems: 2
+Indicates an abort from inside Move code. Contains the location of the abort and the code
+
+{
+}]
+}
+{
+ExecutionFailure*	{
+description:	
+Indicates an failure from inside Move code, where the VM could not continue execution, e.g. dividing by zero or a missing resource
+
+status_code*	integer($uint16)
+minimum: 0
+sub_status	integer($uint64)
+nullable: true
+minimum: 0
+location*	string
+function*	integer($uint16)
+minimum: 0
+code_offset*	integer($uint16)
+minimum: 0
+message	string
+nullable: true
+}
+}
+}
+View{
+description:	
+Unique identifier for a single view across multiple runs of the protocol.
+
+epoch_id*	EpochId{
+description:	
+Unique identifier for a single epoch across multiple runs of the protocol.
+
+chain_id*	integer($uint8)
+minimum: 0
+Unique identifier for this instance of the SMR.
+
+epoch*	integer($uint64)
+minimum: 0
+Identifier of the epoch within the context of chain_id.
+
+}
+round*	integer($uint64)
+minimum: 0
+Identifier of the consensus round.
+
+}
+ViewRequest{
+function*	string
+Entry function id is string representation of a entry function defined on-chain.
+
+Format: {address}::{module name}::{function name}
+
+Both module name and function name are case-sensitive.
+
+type_arguments*	[
+Vector of Move type tag. The Move type tag string representation as below: Values:
+
+bool
+u8
+u16
+u32
+u64
+u128
+u256
+address
+signer
+vector: vector<{non-reference MoveTypeId}>
+struct: {address}::{module_name}::{struct_name}::<{generic types}>
+Vector type value examples:
+
+vector<u8>
+vector<vector<u64>>
+vector<0x1::coin::CoinStore<0x1::supra_coin::SupraCoin>>
+Struct type value examples:
+
+`0x1::coin::CoinStore<0x1::supra_coin::SupraCoin>
+0x1::account::Account
+Note:
+
+Empty chars should be ignored when comparing 2 struct tag ids.
+When used in an URL path, should be encoded by url-encoding (AKA percent-encoding).
+string]
+arguments*	[
+Arguments of the function
+
+{
+}]
+}
+VoteTypestring
+The different types of valid vote messages in Moonshot.
+
+Enum:
+[ Commit, PrepareFallback, PrepareNormal, PrepareOptimistic ]
