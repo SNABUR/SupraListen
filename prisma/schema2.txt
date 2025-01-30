@@ -32,6 +32,7 @@ model EventTracking {
   @@index([processed])
 }
 
+
 model VRFCallback {
   id            Int      @id @default(autoincrement())
   callerAddress String
@@ -57,6 +58,7 @@ model TradeEvent {
   isBuy                 Boolean
   supraAmount           BigInt
   tokenAddress          String
+  pool                  PoolsDB  @relation(fields: [tokenAddress], references: [tokenAddress]) // Relación por tokenAddress
   tokenAmount           BigInt
   user                  String
   virtualSupraReserves  BigInt
@@ -82,7 +84,7 @@ model PoolsDB {
   pool                        String
   symbol                      String
   telegram                    String
-  tokenAddress                String
+  tokenAddress                String   @unique // Clave única para la relación
   tokenDecimals               Int
   twitter                     String
   uri                         String

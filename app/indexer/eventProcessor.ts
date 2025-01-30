@@ -51,6 +51,7 @@ export async function processEvents(events: any[], tx: TransactionClient) {
         case `${MODULE_PATH}::PumpEvent`:
           await processPoolsDB(event, tx)
           break
+        
         default:
           logger.warn(`Unknown event type: ${event.type}`)
       }

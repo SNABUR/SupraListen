@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "VRFCallback" ALTER COLUMN "nonce" SET DATA TYPE TEXT,
-ALTER COLUMN "randomNumbers" SET DATA TYPE TEXT[];
