@@ -21,10 +21,8 @@ export async function startIndexer() {
   }
 }
 
-// For worker environments
 export default {
   async fetch(request: Request, env: any, ctx: any) {
-    // Handle HTTP requests if needed
     return new Response('Indexer Worker Running')
   },
 

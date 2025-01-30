@@ -5,7 +5,7 @@ import prismadb from '@/lib/prismadb'
 
 const logger = createLogger('poller')
 
-const BATCH_SIZE = 10 // Number of blocks to process in each batch
+const BATCH_SIZE = 10
 const MAX_RETRIES = 3
 const POLLING_INTERVAL = 1000 //1ms
 
@@ -30,7 +30,6 @@ export class EventPoller {
   }
 
   async initialize() {
-    // Get the last processed block from database or use starting block
     const blockProgress = await prismadb.blockProgress.findFirst({
       where: { id: 1 }
     })
@@ -38,9 +37,8 @@ export class EventPoller {
     if (blockProgress) {
       this.currentBlockHeight = Number(blockProgress.lastBlockHeight) + 1
     } else {
-      // If no progress record exists, create one with starting block height
       const startBlock = process.env.START_BLOCK_HEIGHT ? 
-        parseInt(process.env.START_BLOCK_HEIGHT) : 8270551 // Default starting block
+        parseInt(process.env.START_BLOCK_HEIGHT) : 8270551 
 
       await prismadb.blockProgress.create({
         data: {
@@ -66,13 +64,11 @@ export class EventPoller {
         await this.processBatch()
         await this.updateLatestBlock()
         
-        // If we've caught up, wait before checking for new blocks
         if (this.currentBlockHeight >= this.latestBlockHeight) {
           await sleep(POLLING_INTERVAL)
         }
       } catch (error) {
         logger.error('Error in polling loop:', error || 'Unknown error')
-        //await sleep(POLLING_INTERVAL)
       }
     }
   }
@@ -97,14 +93,12 @@ export class EventPoller {
     try {
       const events = await fetchBlockEvents(this.currentBlockHeight, endBlock)
       
-      // Process all events in a single transaction but in ordered chunks
       await prismadb.$transaction(async (tx) => {
         const chunkSize = 10
         for (let i = 0; i < events.length; i += chunkSize) {
           const eventChunk = events.slice(i, i + chunkSize)
           await processEvents(eventChunk, tx)
           
-          // Update progress after each chunk
           if (i + chunkSize >= events.length) {
             await tx.blockProgress.update({
               where: { id: 1 },
@@ -113,8 +107,8 @@ export class EventPoller {
           }
         }
       }, {
-        maxWait: 30000, // Maximum time to wait for transaction
-        timeout: 30000  // Maximum time for transaction to complete
+        maxWait: 30000,
+        timeout: 30000 
       })
 
       this.currentBlockHeight = endBlock
