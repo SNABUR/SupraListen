@@ -58,9 +58,12 @@ export class EventPoller {
     if (this.isRunning) return
     this.isRunning = true
     logger.info('Starting event poller')
-
+  
     while (this.isRunning) {
       try {
+        // Verificar en cada ciclo
+        if (!this.isRunning) break;
+        
         await this.processBatch()
         await this.updateLatestBlock()
         
@@ -72,8 +75,10 @@ export class EventPoller {
       }
     }
   }
+  
 
   async stop() {
+    await this.updateLatestBlock()
     this.isRunning = false
     logger.info('Stopping event poller')
   }

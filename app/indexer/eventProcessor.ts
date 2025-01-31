@@ -1,6 +1,5 @@
 import prismadb from '@/lib/prismadb'
 import { createLogger } from './utils'
-import { deserializeVectorU8 } from './utils'
 
 const logger = createLogger('eventProcessor')
 const MODULE_PATH = `${process.env.NEXT_PUBLIC_SPIKE_ADR}::${process.env.NEXT_PUBLIC_MODULE_NAME}`
@@ -10,21 +9,6 @@ type TransactionClient = Omit<
   typeof prismadb,
   '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
 >
-
-// Add helper function for account creation/retrieval
-async function getOrCreateAccount(address: string, tx: TransactionClient) {
-  let account = await tx.account.findUnique({
-    where: { address }
-  })
-
-  if (!account) {
-    account = await tx.account.create({
-      data: { address }
-    })
-  }
-
-  return account
-}
 
 export async function processEvents(events: any[], tx: TransactionClient) {
   logger.debug(`Processing ${events.length} events`)
@@ -137,21 +121,3 @@ async function processPoolsDB(event: any, tx: TransactionClient) {
   })
 
 }
-
-// Add cleanup job for 24h analytics
-export async function cleanupDayOldAnalytics(tx: TransactionClient) {
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
-  
-  await tx.lootboxAnalytics.updateMany({
-    where: {
-      updatedAt: {
-        lt: oneDayAgo
-      }
-    },
-    data: {
-      volume24h: BigInt(0),
-      purchases24h: 0,
-      uniqueBuyers24h: 0
-    }
-  })
-} 

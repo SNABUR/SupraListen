@@ -6,8 +6,6 @@ const logger = createLogger('rpcClient')
 const SUPRA_RPC_URL = process.env.NEXT_PUBLIC_SUPRA_RPC_URL!
 const SURRASPIKE_ADDRESS = process.env.NEXT_PUBLIC_SPIKE_ADR!
 const COLLECTIONS_MODULE = process.env.NEXT_PUBLIC_MODULE_NAME!
-const TOKENS_MODULE_ADDRESS = process.env.NEXT_PUBLIC_TOKENS_MODULE_ADDRESS!
-const TOKENS_MODULE = process.env.NEXT_PUBLIC_TOKENS_MODULE_NAME!
 
 const MAX_RETRIES = 3
 const MAX_BLOCK_RANGE = 10

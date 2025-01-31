@@ -10,26 +10,7 @@ async function verifyIndexedData() {
       where: { id: 1 }
     })
     logger.debug('Current block progress:', blockProgress)
-
-    // Check collections
-    const collections = await prismadb.collection.findMany({
-      include: {
-        tokens: true,
-        lootboxes: true,
-        rarities: true
-      }
-    })
-    logger.debug('Indexed collections:', collections)
-
-    // Check lootbox purchases
-    const purchases = await prismadb.lootboxPurchase.findMany({
-      include: {
-        lootbox: true,
-        rewards: true
-      }
-    })
-    logger.debug('Lootbox purchases:', purchases)
-
+    
     // Check failed events
     const failedEvents = await prismadb.eventTracking.findMany({
       where: {
