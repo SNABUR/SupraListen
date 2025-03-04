@@ -3,7 +3,7 @@ import { createLogger } from './utils'
 
 const logger = createLogger('eventProcessor')
 const MODULE_PATH = `${process.env.NEXT_PUBLIC_SPIKE_ADR}::${process.env.NEXT_PUBLIC_MODULE_NAME}`
-const TOKEN_MODULE_PATH = `${process.env.NEXT_PUBLIC_TOKENS_MODULE_ADDRESS}::${process.env.NEXT_PUBLIC_TOKENS_MODULE_NAME}`
+const MODULE_PATH_AMM = `${process.env.NEXT_PUBLIC_AMM_ADDRESS}::${process.env.NEXT_PUBLIC_AMM_MODULE}`
 
 type TransactionClient = Omit<
   typeof prismadb,
@@ -17,7 +17,7 @@ export async function processEvents(events: any[], tx: TransactionClient) {
     try {
       logger.debug(`Processing event of type ${event.type}`)
       
-      // Create event tracking record
+      // Crear registro de seguimiento del evento
       await tx.eventTracking.create({
         data: {
           eventType: event.type,
@@ -35,12 +35,14 @@ export async function processEvents(events: any[], tx: TransactionClient) {
         case `${MODULE_PATH}::PumpEvent`:
           await processPoolsDB(event, tx)
           break
-        
+        case `${MODULE_PATH_AMM}::PairCreatedEvent`:
+          await processPairAMM(event, tx)
+          break
         default:
           logger.warn(`Unknown event type: ${event.type}`)
       }
 
-      // Update event as processed
+      // Marcar el evento como procesado
       await tx.eventTracking.updateMany({
         where: {
           eventType: event.type,
@@ -55,7 +57,7 @@ export async function processEvents(events: any[], tx: TransactionClient) {
     } catch (error) {
       logger.error(`Error processing event ${event.type}:`, error)
       
-      // Log failed event
+      // Actualizar el registro de seguimiento en caso de error
       await tx.eventTracking.updateMany({
         where: {
           eventType: event.type,
@@ -72,7 +74,6 @@ export async function processEvents(events: any[], tx: TransactionClient) {
     }
   }
 }
-
 
 async function processTradeEvent(event: any, tx: TransactionClient) {
   logger.debug('Processing token burn', event)
@@ -93,14 +94,11 @@ async function processTradeEvent(event: any, tx: TransactionClient) {
     }
   })
   console.log('Processing token burn event finished')
-
   logger.info(`Processed TokenBurnEvent`)
 }
 
-
 async function processPoolsDB(event: any, tx: TransactionClient) {
   logger.debug('Processing token mint', event)
-
   await tx.poolsDB.create({
     data: {
       description: event.data.description,
@@ -119,5 +117,19 @@ async function processPoolsDB(event: any, tx: TransactionClient) {
       website: event.data.website,
     }
   })
+}
 
+async function processPairAMM(event: any, tx: TransactionClient) {
+  logger.debug('Processing PairCreatedEvent', event)
+  
+  await tx.ammpair.create({
+    data: {
+      pair: event.data.pair,
+      creator: event.data.creator,
+      token0: event.data.token0,
+      token1: event.data.token1,
+    }
+  })
+
+  logger.info('Processed PairCreatedEvent')
 }

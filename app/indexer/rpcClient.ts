@@ -4,8 +4,10 @@ import { createLogger } from './utils'
 const logger = createLogger('rpcClient')
 
 const SUPRA_RPC_URL = process.env.NEXT_PUBLIC_SUPRA_RPC_URL!
-const SURRASPIKE_ADDRESS = process.env.NEXT_PUBLIC_SPIKE_ADR!
-const COLLECTIONS_MODULE = process.env.NEXT_PUBLIC_MODULE_NAME!
+const PUMP_SUP_ADDRESS = process.env.NEXT_PUBLIC_SPIKE_ADR!
+const PUMP_SUP_MODULE = process.env.NEXT_PUBLIC_MODULE_NAME!
+const AMM_ADDRESS = process.env.NEXT_PUBLIC_AMM_ADDRESS!
+const AMM_MODULE = process.env.NEXT_PUBLIC_AMM_MODULE!
 
 const MAX_RETRIES = 3
 const MAX_BLOCK_RANGE = 10
@@ -59,10 +61,12 @@ export async function fetchBlockEvents(
 
        // Pump module events
         ...await fetchEventsByTypes([
-          `${SURRASPIKE_ADDRESS}::${COLLECTIONS_MODULE}::TradeEvent`,
-          `${SURRASPIKE_ADDRESS}::${COLLECTIONS_MODULE}::PumpEvent`,
-          `${SURRASPIKE_ADDRESS}::${COLLECTIONS_MODULE}::TransferEvent`,
-          `${SURRASPIKE_ADDRESS}::${COLLECTIONS_MODULE}::UnfreezeEvent`,
+          `${PUMP_SUP_ADDRESS}::${PUMP_SUP_MODULE}::TradeEvent`,
+          `${PUMP_SUP_ADDRESS}::${PUMP_SUP_MODULE}::PumpEvent`,
+          `${PUMP_SUP_ADDRESS}::${PUMP_SUP_MODULE}::TransferEvent`,
+          `${PUMP_SUP_ADDRESS}::${PUMP_SUP_MODULE}::UnfreezeEvent`,
+          `${AMM_ADDRESS}::${AMM_MODULE}::PairCreatedEvent`,
+
         ], startBlock, endBlock)
       ]
 
