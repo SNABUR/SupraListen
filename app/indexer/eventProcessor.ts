@@ -1,5 +1,6 @@
 import prismadb from '@/lib/prismadb'
 import { createLogger } from './utils'
+import { AMMmetadata } from './getmetadata'
 
 const logger = createLogger('eventProcessor')
 const MODULE_PATH = `${process.env.NEXT_PUBLIC_SPIKE_ADR}::${process.env.NEXT_PUBLIC_MODULE_NAME}`
@@ -120,16 +121,55 @@ async function processPoolsDB(event: any, tx: TransactionClient) {
 }
 
 async function processPairAMM(event: any, tx: TransactionClient) {
-  logger.debug('Processing PairCreatedEvent', event)
-  
-  await tx.ammpair.create({
-    data: {
-      pair: event.data.pair,
-      creator: event.data.creator,
-      token0: event.data.token0,
-      token1: event.data.token1,
+  try {
+    logger.debug('Processing PairCreatedEvent', event);
+
+    const typeargs: string[] = ["0x1::object::ObjectCore"];
+
+    // Obtener metadata de token0
+    let metadataFA0 = null;
+    try {
+      metadataFA0 = await AMMmetadata(typeargs, event.data.token0);
+      console.log('metadataFA0:', metadataFA0);
+    } catch (err) {
+      logger.error('Error obteniendo metadataFA0:', err);
     }
-  })
+
+    // Obtener metadata de token1
+    let metadataFA1 = null;
+    try {
+      metadataFA1 = await AMMmetadata(typeargs, event.data.token1);
+      console.log('metadataFA1:', metadataFA1);
+    } catch (err) {
+      logger.error('Error obteniendo metadataFA1:', err);
+    }
+
+    await tx.ammpair.create({
+      data: {
+        pair: event.data.pair,
+        creator: event.data.creator,
+        token0: event.data.token0,
+        token1: event.data.token1,
+
+        // Metadata Token 0 (con fallback si falla)
+        token0Name: metadataFA0?.result?.[0]?.name ?? '',
+        token0Symbol: metadataFA0?.result?.[0]?.symbol ?? '',
+        token0Decimals: metadataFA0?.result?.[0]?.decimals ?? 0,
+        token0IconUri: metadataFA0?.result?.[0]?.icon_uri ?? '',
+        token0ProjectUri: metadataFA0?.result?.[0]?.project_uri ?? '',
+
+        // Metadata Token 1 (con fallback si falla)
+        token1Name: metadataFA1?.result?.[0]?.name ?? '',
+        token1Symbol: metadataFA1?.result?.[0]?.symbol ?? '',
+        token1Decimals: metadataFA1?.result?.[0]?.decimals ?? 0,
+        token1IconUri: metadataFA1?.result?.[0]?.icon_uri ?? '',
+        token1ProjectUri: metadataFA1?.result?.[0]?.project_uri ?? '',
+      },
+    });
+
+  } catch (error) {
+    logger.error('Error procesando PairCreatedEvent:', error);
+  }
 
   logger.info('Processed PairCreatedEvent')
 }

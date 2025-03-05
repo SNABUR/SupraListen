@@ -100,8 +100,24 @@ model Ammpair {
   id        Int      @id @default(autoincrement())
   pair      String
   creator   String
-  token0    String
-  token1    String
+  token0    String  // address del token 0
+  token1    String  // address del token 1
+
+  // Metadata Token 0
+  token0Name        String
+  token0Symbol      String
+  token0Decimals    Int
+  token0IconUri     String
+  token0ProjectUri  String
+
+  // Metadata Token 1
+  token1Name        String
+  token1Symbol      String
+  token1Decimals    Int
+  token1IconUri     String
+  token1ProjectUri  String
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
