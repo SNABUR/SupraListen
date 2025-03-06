@@ -94,8 +94,7 @@ async function processTradeEvent(event: any, tx: TransactionClient) {
       virtualTokenReserves: BigInt(event.data.virtual_token_reserves),
     }
   })
-  console.log('Processing token burn event finished')
-  logger.info(`Processed TokenBurnEvent`)
+  logger.info(`Processed Pump event`)
 }
 
 async function processPoolsDB(event: any, tx: TransactionClient) {
@@ -120,56 +119,61 @@ async function processPoolsDB(event: any, tx: TransactionClient) {
   })
 }
 
+async function getOrCreateToken(tokenAddress: string, tx: TransactionClient) {
+  // Buscar si el token ya existe por su dirección (id)
+  let token = await tx.token.findUnique({
+    where: { id: tokenAddress },
+  });
+
+  if (!token) {
+    // Si no existe, obtener metadatos
+    const typeargs: string[] = ["0x1::object::ObjectCore"];
+    const metadata = await AMMmetadata(typeargs, tokenAddress);
+
+    if (metadata && metadata.result && metadata.result[0]) {
+      const tokenData = metadata.result[0];
+      token = await tx.token.create({
+        data: {
+          id: tokenAddress,
+          name: tokenData.name ?? '',
+          symbol: tokenData.symbol ?? '',
+          decimals: tokenData.decimals ?? 0,
+          iconUri: tokenData.icon_uri ?? '',
+          projectUri: tokenData.project_uri ?? '',
+        },
+      });
+      logger.info(`Created new token with address ${tokenAddress}`);
+    } else {
+      throw new Error(`No se pudieron obtener metadatos para el token ${tokenAddress}`);
+    }
+  }
+
+  return token;
+}
+
 async function processPairAMM(event: any, tx: TransactionClient) {
   try {
     logger.debug('Processing PairCreatedEvent', event);
 
-    const typeargs: string[] = ["0x1::object::ObjectCore"];
+    // Get or create tokens
+    const token0 = await getOrCreateToken(event.data.token0, tx);
+    const token1 = await getOrCreateToken(event.data.token1, tx);
 
-    // Obtener metadata de token0
-    let metadataFA0 = null;
-    try {
-      metadataFA0 = await AMMmetadata(typeargs, event.data.token0);
-      console.log('metadataFA0:', metadataFA0);
-    } catch (err) {
-      logger.error('Error obteniendo metadataFA0:', err);
-    }
-
-    // Obtener metadata de token1
-    let metadataFA1 = null;
-    try {
-      metadataFA1 = await AMMmetadata(typeargs, event.data.token1);
-      console.log('metadataFA1:', metadataFA1);
-    } catch (err) {
-      logger.error('Error obteniendo metadataFA1:', err);
-    }
-
+    // Crear el registro de ammpair con referencias a los tokens
     await tx.ammpair.create({
       data: {
         pair: event.data.pair,
         creator: event.data.creator,
-        token0: event.data.token0,
-        token1: event.data.token1,
-
-        // Metadata Token 0 (con fallback si falla)
-        token0Name: metadataFA0?.result?.[0]?.name ?? '',
-        token0Symbol: metadataFA0?.result?.[0]?.symbol ?? '',
-        token0Decimals: metadataFA0?.result?.[0]?.decimals ?? 0,
-        token0IconUri: metadataFA0?.result?.[0]?.icon_uri ?? '',
-        token0ProjectUri: metadataFA0?.result?.[0]?.project_uri ?? '',
-
-        // Metadata Token 1 (con fallback si falla)
-        token1Name: metadataFA1?.result?.[0]?.name ?? '',
-        token1Symbol: metadataFA1?.result?.[0]?.symbol ?? '',
-        token1Decimals: metadataFA1?.result?.[0]?.decimals ?? 0,
-        token1IconUri: metadataFA1?.result?.[0]?.icon_uri ?? '',
-        token1ProjectUri: metadataFA1?.result?.[0]?.project_uri ?? '',
+        token0Id: token0.id,
+        token1Id: token1.id,
       },
     });
+    logger.debug(`Created AMM pair ${event.data.pair} with tokens ${token0.id} and ${token1.id}`);
 
   } catch (error) {
     logger.error('Error procesando PairCreatedEvent:', error);
+    throw error;
   }
 
-  logger.info('Processed PairCreatedEvent')
+  logger.info('Processed PairCreatedEvent');
 }

@@ -46,7 +46,6 @@ model VRFCallback {
   @@index([timestamp])
 }
 
-
 model TradeEvent {
   id                    Int      @id @default(autoincrement())
   type                  String
@@ -96,28 +95,28 @@ model PoolsDB {
   @@index([tokenAddress])
 }
 
+model Token {
+  id          String    @id  // La dirección del token (ej. "0xa")
+  name        String       // Nombre del token (ej. "Supra Coin")
+  symbol      String       // Símbolo del token (ej. "SUPRA")
+  decimals    Int          // Número de decimales (ej. 8)
+  iconUri     String       // URI del ícono (ej. "" o "URI")
+  projectUri  String       // URI del proyecto (ej. "")
+  ammpairsAsToken0 Ammpair[] @relation("Token0")  // Relación con Ammpair como token0
+  ammpairsAsToken1 Ammpair[] @relation("Token1")  // Relación con Ammpair como token1
+}
+
 model Ammpair {
   id        Int      @id @default(autoincrement())
   pair      String
   creator   String
-  token0    String  // address del token 0
-  token1    String  // address del token 1
-
-  // Metadata Token 0
-  token0Name        String
-  token0Symbol      String
-  token0Decimals    Int
-  token0IconUri     String
-  token0ProjectUri  String
-
-  // Metadata Token 1
-  token1Name        String
-  token1Symbol      String
-  token1Decimals    Int
-  token1IconUri     String
-  token1ProjectUri  String
-
+  token0Id  String   // Address del token 0
+  token1Id  String   // Address del token 1
+  token0    Token    @relation("Token0", fields: [token0Id], references: [id])
+  token1    Token    @relation("Token1", fields: [token1Id], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
 
+  @@index([token0Id])
+  @@index([token1Id])
+}
