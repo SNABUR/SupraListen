@@ -2,27 +2,33 @@ const DEBUG_MODE = process.env.NEXT_PUBLIC_DEBUG_MODE === 'true'
 
 const logger = createLogger('utils');
 
+function safeStringify(arg: any): string {
+  if (arg === null) return 'null'
+  if (arg === undefined) return 'undefined'
+  if (typeof arg === 'bigint') return arg.toString()
+  if (typeof arg === 'object') {
+    try {
+      return JSON.stringify(arg)
+    } catch (error) {
+      return arg.toString()
+    }
+  }
+  return arg.toString()
+}
+
 export function createLogger(name: string) {
   return {
     debug: (...args: any[]) => {
-      console.log(`[${name}] DEBUG:`, ...args.map(arg => 
-        typeof arg === 'bigint' ? arg.toString() : arg
-      ))
+      console.log(`[${name}] DEBUG:`, ...args.map(safeStringify))
     },
     info: (...args: any[]) => {
-      console.log(`[${name}] INFO:`, ...args.map(arg => 
-        typeof arg === 'bigint' ? arg.toString() : arg
-      ))
+      console.log(`[${name}] INFO:`, ...args.map(safeStringify))
     },
     warn: (...args: any[]) => {
-      console.log(`[${name}] WARN:`, ...args.map(arg => 
-        typeof arg === 'bigint' ? arg.toString() : arg
-      ))
+      console.warn(`[${name}] WARN:`, ...args.map(safeStringify))
     },
     error: (...args: any[]) => {
-      console.log(`[${name}] ERROR:`, ...args.map(arg => 
-        arg === null ? 'null' : (typeof arg === 'bigint' ? arg.toString() : arg)
-      ))
+      console.error(`[${name}] ERROR:`, ...args.map(safeStringify))
     }
   }
 }
@@ -44,9 +50,9 @@ export function deserializeVectorU8(hex: string): string {
   // Remove 0x prefix and convert hex to bytes
   const bytes = Buffer.from(hex.slice(2), 'hex')
   // Convert bytes to UTF-8 string
-  let str = bytes.toString('utf8');
-  logger.debug('str', str);
-  return bytes.toString('utf8').trim();
+  let str = bytes.toString('utf8')
+  logger.debug('str', str)
+  return str.trim()
 }
 
 /**
@@ -60,4 +66,4 @@ export function deserializeUint64(hex: string): bigint {
   }
   
   return BigInt(hex)
-} 
+}

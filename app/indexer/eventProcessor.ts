@@ -77,7 +77,7 @@ export async function processEvents(events: any[], tx: TransactionClient) {
 }
 
 async function processTradeEvent(event: any, tx: TransactionClient) {
-  logger.debug('Processing token burn', event)
+  logger.debug('Processing trade Event', event)
   await tx.tradeEvent.create({
     data: {
       type: event.type,
