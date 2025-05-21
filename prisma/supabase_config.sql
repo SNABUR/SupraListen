@@ -4,7 +4,7 @@ RETURNS TRIGGER AS $$
 DECLARE
   payload JSON;
   webhook_url TEXT := 'https://supraspike.fun/api/webhooks/supabase'; -- Asegúrate que esta URL sea correcta
-  secret_key TEXT := 'clav#EDFTG%^&$%024trg%^praspike'; -- Asegúrate que este secreto coincida con Vercel
+  secret_key TEXT := 'cavEDFTG024trgpraspik'; -- Asegúrate que este secreto coincida con Vercel
   request_id BIGINT;
 BEGIN
   -- Construir el payload JSON (sigue siendo tipo JSON aquí)

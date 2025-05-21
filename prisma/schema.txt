@@ -1,0 +1,219 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model BlockProgress {
+  id             Int      @id @default(1)
+  lastBlockHeight BigInt
+  updatedAt      DateTime @updatedAt
+}
+
+model EventTracking {
+  id              Int      @id @default(autoincrement())
+  eventType       String
+  blockHeight     BigInt
+  transactionHash String
+  processed       Boolean  @default(false)
+  error          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([eventType])
+  @@index([blockHeight])
+  @@index([processed])
+}
+
+model VRFCallback {
+  id            Int      @id @default(autoincrement())
+  callerAddress String
+  nonce         String  
+  randomNumbers String[]  
+  timestamp     BigInt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([callerAddress])
+  @@index([nonce])
+  @@index([timestamp])
+}
+
+model TradeEvent {
+  id                    Int      @id @default(autoincrement())
+  type                  String
+  creationNumber        String
+  accountAddress        String
+  sequenceNumber        String
+  timestamp             BigInt
+  isBuy                 Boolean
+  supraAmount           BigInt
+  tokenAddress          String
+  tokenAmount           BigInt
+  user                  String
+  virtualSupraReserves  BigInt
+  virtualTokenReserves  BigInt
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([type])
+  @@index([accountAddress])
+  @@index([tokenAddress])
+  @@index([user])
+  @@index([timestamp])
+}
+
+model PoolsDB {
+  id                          Int      @id @default(autoincrement())
+  description                 String
+  dev                         String
+  initialVirtualSupraReserves BigInt
+  initialVirtualTokenReserves BigInt
+  name                        String
+  platformFee                 Int
+  pool                        String
+  symbol                      String
+  telegram                    String
+  tokenAddress                String
+  tokenDecimals               Int
+  twitter                     String
+  uri                         String
+  website                     String
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  comments                    Comment[]
+
+  @@index([name])
+  @@index([symbol])
+  @@index([dev])
+  @@index([tokenAddress])
+}
+
+model Token {
+  id          String    @id  // La dirección del token (ej. "0xa")
+  name        String       // Nombre del token (ej. "Supra Coin")
+  symbol      String       // Símbolo del token (ej. "SUPRA")
+  decimals    Int          // Número de decimales (ej. 8)
+  iconUri     String       // URI del ícono (ej. "" o "URI")
+  projectUri  String       // URI del proyecto (ej. "")
+  ammpairsAsToken0 Ammpair[] @relation("Token0")  // Relación con Ammpair como token0
+  ammpairsAsToken1 Ammpair[] @relation("Token1")  // Relación con Ammpair como token1
+}
+
+model Ammpair {
+  id        Int      @id @default(autoincrement())
+  pair      String
+  creator   String
+  token0Id  String   // Address del token 0
+  token1Id  String   // Address del token 1
+  token0    Token    @relation("Token0", fields: [token0Id], references: [id])
+  token1    Token    @relation("Token1", fields: [token1Id], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([token0Id])
+  @@index([token1Id])
+}
+
+model GameResult {
+  id            Int      @id @default(autoincrement())
+  nonce         BigInt   @unique
+  player        String
+  playerMove    Int
+  houseMove     Int
+  betAmount     BigInt
+  outcome       Int
+  payoutAmount  BigInt
+  coinTypeName  String
+  season        BigInt
+  timestamp     BigInt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([player])
+  @@index([season])
+  @@index([timestamp])
+}
+
+// --- Nuevos Modelos para la Red Social de Comentarios ---
+
+model User {
+  // Usamos la dirección de la wallet como ID principal, asumiendo que es única y así se identifican los usuarios.
+  walletAddress String    @id @unique
+  username      String?   // Nombre de usuario opcional que el usuario puede establecer
+  avatarUrl     String?   // URL a una imagen de perfil (podría estar en Supabase Storage)
+  nonce         Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relaciones: Un usuario puede escribir muchos comentarios y dar muchos likes
+  comments      Comment[]
+  likes         Like[]
+
+  @@map("users") // Nombre de la tabla en la base de datos (opcional, buena práctica)
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  text      String   // El contenido del comentario
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relación con el usuario que escribió el comentario
+  userId    String   // Clave foránea que apunta a User.walletAddress
+  user      User     @relation(fields: [userId], references: [walletAddress], onDelete: Cascade) // Si se borra el usuario, se borran sus comentarios
+
+  // Relación opcional con un Pool (si los comentarios son específicos de un pool/token)
+  poolId    Int?     // Clave foránea opcional que apunta a PoolsDB.id
+  pool      PoolsDB? @relation(fields: [poolId], references: [id], onDelete: SetNull) // Si se borra el pool, el comentario queda sin pool asociado
+
+  // Relaciones: Un comentario puede tener muchos likes y muchas imágenes
+  likes     Like[]
+  images    Image[]
+
+  @@index([userId]) // Indexar para buscar comentarios por usuario
+  @@index([poolId]) // Indexar para buscar comentarios por pool (si aplica)
+  @@index([createdAt]) // Indexar para ordenar por fecha
+  @@map("comments")
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  // Relación con el usuario que dio el like
+  userId    String   // Clave foránea que apunta a User.walletAddress
+  user      User     @relation(fields: [userId], references: [walletAddress], onDelete: Cascade) // Si se borra el usuario, se borran sus likes
+
+  // Relación con el comentario que recibió el like
+  commentId Int      // Clave foránea que apunta a Comment.id
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade) // Si se borra el comentario, se borran sus likes
+
+  // Restricción única: Un usuario solo puede dar like una vez a un comentario específico
+  @@unique([userId, commentId])
+  @@index([commentId]) // Indexar para contar likes por comentario rápidamente
+  @@map("likes")
+}
+
+model Image {
+  id        Int      @id @default(autoincrement())
+  url       String   // URL de la imagen (probablemente en Supabase Storage)
+  altText   String?  // Texto alternativo para accesibilidad (opcional)
+  createdAt DateTime @default(now())
+
+  // Relación con el comentario al que pertenece la imagen
+  commentId Int      // Clave foránea que apunta a Comment.id
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade) // Si se borra el comentario, se borran sus imágenes
+
+  @@index([commentId]) // Indexar para buscar imágenes por comentario
+  @@map("images")
+}
+

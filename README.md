@@ -34,3 +34,145 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+///////////////////////ESTO ES PARA CREAR LA VISTA DE LAS TABLAS EN SUPBASE SQL //////////////////////////////////////
+CREATE OR REPLACE VIEW tokens_with_participating_ammpairs AS
+SELECT
+    t.id,
+    t.network,
+    t.name,
+    t.symbol,
+    t.decimals,
+    t."iconUri",         -- Citado porque es camelCase en tu schema Prisma
+    t."projectUri",      -- Citado
+    t.verified AS token_verified,
+    t."displayOrder" AS token_display_order, -- Citado
+    t."metadataFetched", -- Citado
+    t."metadataStandard",-- Citado
+    t."lastMetadataAttempt", -- Citado
+    (
+        SELECT jsonb_agg(
+                   jsonb_build_object(
+                           'id', ap.id, -- ID del Ammpair
+                           'pair_address', ap.pair, -- Dirección del par AMM
+                           'creator_address', ap.creator,
+                           'verified', ap.verified, -- verified del Ammpair
+                           'display_order', ap."displayOrder", -- displayOrder del Ammpair (citado)
+                           'network', ap.network, -- network del Ammpair
+                           'token0_address', ap."token0Address", -- Citado
+                           'token0_network', ap."token0Network", -- Citado
+                           'token1_address', ap."token1Address", -- Citado
+                           'token1_network', ap."token1Network"  -- Citado
+                       )
+                   ORDER BY ap."displayOrder" ASC NULLS LAST, ap."createdAt" DESC
+               )
+        FROM "Ammpair" ap -- <<--- Usando el nombre del modelo Prisma (PascalCase, citado)
+        WHERE
+            (ap."token0Address" = t.id AND ap."token0Network" = t.network) OR
+            (ap."token1Address" = t.id AND ap."token1Network" = t.network)
+    ) AS participating_pairs
+FROM
+    tokens t; -- Nombre de la tabla de tokens (mapeada a "tokens")
+
+/////////////////////////////////PERMISOS PARA PODER LEER LAS VISTAS////////////////////////////////////////
+
+
+
+-- Conceder permiso SELECT al rol anónimo
+GRANT SELECT ON TABLE ammpairs_with_token_details TO anon;
+
+-- Conceder permiso SELECT al rol de usuarios autenticados
+GRANT SELECT ON TABLE ammpairs_with_token_details TO authenticated;
+
+
+
+
+/////////////////////////////////ESTO DA PERMISOS A SUPABASE ROL ANON LEER ! /////////////////////////////////////////
+GRANT USAGE ON SCHEMA public TO anon;
+
+-- Habilitar RLS y permitir lectura para el rol ANON
+-- (Asegúrate de que los nombres de tabla sean los correctos en tu BD)
+
+-- Tabla: BlockProgress
+ALTER TABLE public."BlockProgress" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to BlockProgress" ON public."BlockProgress" FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public."BlockProgress" TO anon;
+
+-- Tabla: EventTracking
+ALTER TABLE public."EventTracking" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to EventTracking" ON public."EventTracking" FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public."EventTracking" TO anon;
+
+-- Tabla: VRFCallback
+ALTER TABLE public."VRFCallback" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to VRFCallback" ON public."VRFCallback" FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public."VRFCallback" TO anon;
+
+-- Tabla: TradeEvent
+ALTER TABLE public."TradeEvent" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to TradeEvent" ON public."TradeEvent" FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public."TradeEvent" TO anon;
+
+-- Tabla: PoolsDB
+ALTER TABLE public."PoolsDB" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to PoolsDB" ON public."PoolsDB" FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public."PoolsDB" TO anon;
+
+-- Tabla: tokens (mapeada desde Token)
+ALTER TABLE public.tokens ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to tokens" ON public.tokens FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public.tokens TO anon;
+
+-- Tabla: Ammpair
+ALTER TABLE public."Ammpair" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to Ammpair" ON public."Ammpair" FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public."Ammpair" TO anon;
+
+-- Tabla: GameResult
+ALTER TABLE public."GameResult" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to GameResult" ON public."GameResult" FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public."GameResult" TO anon;
+
+-- Tabla: users (mapeada desde User)
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to users" ON public.users FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public.users TO anon;
+
+-- Tabla: comments (mapeada desde Comment)
+ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to comments" ON public.comments FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public.comments TO anon;
+
+-- Tabla: likes (mapeada desde Like)
+ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to likes" ON public.likes FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public.likes TO anon;
+
+-- Tabla: images (mapeada desde Image)
+ALTER TABLE public.images ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to images" ON public.images FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public.images TO anon;
+
+-- Tabla: staking_pools (mapeada desde StakingPool)
+ALTER TABLE public.staking_pools ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to staking_pools" ON public.staking_pools FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public.staking_pools TO anon;
+
+-- SI AÑADES MÁS TABLAS EN EL FUTURO, AÑADE SUS COMANDOS AQUÍ --
+-- Ejemplo para futuras tablas de eventos de staking que aún no tienes:
+/*
+-- Tabla: staking_user_stakes
+ALTER TABLE public.staking_user_stakes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to staking_user_stakes" ON public.staking_user_stakes FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public.staking_user_stakes TO anon;
+
+-- Tabla: staking_pool_registered_events
+ALTER TABLE public.staking_pool_registered_events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to staking_pool_registered_events" ON public.staking_pool_registered_events FOR SELECT TO anon USING (true);
+GRANT SELECT ON TABLE public.staking_pool_registered_events TO anon;
+*/
+
+-- NOTA: Si una tabla ya tiene RLS habilitado, el comando ALTER TABLE no hará daño.
+-- Si una política con el mismo nombre ya existe para la misma tabla y evento, el CREATE POLICY fallará.
+-- Podrías usar DROP POLICY IF EXISTS ... y luego CREATE POLICY, o darles nombres únicos si necesitas múltiples políticas SELECT para anon (raro).
+-- Los GRANT son idempotentes en el sentido de que otorgar un permiso que ya existe no causa error.
