@@ -74,6 +74,54 @@ SELECT
 FROM
     tokens t; -- Nombre de la tabla de tokens (mapeada a "tokens")
 
+
+/////////////////////////////////AMM Pairs details for backend sql////////////////////////////////////
+
+CREATE OR REPLACE VIEW ammpairs_with_token_details AS
+SELECT
+    amm.id AS ammpair_id, 
+    amm.network, -- Probablemente la vista existente lo llama 'network'
+    amm.pair,    -- Probablemente la vista existente lo llama 'pair'
+    amm.creator, -- Probablemente la vista existente lo llama 'creator'
+    amm.verified, -- Probablemente la vista existente lo llama 'verified'
+    amm."displayOrder" AS ammpair_display_order,
+    amm."createdAt" AS ammpair_created_at,
+    amm."updatedAt" AS ammpair_updated_at,
+    
+    t0.id AS token0_id,
+    t0.network AS token0_network,
+    t0.name AS token0_name,
+    t0.symbol AS token0_symbol,
+    t0.decimals AS token0_decimals,
+    t0."iconUri" AS token0_icon_uri,       
+    t0."projectUri" AS token0_project_uri,
+    t0."originalCoinType" AS token0_original_coin_type,
+    t0."metadataStandard" AS token0_metadata_standard,
+    t0."metadataFetched" AS token0_metadata_fetched,
+    t0."lastMetadataAttempt" AS token0_last_metadata_attempt,
+    t0.verified AS token0_verified,
+    t0."displayOrder" AS token0_display_order,
+    
+    t1.id AS token1_id,
+    t1.network AS token1_network,
+    t1.name AS token1_name,
+    t1.symbol AS token1_symbol,
+    t1.decimals AS token1_decimals,
+    t1."iconUri" AS token1_icon_uri,
+    t1."projectUri" AS token1_project_uri,
+    t1."originalCoinType" AS token1_original_coin_type,
+    t1."metadataStandard" AS token1_metadata_standard,
+    t1."metadataFetched" AS token1_metadata_fetched,
+    t1."lastMetadataAttempt" AS token1_last_metadata_attempt,
+    t1.verified AS token1_verified,
+    t1."displayOrder" AS token1_display_order
+FROM
+    "Ammpair" amm 
+LEFT JOIN
+    tokens t0 ON amm."token0Address" = t0.id AND amm."token0Network" = t0.network 
+LEFT JOIN
+    tokens t1 ON amm."token1Address" = t1.id AND amm."token1Network" = t1.network;
+
 /////////////////////////////////PERMISOS PARA PODER LEER LAS VISTAS////////////////////////////////////////
 
 

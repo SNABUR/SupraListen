@@ -306,6 +306,9 @@ model StakingPool {
   initialRewardPerSec         String
   initialEndTimestamp         BigInt
   boostEnabled                Boolean
+  boostConfigCollectionOwner  String?  // Address del dueño de la colección NFT para el boost
+  boostConfigCollectionName   String?  // Nombre de la colección NFT para el boost (puede ser String si tu evento emite String)
+  boostConfigPercent          String?  // Porcentaje de boost (u128 del evento, guardado como String para precisión)
 
   rewardPerSec                String
   accumReward                 String   @default("0")
@@ -343,6 +346,8 @@ model StakingPool {
   @@index([network, verified, displayOrder])
   @@index([network, totalStakedAmount])
   @@index([network, cachedApy])
+  @@index([network, boostEnabled])
+  @@index([network, boostConfigCollectionOwner]) // Si buscas pools por colección de boost
 }
 
 model UserStake {

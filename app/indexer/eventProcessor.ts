@@ -11,7 +11,7 @@ const MODULE_PATH_GAME = `${process.env.NEXT_PUBLIC_GAME_ADDRESS}::${process.env
 const MODULE_PATH_STAKING = `${process.env.NEXT_PUBLIC_STAKING_ADDRESS}::${process.env.NEXT_PUBLIC_STAKING_MODULE}`; // Asumo que tienes una variable para el nombre del módulo de staking
 
 const MODULE_PATH_METADATA = `${process.env.NEXT_PUBLIC_FA_ADDRESS}::${process.env.NEXT_PUBLIC_PAIR_MODULE}`; // Asumo que tienes una variable para el nombre del módulo de metadatos
-const MODULE_PATH_WRAPED = `${process.env.NEXT_PUBLIC_STAKING_ADDRESS}::${process.env.NEXT_PUBLIC_STAKING_ROUTE}`; // Asumo que tienes una variable para el nombre del módulo de metadatos
+const MODULE_PATH_STAKE_FA = `${process.env.NEXT_PUBLIC_STAKING_ADDRESS}::${process.env.NEXT_PUBLIC_STAKING_ROUTE}`; // Asumo que tienes una variable para el nombre del módulo de metadatos
 
 // Interfaz RpcEvent (Asegúrate de que esta interfaz ahora use 'network' o ajústalo)
 export interface RpcEvent {
@@ -30,6 +30,12 @@ type TransactionClient = Omit<
   '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
 >;
 
+interface EventOptionStringVec {
+  vec: string[]; // O string[1] si estás seguro de que siempre es un array de un elemento
+                 // O simplemente string si el deserializador de tu evento ya te da el valor directamente.
+                 // PERO TUS LOGS MUESTRAN CLARAMENTE { vec: [...] }
+}
+
 interface PoolRegisteredEventData {
   pool_key: {
     creator_addr: string;
@@ -41,6 +47,9 @@ interface PoolRegisteredEventData {
   initial_end_timestamp: string; // u64
   initial_reward_per_sec: string; // u128
   boost_enabled: boolean; // Asumo que este campo existe en tus datos de evento
+  boost_config_collection_owner?: EventOptionStringVec | null; // Campo para address
+  boost_config_collection_name?: EventOptionStringVec | null;  // Campo para string
+  boost_config_percent?: EventOptionStringVec | null;          // Campo para u128 (que es string)
 }
 
 
@@ -247,8 +256,10 @@ async function processPoolsDB(event: RpcEvent, tx: TransactionClient) {
 // getOrCreateToken ahora usa 'network'
 // En eventProcessor.ts
 
+// En eventProcessor.ts
+
 async function getOrCreateToken(
-  tokenAddress: string,
+  tokenAddress: string, // Este es el 'id' del token que estamos procesando
   network: string,
   tx: TransactionClient
 ): Promise<import('@prisma/client').Token> {
@@ -261,134 +272,211 @@ async function getOrCreateToken(
     where: { network_id: { network: network, id: tokenAddress } },
   });
 
-  // Si el token ya existe Y ya tiene metadatos completos, lo devolvemos.
+  // Si el token ya existe Y TIENE METADATOS COMPLETOS Y EL ESTÁNDAR DESEADO, lo devolvemos.
+  // OJO: Si cambias la lógica de `determinedMetadataStandard`, este `if` podría necesitar ajuste
+  // si un token ya "completo" bajo la vieja lógica necesita ser re-evaluado bajo la nueva.
+  // Por ahora, mantenemos la lógica de `metadataFetched`.
   if (token && token.metadataFetched) {
-    logger.debug(`[${network}] Token ${tokenAddress} found with complete metadata.`);
+    // Podrías añadir una comprobación aquí si el `metadataStandard` existente es el que esperas
+    // y si no, forzar una reevaluación. Pero eso complica.
+    // Ejemplo: if (token.metadataFetched && token.metadataStandard === LOGICA_ESPERADA_AQUI)
+    logger.debug(`[${network}] Token ${tokenAddress} found with previously fetched metadata.`);
     return token;
   }
 
-  // Si el token no existe, O existe pero le faltan metadatos (es un "fantasma"),
-  // intentamos obtener/refrescar los metadatos.
-  logger.info(`[${network}] Token ${tokenAddress} ${token ? 'exists as minimal entry or lacks metadata' : 'not found'}. Fetching metadata...`);
+  logger.info(`[${network}] Token ${tokenAddress} ${token ? 'exists (minimal/needs update)' : 'not found'}. Fetching/determining metadata...`);
 
   let metadataSuccess = false;
-  let tokenDataFromRpc: any = null; // Para almacenar los datos del RPC
+  let tokenDataFromRpc: any = null;
   let originalCoinTypeFromRpc: string | null = null;
+  let determinedMetadataStandard: string | undefined = undefined;
 
+  // 1. Obtener metadatos del propio tokenAddress (nombre, símbolo, decimales)
   try {
-    const typeArgsForMetadata: string[] = ["0x1::object::ObjectCore"]; // Ajusta si es necesario
-    const metadataResponse = await callViewFunction(network, MODULE_PATH_METADATA, "metadata", typeArgsForMetadata, [tokenAddress]);
-
-    if (metadataResponse && metadataResponse.result && metadataResponse.result[0]) {
-      tokenDataFromRpc = metadataResponse.result[0];
-      // Validar que los campos esperados existan en tokenDataFromRpc antes de usarlos
-      if (typeof tokenDataFromRpc.name === 'string' &&
-          typeof tokenDataFromRpc.symbol === 'string' &&
-          typeof tokenDataFromRpc.decimals === 'number') { // O el tipo que esperes
-        metadataSuccess = true;
-        logger.info(`[${network}] Successfully fetched metadata for ${tokenAddress}: Name=${tokenDataFromRpc.name}, Symbol=${tokenDataFromRpc.symbol}, Decimals=${tokenDataFromRpc.decimals}`);
-      } else {
-        logger.warn(`[${network}] Metadata fetched for ${tokenAddress}, but structure is unexpected or missing key fields.`, tokenDataFromRpc);
-      }
-    } else {
-      logger.warn(`[${network}] Metadata call successful but no data/result found for ${tokenAddress}. Raw response:`, metadataResponse);
-    }
-  } catch (rpcError: any) {
-    logger.error(`[${network}] RPC call to fetch metadata for ${tokenAddress} failed. Error: ${rpcError.message}. Will proceed with/create minimal entry if token is new.`);
-    // No relanzamos el error aquí, para permitir la creación del "fantasma"
-  }
-
-  try {
-    // La función "get_original_from_address" usualmente no necesita type_arguments, solo la dirección del token envuelto.
-    const wrappedResponse = await callViewFunction(network, MODULE_PATH_WRAPED, "get_original_from_address", [], [tokenAddress]);
-
-    if (wrappedResponse && wrappedResponse.result && wrappedResponse.result.length > 0) {
-      const potentialOriginalAddress = wrappedResponse.result[0];
-      if (typeof potentialOriginalAddress === 'string') {
-        // Solo lo consideramos "envuelto" si la dirección original es DIFERENTE a la del token actual.
-        if (potentialOriginalAddress !== tokenAddress && potentialOriginalAddress !== "0x0" && !potentialOriginalAddress.startsWith("0x00000000000000000000000000000000")) { // Evitar dirección nula como original
-            originalCoinTypeFromRpc = potentialOriginalAddress;
-            logger.info(`[${network}] Successfully fetched original address for ${tokenAddress}: ${originalCoinTypeFromRpc}. It's a wrapped token.`);
-        } else if (potentialOriginalAddress === tokenAddress) {
-            logger.debug(`[${network}] Original address for ${tokenAddress} is itself. Not a distinctly wrapped token.`);
+    if (!tokenAddress.includes("::")) { // Es una dirección 0x... (potencialmente FA)
+        const metadataResponse = await callViewFunction(network, MODULE_PATH_METADATA, "metadata", ["0x1::object::ObjectCore"], [tokenAddress]);
+        if (metadataResponse && metadataResponse.result && metadataResponse.result[0]) {
+            tokenDataFromRpc = metadataResponse.result[0];
+            if (typeof tokenDataFromRpc.name === 'string' &&
+                typeof tokenDataFromRpc.symbol === 'string' &&
+                typeof tokenDataFromRpc.decimals === 'number') { // Podrías ser más estricto o flexible aquí
+                metadataSuccess = true;
+                logger.info(`[${network}] Successfully fetched FA metadata for ${tokenAddress}: Name=${tokenDataFromRpc.name}, Symbol=${tokenDataFromRpc.symbol}, Decimals=${tokenDataFromRpc.decimals}`);
+            } else {
+                logger.warn(`[${network}] FA metadata for ${tokenAddress} has unexpected structure.`, tokenDataFromRpc);
+            }
         } else {
-             logger.debug(`[${network}] get_original_from_address for ${tokenAddress} returned zero address or invalid address: ${potentialOriginalAddress}.`);
+             logger.warn(`[${network}] No FA metadata result for ${tokenAddress}.`, metadataResponse);
         }
-      } else if (potentialOriginalAddress === null) {
-        // Si la función devuelve Option<address> y el token no está envuelto, puede devolver None (que se traduce a null en JSON).
-        logger.info(`[${network}] Token ${tokenAddress} is not a wrapped asset (RPC returned null for original address).`);
-      } else {
-        logger.warn(`[${network}] Unexpected data type for original address for ${tokenAddress}. Expected string or null, got:`, potentialOriginalAddress);
-      }
-    } else {
-      logger.warn(`[${network}] Call to get_original_from_address for ${tokenAddress} was successful but response format was unexpected or empty. Raw response:`, wrappedResponse);
+    } else { // Es un tipo A::B::C (Coin-Legacy)
+        logger.info(`[${network}] Token ${tokenAddress} appears to be Coin-Legacy. FA metadata call skipped. Attempting to fetch Coin-Legacy specific info.`);
+        // Lógica específica para obtener metadatos de Coin-Legacy
+        // Ejemplo para SupraCoin (ajusta según sea necesario para otros Coin-Legacy)
+        if (tokenAddress === `${process.env.NEXT_PUBLIC_SUI_ADDRESS}::supra_coin::SupraCoin` || // Asumiendo que SUI_ADDRESS es el 0x1 o equivalente
+            tokenAddress === `0x1::supra_coin::SupraCoin`) { // Sé explícito si el prefijo puede variar
+            tokenDataFromRpc = { name: "Supra Coin", symbol: "SUPRA", decimals: 18 }; // Ejemplo, idealmente desde RPC si es posible
+            metadataSuccess = true;
+            logger.info(`[${network}] Hardcoded/known metadata for Coin-Legacy ${tokenAddress} applied.`);
+        } else {
+            // Podrías tener una llamada a "0x1::coin::coin_info" u otra función genérica para Coin-Legacy
+            // const coinInfoResponse = await callViewFunction(network, "0x1::coin", "coin_info", [tokenAddress], []);
+            // if (coinInfoResponse && coinInfoResponse.result && coinInfoResponse.result.length > 0) {
+            //     const info = coinInfoResponse.result[0];
+            //     tokenDataFromRpc = { name: info.name, symbol: info.symbol, decimals: parseInt(info.decimals) };
+            //     metadataSuccess = true;
+            //     logger.info(`[${network}] Successfully fetched Coin-Legacy metadata for ${tokenAddress}.`);
+            // } else {
+            //     logger.warn(`[${network}] Could not fetch specific metadata for Coin-Legacy ${tokenAddress}.`);
+            // }
+            logger.warn(`[${network}] No specific metadata fetching logic for Coin-Legacy ${tokenAddress} (besides known ones).`);
+        }
     }
   } catch (rpcError: any) {
-    logger.error(`[${network}] RPC call to get_original_from_address for ${tokenAddress} failed. Error: ${rpcError.message}.`);
-    // originalCoinTypeFromRpc permanecerá null
+    logger.error(`[${network}] RPC call to fetch metadata for ${tokenAddress} failed. Error: ${rpcError.message}.`);
   }
 
+  // 2. Verificar si tokenAddress (que es 0x...) es un wrapper y obtener su originalCoinType
+  // Esta sección solo se ejecuta si tokenAddress es 0x..., no si es A::B::C
+  if (!tokenAddress.includes("::")) {
+    try {
+        const wrappedResponse = await callViewFunction(network, MODULE_PATH_STAKE_FA, "get_original_from_address", [], [tokenAddress]);
+        if (wrappedResponse && wrappedResponse.result && wrappedResponse.result.length > 0) {
+            const potentialOriginalAddress = wrappedResponse.result[0];
+            if (typeof potentialOriginalAddress === 'string' &&
+                potentialOriginalAddress !== tokenAddress && // Debe ser diferente al tokenAddress original
+                potentialOriginalAddress !== "0x0" &&
+                !potentialOriginalAddress.startsWith("0x00000000000000000000000000000000") && // No una dirección nula
+                potentialOriginalAddress.includes("::") // Y el original DEBE SER un tipo Coin-Legacy (A::B::C)
+            ) {
+                originalCoinTypeFromRpc = potentialOriginalAddress;
+                logger.info(`[${network}] Token ${tokenAddress} (FA) is a wrapper. Original Coin Type (Coin-Legacy): ${originalCoinTypeFromRpc}.`);
+            } else if (potentialOriginalAddress === tokenAddress) {
+                logger.debug(`[${network}] Token ${tokenAddress} (FA) get_original_from_address returned itself. Not a wrapper of a Coin-Legacy.`);
+            } else if (potentialOriginalAddress && typeof potentialOriginalAddress === 'string' && !potentialOriginalAddress.includes("::")) {
+                logger.debug(`[${network}] Token ${tokenAddress} (FA) get_original_from_address returned another FA address: ${potentialOriginalAddress}. Not treating as Coin-Legacy wrapper for this logic.`);
+                // Si quisieras manejar FA-wraps-FA, necesitarías otra lógica aquí.
+                // Por ahora, originalCoinTypeFromRpc permanece null si el original no es A::B::C.
+            } else {
+                logger.debug(`[${network}] get_original_from_address for ${tokenAddress} (FA) returned an unexpected or non-Coin-Legacy type: ${potentialOriginalAddress}.`);
+            }
+        } else if (wrappedResponse && wrappedResponse.result && wrappedResponse.result[0] === null) {
+             logger.info(`[${network}] Token ${tokenAddress} (FA) is not a wrapped asset (RPC get_original_from_address returned null).`);
+        } else {
+            logger.warn(`[${network}] Unexpected response from get_original_from_address for ${tokenAddress} (FA).`, wrappedResponse);
+        }
+    } catch (rpcError: any) {
+        logger.error(`[${network}] RPC call to get_original_from_address for ${tokenAddress} (FA) failed. Error: ${rpcError.message}.`);
+    }
+  } else {
+      logger.debug(`[${network}] Token ${tokenAddress} is Coin-Legacy, skipping wrapper check (get_original_from_address).`);
+      // originalCoinTypeFromRpc permanece null para un Coin-Legacy "puro"
+  }
 
-  if (!token) { // Si el token no existía en la BD en absoluto
-    logger.info(`[${network}] Creating ${metadataSuccess ? 'full' : 'minimal (RPC failed/no data)'} token entry for ${tokenAddress}.`);
+  // 3. Determinar metadataStandard basado en TU LÓGICA DESEADA
+  if (tokenAddress.includes("::")) {
+    // Si el tokenAddress original es A::B::C, es un Coin-Legacy.
+    determinedMetadataStandard = "Coin-Legacy";
+    // originalCoinTypeFromRpc ya es null porque el Paso 2 se salta o no asigna para estos.
+  } else {
+    // tokenAddress es 0x... (un FA o un wrapper FA)
+    if (originalCoinTypeFromRpc) {
+      // originalCoinTypeFromRpc aquí es el A::B::C subyacente (resultado del Paso 2).
+      // El tokenAddress (0x...) es un wrapper de un Coin-Legacy.
+      // Según tu deseo, clasificamos el wrapper 0x... (tokenAddress) como "Coin-Legacy".
+      determinedMetadataStandard = "Coin-Legacy";
+      // El campo originalCoinType en la BD apuntará al A::B::C.
+      logger.info(`[${network}] Token ${tokenAddress} (FA wrapper) will be classified as 'Coin-Legacy' because it wraps ${originalCoinTypeFromRpc}.`);
+    } else {
+      // El tokenAddress (0x...) no es un wrapper de un Coin-Legacy identificable
+      // (o la llamada falló, o devolvió el mismo 0x..., o devolvió otro 0x...).
+      // Es un Fungible Asset "puro" o un FA que envuelve otro FA (no un Coin-Legacy).
+      determinedMetadataStandard = "Fungible-Asset";
+      // originalCoinTypeFromRpc ya es null o no es un Coin-Legacy.
+      logger.info(`[${network}] Token ${tokenAddress} (FA) will be classified as 'Fungible-Asset'.`);
+    }
+  }
+  logger.info(`[${network}] Final classification for ${tokenAddress}: metadataStandard='${determinedMetadataStandard}', originalCoinType='${originalCoinTypeFromRpc || 'N/A'}'.`);
+
+
+  // 4. Crear o Actualizar la entrada en la base de datos
+  const dataForDb = {
+    name: metadataSuccess && tokenDataFromRpc ? (tokenDataFromRpc.name ?? null) : (token ? token.name : null),
+    symbol: metadataSuccess && tokenDataFromRpc ? (tokenDataFromRpc.symbol ?? null) : (token ? token.symbol : null),
+    decimals: metadataSuccess && tokenDataFromRpc ? (tokenDataFromRpc.decimals ?? null) : (token ? token.decimals : null),
+    iconUri: metadataSuccess && tokenDataFromRpc ? (tokenDataFromRpc.icon_uri ?? null) : (token ? token.iconUri : null),
+    projectUri: metadataSuccess && tokenDataFromRpc ? (tokenDataFromRpc.project_uri ?? null) : (token ? token.projectUri : null),
+    metadataStandard: determinedMetadataStandard, // Usar el estándar determinado por tu nueva lógica
+    originalCoinType: originalCoinTypeFromRpc,   // Puede ser el A::B::C si es un wrapper FA, o null
+    metadataFetched: (token?.metadataFetched || metadataSuccess), // Mantener fetched si ya lo estaba o si ahora lo está
+    lastMetadataAttempt: new Date(),
+  };
+
+  if (!token) {
+    logger.info(`[${network}] Creating new token entry for ${tokenAddress} with standard: ${determinedMetadataStandard}.`);
     try {
       token = await tx.token.create({
         data: {
           network: network,
           id: tokenAddress,
-          name: metadataSuccess ? (tokenDataFromRpc.name ?? null) : null, // Usa ?? null para asegurar que se pase null si es undefined
-          symbol: metadataSuccess ? (tokenDataFromRpc.symbol ?? null) : null,
-          decimals: metadataSuccess ? (tokenDataFromRpc.decimals ?? null) : null,
-          iconUri: metadataSuccess ? (tokenDataFromRpc.icon_uri ?? null) : null,
-          projectUri: metadataSuccess ? (tokenDataFromRpc.project_uri ?? null) : null,
-          originalCoinType: originalCoinTypeFromRpc,
-          metadataFetched: metadataSuccess,
-          lastMetadataAttempt: new Date(), // Podrías actualizar esto siempre
+          ...dataForDb,
+          metadataFetched: metadataSuccess, // Para creación, es solo el estado actual
         },
       });
     } catch (e: any) {
       if (e.code === 'P2002' && e.meta?.target?.includes('network_id')) {
-        logger.warn(`[${network}] Race condition during token creation for ${tokenAddress}. Fetching existing.`);
-        token = await tx.token.findUniqueOrThrow({
+        logger.warn(`[${network}] Race condition: Token ${tokenAddress} created concurrently. Fetching existing.`);
+        token = await tx.token.findUniqueOrThrow({ // Si falla aquí, algo está muy mal
           where: { network_id: { network: network, id: tokenAddress } },
         });
-        // Si hubo race condition y el otro creó el token con metadatos, el nuestro es obsoleto.
-        // O si el otro también falló el RPC, el estado es el mismo.
-        // Podríamos re-evaluar si actualizar si `token.metadataFetched` es false y `metadataSuccess` es true aquí.
-        // Por simplicidad por ahora, solo lo obtenemos. Tu worker se encargaría de actualizarlo si es necesario.
+        // Si hubo race condition, el token ya existe. Procedemos a actualizarlo si es necesario.
+        // La lógica de actualización de abajo se encargará de ello.
       } else {
-        throw e;
+        logger.error(`[${network}] Error creating token ${tokenAddress}:`, e);
+        throw e; // Relanzar si no es un P2002 manejable
       }
     }
-  } else if (token && !token.metadataFetched && metadataSuccess) { // Si existía como "fantasma" y AHORA SÍ obtuvimos metadatos
-    logger.info(`[${network}] Updating existing minimal token ${tokenAddress} with fetched metadata.`);
+  }
+  
+  // Si el token ya existía (de la búsqueda inicial o de la captura de race condition)
+  // O si acabamos de crearlo y queremos asegurar que esté actualizado con la última dataForDb
+  // Comprobamos si es necesario actualizar.
+  // Esto es importante si la `metadataFetched` inicial era false, o si el `standard` o `originalType` cambió.
+  if (token && (
+        !token.metadataFetched || // Si no tenía metadatos y ahora sí (o no)
+        (metadataSuccess && ( // O si teníamos metadatos y ahora también, pero algo cambió
+            token.name !== dataForDb.name ||
+            token.symbol !== dataForDb.symbol ||
+            token.decimals !== dataForDb.decimals
+            // No comparamos URIs porque pueden ser nulos y causar actualizaciones innecesarias
+        )) ||
+        token.metadataStandard !== dataForDb.metadataStandard || // El estándar determinado cambió
+        token.originalCoinType !== dataForDb.originalCoinType  // El tipo original determinado cambió
+    )) {
+    logger.info(`[${network}] Updating existing token ${tokenAddress}. Current fetched: ${token.metadataFetched}, New success: ${metadataSuccess}. Current standard: ${token.metadataStandard}, New standard: ${dataForDb.metadataStandard}. Current original: ${token.originalCoinType}, New original: ${dataForDb.originalCoinType}`);
     token = await tx.token.update({
       where: { network_id: { network: network, id: tokenAddress } },
-      data: {
-        name: tokenDataFromRpc.name ?? token.name, // Usa el valor del RPC, o el existente si el del RPC es null/undefined
-        symbol: tokenDataFromRpc.symbol ?? token.symbol,
-        decimals: tokenDataFromRpc.decimals ?? token.decimals,
-        iconUri: tokenDataFromRpc.icon_uri ?? token.iconUri,
-        projectUri: tokenDataFromRpc.project_uri ?? token.projectUri,
-        metadataFetched: true,
-        lastMetadataAttempt: new Date(),
-      },
+      data: dataForDb, // dataForDb ya tiene los valores correctos para todos los campos
     });
-  } else if (token && !token.metadataFetched && !metadataSuccess) { // Existía como fantasma, RPC falló OTRA VEZ
-      logger.warn(`[${network}] RPC for metadata failed again for existing minimal token ${tokenAddress}. No update to metadata fields.`);
-      // Opcional: actualizar lastMetadataAttempt si quieres rastrear reintentos fallidos
-      if (token.lastMetadataAttempt !== undefined) { // Solo si el campo existe en tu modelo
+  } else if (token && !metadataSuccess && !token.metadataFetched) {
+      // Si ya existía, no se pudieron obtener metadatos antes, y tampoco ahora, solo actualizar timestamp
+      logger.warn(`[${network}] Metadata RPC failed again for existing minimal token ${tokenAddress}. Updating attempt time.`);
+      if (token.lastMetadataAttempt !== undefined) { // Asegurar que el campo exista en el tipo
           token = await tx.token.update({
               where: { network_id: { network: network, id: tokenAddress } },
               data: { lastMetadataAttempt: new Date() }
           });
       }
   }
-  // Si el token existía y ya tenía metadataFetched = true, no se hizo nada en este bloque if/else if,
-  // y se devuelve el token original.
 
-  return token!; // En todos los caminos, token debería estar definido.
+  if (!token) {
+    // Esto no debería ocurrir si la lógica de creación/búsqueda es correcta
+    logger.error(`[${network}] CRITICAL: Token object is null for ${tokenAddress} at the end of getOrCreateToken. This should not happen.`);
+    throw new Error(`Failed to get or create token ${tokenAddress} on network ${network}.`);
+  }
+
+  return token;
 }
+
 
 async function processPairAMM(event: RpcEvent, tx: TransactionClient) {
   try {
@@ -477,7 +565,17 @@ async function handleRegisterPoolEvent(event: RpcEvent, tx: TransactionClient) {
   // 2. Loguea 'eventData' DESPUÉS del casteo para ver si la estructura coincide con tu interfaz.
   logger.info(`[${currentNetwork}] Casted eventData:`, JSON.stringify(eventData, null, 2));
 
-  const { pool_key, is_dynamic, start_timestamp, initial_end_timestamp, initial_reward_per_sec, boost_enabled } = eventData;
+  const {
+    pool_key,
+    is_dynamic,
+    start_timestamp,
+    initial_end_timestamp,
+    initial_reward_per_sec,
+    boost_enabled,
+    boost_config_collection_owner: owner_obj,
+    boost_config_collection_name: name_obj,
+    boost_config_percent: percent_obj,
+  } = eventData;
 
   // 3. Loguea 'pool_key' específicamente, ya que es donde están las direcciones.
   logger.info(`[${currentNetwork}] Extracted pool_key:`, JSON.stringify(pool_key, null, 2));
@@ -486,11 +584,27 @@ async function handleRegisterPoolEvent(event: RpcEvent, tx: TransactionClient) {
   const creator_addr_from_key = pool_key?.creator_addr;
   const stake_addr_from_key = pool_key?.stake_addr; // Usando el nombre corregido
   const reward_addr_from_key = pool_key?.reward_addr; // Usando el nombre corregido
+  const finalBoostOwner = (boost_enabled && owner_obj && owner_obj.vec && owner_obj.vec.length > 0)
+    ? owner_obj.vec[0]
+    : null;
+
+  const finalBoostName = (boost_enabled && name_obj && name_obj.vec && name_obj.vec.length > 0)
+    ? name_obj.vec[0] // Asumimos que el contenido de vec es el string que necesitas
+                      // Si name_obj.vec[0] fuera un vector<u8> (array de números), necesitarías:
+                      // Buffer.from(name_obj.vec[0] as number[]).toString('utf8')
+    : null;
+
+  const finalBoostPercent = (boost_enabled && percent_obj && percent_obj.vec && percent_obj.vec.length > 0)
+    ? String(percent_obj.vec[0]) // Convertir el string "10" a String (ya es string, así que String() es redundante pero seguro)
+    : null;
 
   // 4. Loguea las direcciones individuales extraídas.
   logger.info(`[${currentNetwork}] Creator Addr from pool_key: ${creator_addr_from_key}`);
   logger.info(`[${currentNetwork}] Stake Addr from pool_key: ${stake_addr_from_key}`);
   logger.info(`[${currentNetwork}] Reward Addr from pool_key: ${reward_addr_from_key}`);
+  logger.info(`[${currentNetwork}] Final Boost Owner: ${finalBoostOwner}`);
+  logger.info(`[${currentNetwork}] Final Boost Name: ${finalBoostName}`);
+  logger.info(`[${currentNetwork}] Final Boost Percent: ${finalBoostPercent}`);
 
   try {
     logger.debug(`[${currentNetwork}] Attempting to process StakingPoolRegisteredEvent with (presumed correct) extracted addresses.`);
@@ -526,6 +640,9 @@ async function handleRegisterPoolEvent(event: RpcEvent, tx: TransactionClient) {
           initialEndTimestamp: BigInt(initial_end_timestamp),
           initialRewardPerSec: String(initial_reward_per_sec),
           boostEnabled: boost_enabled,
+          boostConfigCollectionOwner: finalBoostOwner,
+          boostConfigCollectionName: finalBoostName,
+          boostConfigPercent: finalBoostPercent,
           rewardPerSec: String(initial_reward_per_sec),
           endTimestamp: BigInt(initial_end_timestamp),
           accumReward: "0",
