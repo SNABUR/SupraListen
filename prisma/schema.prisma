@@ -164,16 +164,34 @@ model Ammpair {
   token1Address String // Dirección del token 1
   token0        Token    @relation("Token0", fields: [token0Network, token0Address], references: [network, id]) // CAMBIADO
   token1        Token    @relation("Token1", fields: [token1Network, token1Address], references: [network, id]) // CAMBIADO
+
+  reserve0      String? // Cantidad de token0 en la reserva del pool (formato raw/base units)
+  reserve1      String? // Cantidad de token1 en la reserva del pool (formato raw/base units)
+  tvlUsd        String? // Valor Total Bloqueado en USD (ej: "10500.75")
+
+  volumeToken0_24h String? // Volumen de token0 en las últimas 24h (formato raw/base units)
+  volumeToken1_24h String? // Volumen de token1 en las últimas 24h (formato raw/base units)
+  volumeUsd24h     String? // Volumen en USD en las últimas 24h
+
+  lpFeePercent     String? // Porcentaje de fee para proveedores de liquidez (ej: "0.3" para 0.3%)
+  apr24h           String? 
+  apyCalculated    String? 
+
+  lastStatsUpdate  DateTime? 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([network, pair]) // CAMBIADO de chainId a network
-  @@index([network])      // CAMBIADO de chainId a network
-  @@index([token0Network, token0Address]) // CAMBIADO
-  @@index([token1Network, token1Address]) // CAMBIADO
-  @@index([network, creator])           // CAMBIADO
+  @@unique([network, pair])
+  @@index([network])
+  @@index([token0Network, token0Address])
+  @@index([token1Network, token1Address])
+  @@index([network, creator])
   @@index([network, displayOrder])
   @@index([network, verified, displayOrder])
+  @@index([network, tvlUsd])
+  @@index([network, volumeUsd24h])
+  @@index([network, apr24h])
 }
 
 model GameResult {

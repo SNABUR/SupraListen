@@ -1,4 +1,7 @@
 // Constantes de configuración
+import { createLogger } from '@/app/indexer/utils'; // Para logging
+const logger = createLogger('executeGetReserves-task');
+
 const SUPRA_RPC_URL_TESTNET = process.env.NEXT_PUBLIC_SUPRA_RPC_URL_TESTNET || '';
 const SUPRA_RPC_URL_MAINNET = process.env.NEXT_PUBLIC_SUPRA_RPC_URL_MAINNET || '';
 
@@ -76,7 +79,7 @@ export async function callViewFunction(
       } catch (e) {
         errorData = await response.text();
       }
-      console.error(`❌ Error en la respuesta de la API de Supra (${response.status}) para ${functionName} en ${network}:`, errorData);
+      logger.error(`❌ Error en la respuesta de la API de Supra (${response.status}) para ${functionName} en ${network}:`, errorData);
       throw new Error(`Supra API request failed with status ${response.status} for ${functionName} on ${network}. Details: ${JSON.stringify(errorData)}`);
     }
 
@@ -84,6 +87,7 @@ export async function callViewFunction(
 
     if (data) { // `data` puede ser un array vacío `[]` si la función view devuelve eso, lo cual es válido.
                  // O `null` si la función devuelve `Option::None` serializado.
+      logger.debug("this is the data!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", data)
       return data;
     } else {
       // Esta condición es un poco ambigua. Si la API devuelve un 200 OK con `null` o `[]`, ¿es un error?

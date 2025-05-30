@@ -77,7 +77,9 @@ FROM
 
 /////////////////////////////////AMM Pairs details for backend sql////////////////////////////////////
 
-CREATE OR REPLACE VIEW ammpairs_with_token_details AS
+DROP VIEW IF EXISTS ammpairs_with_token_details;
+
+CREATE VIEW ammpairs_with_token_details AS
 SELECT
     amm.id AS ammpair_id, 
     amm.network, -- Probablemente la vista existente lo llama 'network'
@@ -87,6 +89,17 @@ SELECT
     amm."displayOrder" AS ammpair_display_order,
     amm."createdAt" AS ammpair_created_at,
     amm."updatedAt" AS ammpair_updated_at,
+
+    amm.reserve0,
+    amm.reserve1,
+    amm."tvlUsd",
+    amm."volumeToken0_24h",
+    amm."volumeToken1_24h",
+    amm."volumeUsd24h",
+    amm."lpFeePercent",
+    amm."apr24h",
+    amm."apyCalculated",
+    amm."lastStatsUpdate",
     
     t0.id AS token0_id,
     t0.network AS token0_network,

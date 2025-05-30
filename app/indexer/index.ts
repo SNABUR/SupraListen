@@ -1,3 +1,4 @@
+// Tu archivo indexer.ts (o como se llame el componente padre)
 import { EventPoller } from './poller'
 import { createLogger } from './utils'
 import {
@@ -6,10 +7,12 @@ import {
   CHAIN_ID_SUPRA_TESTNET,
   CHAIN_ID_SUPRA_MAINNET
 } from './rpcClient'
+// Asegúrate que la importación de NetworkConfig es la correcta, la de TaskProcessor
+import { startScheduledTasks, stopScheduledTasks, NetworkConfig as SchedulerNetworkConfig } from '../../lib/TaskProcessor'; // Renombrado para claridad si es necesario
 
 const logger = createLogger('indexer')
 
-let indexerActive = false; // Global state for the indexer service
+let indexerActive = false;
 
 interface PollerInstances {
   testnet?: EventPoller;
@@ -17,17 +20,43 @@ interface PollerInstances {
 }
 let pollers: PollerInstances = {};
 
+// POLLER_IDS es una buena manera de tener estos strings centralizados si los usas en varios sitios.
 const POLLER_IDS = {
   TESTNET: 'supra-testnet',
   MAINNET: 'supra-mainnet'
 };
 
+// Esta interfaz ahora usará la NetworkConfig completa del Scheduler
+interface SchedulerStartupConfig {
+  testnet?: SchedulerNetworkConfig; // Usamos el tipo importado
+  mainnet?: SchedulerNetworkConfig; // Usamos el tipo importado
+}
+
 export async function startIndexer() {
+  const schedulerConfig: SchedulerStartupConfig = {};
+
+  if (SUPRA_RPC_URL_TESTNET && CHAIN_ID_SUPRA_TESTNET) {
+    schedulerConfig.testnet = {
+      rpcUrl: SUPRA_RPC_URL_TESTNET,
+      chainId: CHAIN_ID_SUPRA_TESTNET,
+      networkName: POLLER_IDS.TESTNET // Usamos la constante POLLER_IDS
+    };
+  }
+  if (SUPRA_RPC_URL_MAINNET && CHAIN_ID_SUPRA_MAINNET) {
+    schedulerConfig.mainnet = {
+      rpcUrl: SUPRA_RPC_URL_MAINNET,
+      chainId: CHAIN_ID_SUPRA_MAINNET,
+      networkName: POLLER_IDS.MAINNET // Usamos la constante POLLER_IDS
+    };
+  }
+
   if (indexerActive && (pollers.testnet || pollers.mainnet)) {
     logger.info('Indexer is already running or starting.');
-    // Check status of individual pollers if needed
     if (pollers.testnet) logger.info(`Poller ${POLLER_IDS.TESTNET} status: running (assumed)`);
     if (pollers.mainnet) logger.info(`Poller ${POLLER_IDS.MAINNET} status: running (assumed)`);
+    // Importante: Pasar la schedulerConfig aquí también si la lógica lo requiere,
+    // aunque startScheduledTasks tiene su propia lógica para no reinicializar si ya hay jobs.
+    startScheduledTasks(schedulerConfig); 
     return;
   }
 
@@ -36,14 +65,12 @@ export async function startIndexer() {
 
   const pollerConfigBase = {
     maxRequestsPerSecond: parseInt(process.env.MAX_REQUESTS_PER_SECOND || '10', 10),
-    // startBlockHeight is now handled within EventPoller using BlockProgress
   };
 
-  // Create Testnet Poller
   if (SUPRA_RPC_URL_TESTNET && CHAIN_ID_SUPRA_TESTNET) {
     logger.info(`Setting up poller for Testnet (ID: ${POLLER_IDS.TESTNET})`);
     pollers.testnet = new EventPoller(
-      POLLER_IDS.TESTNET,
+      POLLER_IDS.TESTNET, // Aquí pasas el networkName al poller
       CHAIN_ID_SUPRA_TESTNET,
       SUPRA_RPC_URL_TESTNET,
       pollerConfigBase
@@ -52,11 +79,10 @@ export async function startIndexer() {
     logger.warn('Testnet RPC URL or Chain ID not configured. Testnet poller will not start.');
   }
 
-  // Create Mainnet Poller
   if (SUPRA_RPC_URL_MAINNET && CHAIN_ID_SUPRA_MAINNET) {
     logger.info(`Setting up poller for Mainnet (ID: ${POLLER_IDS.MAINNET})`);
     pollers.mainnet = new EventPoller(
-      POLLER_IDS.MAINNET,
+      POLLER_IDS.MAINNET, // Aquí pasas el networkName al poller
       CHAIN_ID_SUPRA_MAINNET,
       SUPRA_RPC_URL_MAINNET,
       pollerConfigBase
@@ -71,7 +97,6 @@ export async function startIndexer() {
       pollers.testnet.initialize().then(() => pollers.testnet!.start())
       .catch(err => {
         logger.error(`Error starting Testnet poller:`, err);
-        // Optionally remove the poller or mark as failed
         pollers.testnet = undefined;
       })
     );
@@ -86,26 +111,33 @@ export async function startIndexer() {
     );
   }
 
-  if (startingPollers.length === 0) {
-    logger.warn('No pollers were configured or started. Indexer effectively idle.');
-    indexerActive = false; // No pollers, so indexer is not really active
-    return;
+  if (startingPollers.length === 0 && Object.keys(schedulerConfig).length === 0) {
+    logger.warn('No pollers were configured or started, and no scheduler config provided. Indexer effectively idle.');
+    indexerActive = false; 
+    return; 
+  } else if (startingPollers.length === 0 && Object.keys(schedulerConfig).length > 0) {
+     logger.warn('No pollers were configured or started, but scheduler config provided. Attempting to start scheduled tasks.');
   }
 
-  try {
-    await Promise.all(startingPollers);
-    logger.info('All configured indexer pollers started (or attempted to start).');
-  } catch (error) {
-    // This catch might not be strictly necessary if individual pollers handle their errors
-    logger.error('An error occurred during the startup of one or more pollers:', error);
-    // indexerActive remains true, but some pollers might have failed.
-    // Individual poller health should be monitored if possible.
+  // La schedulerConfig ya contiene los networkName correctos
+  startScheduledTasks(schedulerConfig);
+
+  if (startingPollers.length > 0) {
+    try {
+      await Promise.all(startingPollers);
+      logger.info('All configured indexer pollers started (or attempted to start).');
+    } catch (error) {
+      logger.error('An error occurred during the startup of one or more pollers:', error);
+    }
   }
 }
 
+// ... (el resto de tu archivo stopIndexer, checkIndexerStatus, y el default export se mantienen igual)
 export async function stopIndexer() {
   logger.info('Stopping Supra Chain Indexer...');
-  indexerActive = false; // Signal that the indexer service should stop
+  indexerActive = false; 
+
+  stopScheduledTasks();
 
   const stoppingPollers: Promise<void>[] = [];
   if (pollers.testnet) {
@@ -121,35 +153,31 @@ export async function stopIndexer() {
     await Promise.all(stoppingPollers);
   }
   
-  pollers = {}; // Clear instances
+  pollers = {}; 
   logger.info('Indexer pollers stopped (or attempted to stop).');
 }
 
 export function checkIndexerStatus() {
-  // Could be enhanced to return status per poller
   let status = `Indexer service is ${indexerActive ? 'active' : 'inactive'}.`;
   if (indexerActive) {
     status += ` Testnet poller: ${pollers.testnet ? 'configured' : 'not configured/failed'}.`;
     status += ` Mainnet poller: ${pollers.mainnet ? 'configured' : 'not configured/failed'}.`;
-    // Note: 'configured' doesn't mean 'running without errors'. True status is complex.
   }
   return status;
 }
 
-// This part is for Cloudflare Workers or similar environments
 export default {
   async fetch(request: Request, env: any, ctx: any) {
-    // Could add an endpoint to check status or trigger start/stop for admin purposes
     const url = new URL(request.url);
     if (url.pathname === "/status") {
       return new Response(checkIndexerStatus());
     }
     if (url.pathname === "/start") {
-      ctx.waitUntil(startIndexer()); // Non-blocking start
+      ctx.waitUntil(startIndexer()); 
       return new Response("Indexer start initiated.");
     }
     if (url.pathname === "/stop") {
-      ctx.waitUntil(stopIndexer()); // Non-blocking stop
+      ctx.waitUntil(stopIndexer()); 
       return new Response("Indexer stop initiated.");
     }
     return new Response('Indexer Worker Running. Use /status, /start, or /stop.');
@@ -157,8 +185,6 @@ export default {
 
   async scheduled(event: any, env: any, ctx: any) {
     logger.info('Scheduled event triggered. Ensuring indexer is running...');
-    // This will attempt to start the indexer if it's not already running.
-    // If it is running, startIndexer should ideally be idempotent or log that it's already active.
     ctx.waitUntil(startIndexer());
   }
 }

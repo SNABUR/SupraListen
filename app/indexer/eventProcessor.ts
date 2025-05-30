@@ -1,11 +1,11 @@
 import prismadb from '@/lib/prismadb'; // Asumo que esto exporta tu PrismaClient instanciado
 import { createLogger } from './utils';
-import { callViewFunction } from './getmetadata'; // Asumo que esta función es compatible o se adapta
+import { callViewFunction } from '../../lib/viewFunction/useView'; // Asumo que esta función es compatible o se adapta
 
 const logger = createLogger('eventProcessor');
 // Estas variables de entorno deben apuntar a las direcciones correctas
 const MODULE_PATH = `${process.env.NEXT_PUBLIC_SPIKE_ADR}::${process.env.NEXT_PUBLIC_MODULE_NAME}`;
-const MODULE_PATH_AMM = `${process.env.NEXT_PUBLIC_AMM_ADDRESS}::${process.env.NEXT_PUBLIC_AMM_MODULE}`;
+const MODULE_PATH_AMM = `${process.env.NEXT_PUBLIC_AMM_ADDRESS}::${process.env.NEXT_PUBLIC_SUPRA_AMM_FACTORY_MODULE}`;
 const MODULE_PATH_GAME = `${process.env.NEXT_PUBLIC_GAME_ADDRESS}::${process.env.NEXT_PUBLIC_GAME_MODULE}`;
 // ¡OJO AQUÍ! process.env.NEXT_PUBLIC_STAKING_ADDRESS se repite. Debería ser MODULE_NAME para staking
 const MODULE_PATH_STAKING = `${process.env.NEXT_PUBLIC_STAKING_ADDRESS}::${process.env.NEXT_PUBLIC_STAKING_MODULE}`; // Asumo que tienes una variable para el nombre del módulo de staking
