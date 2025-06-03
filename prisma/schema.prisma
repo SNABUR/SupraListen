@@ -11,27 +11,47 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model BlockProgress {
-  network         String   @id // 'testnet' o 'mainnet'
-  lastBlockHeight BigInt
-  updatedAt       DateTime @updatedAt
+// --- General stats
 
-  @@map("block_progress") // Buena práctica para nombrar la tabla explícitamente
+model ProtocolStats {
+  id                      Int      @id @default(autoincrement())
+  network                 String
+  timestamp               DateTime // Momento del snapshot (ej. cada hora, cada día)
+
+  // TVL Agregado
+  totalTvlUsd             Decimal? @db.Decimal(36, 6)  // TVL total de toda la plataforma en USD
+  ammTvlUsd               Decimal? @db.Decimal(36, 6)  // TVL específico de los Ammpairs
+  virtualPoolsTvlUsd      Decimal? @db.Decimal(36, 6)  // TVL específico de PoolsDB (si aplica y lo puedes calcular)
+  stakingTvlUsd           Decimal? @db.Decimal(36, 6)  // TVL específico de StakingPools
+
+  // Volumen Agregado (ej. últimas 24 horas, si el snapshot es diario)
+  totalVolume24hUsd       Decimal? @db.Decimal(36, 6)
+  ammVolume24hUsd         Decimal? @db.Decimal(36, 6)
+
+  // Otras métricas globales
+  totalUniqueUsers        Int?     // Número de usuarios únicos que han interactuado (más complejo de rastrear)
+  totalFeesEarnedUsd24h   Decimal? @db.Decimal(36, 6)  // Comisiones totales generadas en las últimas 24h
+
+  // Podrías añadir más campos según lo que quieras rastrear a nivel de protocolo
+  // activeAmmPairsCount   Int?
+  // activeStakingPoolsCount Int?
+
+  @@unique([network, timestamp], name: "unique_protocol_stats_snapshot")
+  @@index([network, timestamp])
+  @@map("protocol_stats")
 }
 
-// prisma/schema.prisma
 model EventTracking {
   id              Int      @id @default(autoincrement())
-  network         String   // 'testnet' o 'mainnet'
+  network         String   
   eventType       String
-  // chainId         String   // Eliminado por redundancia con 'network'
   blockHeight     BigInt
   transactionHash String   // Asumimos que el hash de tx es único dentro de una red y tipo de evento, o globalmente.
   sequenceNumber  String?  // Añadido si es necesario para unicidad o seguimiento, como en rpcClient
   processed       Boolean  @default(false)
   error           String?
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  updatedAt       DateTime @default(now()) @updatedAt // Asegúrate de este cambio
 
   // Si transactionHash + sequenceNumber + eventType son únicos por red:
   @@unique([network, transactionHash, sequenceNumber, eventType], name: "unique_event_per_network")
@@ -42,23 +62,7 @@ model EventTracking {
   // @@index([chainId]) // Eliminado
 }
 
-model VRFCallback {
-  id            Int      @id @default(autoincrement())
-  network       String   // 'testnet' o 'mainnet'
-  callerAddress String
-  nonce         String   // Asumimos que nonce es único por callerAddress dentro de una red
-  randomNumbers String[]
-  timestamp     BigInt
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@unique([network, callerAddress, nonce])
-  @@index([network])
-  @@index([network, callerAddress])
-  @@index([network, nonce])
-  @@index([network, timestamp])
-  // @@index([chainId]) // Eliminado si chainId fue eliminado de VRFCallback
-}
+// ---- Pump Spike tables
 
 model TradeEvent {
   id                    Int      @id @default(autoincrement())
@@ -76,7 +80,7 @@ model TradeEvent {
   virtualSupraReserves  BigInt
   virtualTokenReserves  BigInt
   createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  updatedAt             DateTime @default(now()) @updatedAt // Asegúrate de este cambio
 
   // Asumiendo que creationNumber + sequenceNumber identifican un evento único en una red
   @@unique([network, creationNumber, sequenceNumber, type], name: "unique_trade_event_per_network")
@@ -106,7 +110,7 @@ model PoolsDB {
   uri                         String
   website                     String
   createdAt                   DateTime @default(now())
-  updatedAt                   DateTime @updatedAt
+  updatedAt                   DateTime @default(now()) @updatedAt // Asegúrate de este cambio
   displayOrder                Int?
   comments                    Comment[]
 
@@ -119,133 +123,30 @@ model PoolsDB {
   @@index([network, displayOrder])
 }
 
-model Token {
-  id                  String    // La dirección del token
-  network             String    // La red
-  name                String?   // Nombre del token, opcional hasta que se obtengan metadatos
-  symbol              String?   // Símbolo del token, opcional
-  decimals            Int?      // Número de decimales, opcional
-  iconUri             String?   // URI del ícono, opcional
-  projectUri          String?   // URI del proyecto, opcional
-  originalCoinType    String?   // Ej: "0x1::aptos_coin::AptosCoin". Null si es un FA nativo.
-
-  // Nuevos campos para manejar los diferentes estándares y el estado de los metadatos
-  metadataStandard    String?   // Podría ser "CoinLegacy", "FungibleAsset", o un Enum si lo prefieres
-                                // enum TokenStandard { COIN_LEGACY FUNGIBLE_ASSET UNKNOWN }
-                                // metadataStandard TokenStandard @default(UNKNOWN)
-  metadataFetched     Boolean   @default(false) // Para rastrear si tu hook ya procesó este token
-  lastMetadataAttempt DateTime? // Opcional: para rastrear cuándo fue el último intento de obtener metadatos
-  verified            Boolean   @default(false) // <--- NUEVO CAMPO AÑADIDO
-  displayOrder        Int?      // Nuevo campo para el orden. Opcional.
-
-  // Relaciones (estas ya las tienes y están bien)
-  ammpairsAsToken0 Ammpair[] @relation("Token0")
-  ammpairsAsToken1 Ammpair[] @relation("Token1")
-  stakingPoolsAsStakeToken  StakingPool[] @relation("StakeTokenPools")
-  stakingPoolsAsRewardToken StakingPool[] @relation("RewardTokenPools")
-
-  @@id([network, id]) // Clave primaria compuesta
-  @@index([network, metadataFetched]) // Útil para tu worker de metadatos
-  @@map("tokens")
-  @@index([network, displayOrder]) // Índice para ordenar eficientemente
-  @@index([network, verified, displayOrder]) // Índice combinado si sueles filtrar por verified y luego ordenar
-}
-
-model Ammpair {
+model Image {
   id        Int      @id @default(autoincrement())
-  network   String   // CAMBIADO de chainId a network (Red donde se creó el par)
-  pair      String
-  creator   String
-  verified  Boolean  @default(false)
-  displayOrder  Int?      // Nuevo campo para el orden
-  token0Network String   // CAMBIADO de token0ChainId a token0Network
-  token0Address String // Dirección del token 0
-  token1Network String   // CAMBIADO de token1ChainId a token1Network
-  token1Address String // Dirección del token 1
-  token0        Token    @relation("Token0", fields: [token0Network, token0Address], references: [network, id]) // CAMBIADO
-  token1        Token    @relation("Token1", fields: [token1Network, token1Address], references: [network, id]) // CAMBIADO
-
-  reserve0      String? // Cantidad de token0 en la reserva del pool (formato raw/base units)
-  reserve1      String? // Cantidad de token1 en la reserva del pool (formato raw/base units)
-  tvlUsd        String? // Valor Total Bloqueado en USD (ej: "10500.75")
-
-  volumeToken0_24h String? // Volumen de token0 en las últimas 24h (formato raw/base units)
-  volumeToken1_24h String? // Volumen de token1 en las últimas 24h (formato raw/base units)
-  volumeUsd24h     String? // Volumen en USD en las últimas 24h
-
-  lpFeePercent     String? // Porcentaje de fee para proveedores de liquidez (ej: "0.3" para 0.3%)
-  apr24h           String? 
-  apyCalculated    String? 
-
-  lastStatsUpdate  DateTime? 
-
+  url       String   // URL de la imagen (probablemente en Supabase Storage)
+  altText   String?  // Texto alternativo para accesibilidad (opcional)
+  // No necesita chainId a menos que la imagen en sí esté ligada a una cadena
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  @@unique([network, pair])
-  @@index([network])
-  @@index([token0Network, token0Address])
-  @@index([token1Network, token1Address])
-  @@index([network, creator])
-  @@index([network, displayOrder])
-  @@index([network, verified, displayOrder])
-  @@index([network, tvlUsd])
-  @@index([network, volumeUsd24h])
-  @@index([network, apr24h])
+  // Relación con el comentario al que pertenece la imagen
+  commentId Int      // Clave foránea que apunta a Comment.id
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade) // Si se borra el comentario, se borran sus imágenes
+
+  @@index([commentId]) // Indexar para buscar imágenes por comentario
+  // No necesita índice de chainId si no tiene la columna
+  @@map("images")
 }
 
-model GameResult {
-  id            Int      @id @default(autoincrement())
-  network       String   // CAMBIADO de chainId a network
-  nonce         BigInt   // No es único globalmente
-  player        String
-  playerMove    Int
-  houseMove     Int
-  betAmount     BigInt
-  outcome       Int
-  payoutAmount  BigInt
-  coinTypeName  String
-  season        BigInt
-  timestamp     BigInt
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@unique([network, nonce]) // CAMBIADO de chainId a network
-  @@index([network])       // CAMBIADO de chainId a network
-  @@index([network, player]) // CAMBIADO
-  @@index([network, season]) // CAMBIADO
-  @@index([network, timestamp]) // CAMBIADO
-}
-
-// --- Nuevos Modelos para la Red Social de Comentarios ---
-
-model User {
-  walletAddress String
-  network       String
-  username      String?   // Opcional, puede ser poblado después
-  avatarUrl     String?   // Opcional
-  nonce         Int?      // Este campo parece específico de tu lógica de User, mantenlo como necesites
-  // Podrías añadir un campo similar a metadataFetched si tienes un proceso para enriquecer perfiles de usuario
-  // profileEnriched Boolean @default(false)
-
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  comments      Comment[]
-  likes         Like[]
-  createdStakingPools StakingPool[] @relation("CreatedPools")
-  stakes        UserStake[] // <--- ¡ESTA LÍNEA ES LA QUE FALTA!
-
-  @@id([network, walletAddress])
-  @@map("users")
-}
+// --- Social Tables
 
 model Comment {
   id        Int      @id @default(autoincrement())
   network   String   // CAMBIADO de chainId a network (Red donde se creó el comentario)
   text      String   // El contenido del comentario
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt // Asegúrate de este cambio
 
   // Campos escalares para la clave foránea a User
   userNetwork       String   // Almacena la 'network' del User
@@ -297,21 +198,214 @@ model Like {
   @@map("likes")
 }
 
-model Image {
-  id        Int      @id @default(autoincrement())
-  url       String   // URL de la imagen (probablemente en Supabase Storage)
-  altText   String?  // Texto alternativo para accesibilidad (opcional)
-  // No necesita chainId a menos que la imagen en sí esté ligada a una cadena
-  createdAt DateTime @default(now())
+// --- Users db
 
-  // Relación con el comentario al que pertenece la imagen
-  commentId Int      // Clave foránea que apunta a Comment.id
-  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade) // Si se borra el comentario, se borran sus imágenes
+model UserStake {
+  id                 Int      @id @default(autoincrement())
 
-  @@index([commentId]) // Indexar para buscar imágenes por comentario
-  // No necesita índice de chainId si no tiene la columna
-  @@map("images")
+  // Relación con StakingPool
+  poolId             Int
+  stakingPool        StakingPool @relation(fields: [poolId], references: [id], onDelete: Cascade) // Si se borra el pool, se borran los stakes
+
+  // Relación con User
+  userNetwork        String
+  userAddress        String
+  user               User     @relation(fields: [userNetwork, userAddress], references: [network, walletAddress], onDelete: Cascade) // Si se borra el user, se borran sus stakes
+
+  stakedAmount       String   // Cantidad de stakeToken apostada por el usuario (formato string para precisión)
+  rewardDebt         String   @default("0") // Recompensa ya reclamada o contabilizada para este stake (formato string)
+                                        // Ayuda a calcular recompensas pendientes: (pool.accRewardPerShare * stakedAmount) - rewardDebt (simplificado)
+  lastClaimTimestamp BigInt?  // Timestamp de la última vez que el usuario reclamó recompensas de este stake (opcional, depende de tu lógica de claim)
+
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now()) @updatedAt // Asegúrate de este cambio
+
+  @@unique([poolId, userNetwork, userAddress]) // Un usuario solo tiene una entrada de stake por pool
+  @@map("user_stakes")
+  @@index([poolId])
+  @@index([userNetwork, userAddress])
+  @@index([poolId, userNetwork, userAddress, stakedAmount]) // Para consultas específicas de usuario y su cantidad
 }
+
+model User {
+  walletAddress String
+  network       String
+  username      String?   // Opcional, puede ser poblado después
+  avatarUrl     String?   // Opcional
+  nonce         Int?      // Este campo parece específico de tu lógica de User, mantenlo como necesites
+  // Podrías añadir un campo similar a metadataFetched si tienes un proceso para enriquecer perfiles de usuario
+  // profileEnriched Boolean @default(false)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt // Asegúrate de este cambio
+
+  comments      Comment[]
+  likes         Like[]
+  createdStakingPools StakingPool[] @relation("CreatedPools")
+  stakes        UserStake[] // <--- ¡ESTA LÍNEA ES LA QUE FALTA!
+
+  @@id([network, walletAddress])
+  @@map("users")
+}
+
+// --- Token Tables
+
+model TokenPriceHistory {
+  id              Int      @id @default(autoincrement())
+  network         String
+  tokenAddress    String
+
+  timestamp       DateTime // El inicio del período (ej. 00:00 UTC de un día, inicio de una hora)
+  granularity     String   // 'HOURLY', 'DAILY', 'WEEKLY' (para saber qué representa el timestamp)
+
+  openUsd         Decimal? @db.Decimal(36, 18) // Precio de apertura en USD del período
+  highUsd         Decimal? @db.Decimal(36, 18) // Precio más alto en USD del período
+  lowUsd          Decimal? @db.Decimal(36, 18) // Precio más bajo en USD del período
+  closeUsd        Decimal? @db.Decimal(36, 18) // Precio de cierre en USD del período
+  volumeUsd       Decimal? @db.Decimal(36, 6)  // Volumen total comerciado (en USD) de este token durante el período.
+                                               // Podría venir de la suma de volúmenes en AMMs o de APIs.
+
+  // Podrías tener también OHLCV en términos del token ancla si es relevante
+  // openAnchor, highAnchor, lowAnchor, closeAnchor, volumeAnchor
+
+  // Opcional: Relación con Token
+  // token           Token    @relation(fields: [network, tokenAddress], references: [network, id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([network, tokenAddress, timestamp, granularity], name: "unique_token_price_history_entry")
+  @@index([network, tokenAddress, granularity, timestamp]) // Para consultar series temporales eficientemente
+  @@map("token_price_history")
+}
+
+model Token {
+  // --- Identificadores y Metadatos Básicos (Esenciales) ---
+  id                  String    // La dirección del token (clave primaria con network)
+  network             String    // La red (clave primaria con id)
+
+  name                String?   // Nombre del token (ej. "Aptos Coin")
+  symbol              String?   // Símbolo del token (ej. "APT")
+  decimals            Int?      // Número de decimales (ej. 8)
+  iconUri             String?   // URL del ícono del token
+  projectUri          String?   // URL del sitio web o proyecto del token
+  originalCoinType    String?   // Tipo de moneda original on-chain (ej. "0x1::aptos_coin::AptosCoin")
+
+  // --- Estado de Metadatos y Verificación (Gestión Interna y UI) ---
+  metadataStandard    String?   // Estándar de metadatos ("CoinLegacy", "FungibleAsset", etc.)
+  metadataFetched     Boolean   @default(false) // ¿Ya se intentó obtener metadatos on-chain?
+  verified            Boolean   @default(false) // ¿Es un token verificado por tu plataforma?
+  displayOrder        Int?      // Para ordenamiento manual en listas destacadas (opcional)
+
+  // --- Métricas de Mercado Clave (Actualizadas por Cron Jobs) ---
+  totalSupply         String?   // Suministro total del token (unidades base, como string para precisión)
+                                // Fuente: Contrato del token.
+  circulatingSupply   String?   // Suministro circulante (unidades base, string).
+                                // Fuente: Contrato o API externa (puede ser más difícil de obtener).
+  priceUsdCurrent     Decimal?  @db.Decimal(36, 18) // Precio actual en USD.
+                                // Fuente: Actualizado desde tu tabla TokenPrice.
+                                // Justificación: Muy usado en UI, evita JOINs constantes.
+  marketCapUsd        String?   // Capitalización de mercado en USD (string para precisión).
+                                // Cron: (circulatingSupply / 10^decimals) * priceUsdCurrent.
+  volume24hUsd        String?   // Volumen de comercio en USD en las últimas 24 horas (string).
+                                // Cron: Agregado de AMMs o API externa.
+  priceChange24hPercent Decimal? @db.Decimal(18, 4) // Cambio porcentual del precio en las últimas 24h.
+                                // Cron: ((priceUsdCurrent - priceUsd24hAgo) / priceUsd24hAgo) * 100.
+                                //       (priceUsd24hAgo se obtiene de TokenPriceHistory o TokenPrice si tienes snapshots).
+
+  // --- Timestamps y Otros ---
+  lastMetadataAttempt DateTime? // Opcional: si quieres rastrear el último intento de fetch.
+  //                               // Podrías quitarlo si metadataFetched es suficiente por ahora.
+  createdAt           DateTime  @default(now()) // Cuándo se añadió este token a TU base de datos.
+  updatedAt           DateTime  @default(now()) @updatedAt // <--- Añade @default(now()) aquí
+
+
+  // --- Relaciones (Estas ya las tienes y están bien) ---
+  ammpairsAsToken0 Ammpair[] @relation("Token0")
+  ammpairsAsToken1 Ammpair[] @relation("Token1")
+  stakingPoolsAsStakeToken  StakingPool[] @relation("StakeTokenPools")
+  stakingPoolsAsRewardToken StakingPool[] @relation("RewardTokenPools")
+  // Opcional: Relación inversa con TokenPrice y TokenPriceHistory si quieres navegar desde Token a sus precios
+  // prices              TokenPrice[]
+  // priceHistory        TokenPriceHistory[]
+
+
+  @@id([network, id])
+  @@index([network, metadataFetched])
+  @@index([network, verified, displayOrder]) // Para listas de tokens verificados y ordenados
+  @@index([network, marketCapUsd])          // Para ordenar tokens por market cap
+  @@index([network, volume24hUsd])          // Para ordenar tokens por volumen
+  @@index([network, priceChange24hPercent]) // Para ordenar por ganadores/perdedores
+  @@map("tokens")
+}
+
+model TokenPrice {
+  id              Int      @id @default(autoincrement())
+  network         String   // 'testnet' o 'mainnet'
+  tokenAddress    String   // Dirección del token (debe coincidir con Token.id)
+
+  priceUsd        Decimal? @db.Decimal(36, 18) // Precio en USD. Ampliamos precisión (36 total, 18 decimales)
+                                               // Puedes ajustar esto según los rangos de precios que esperes.
+                                               // Null si no se pudo obtener o no aplica.
+  priceAnchor     Decimal? @db.Decimal(36, 18) // Precio en tu token ancla (ej. APT), si es diferente de USD y lo obtienes.
+                                               // Null si no se pudo obtener o no aplica.
+
+  source          String?  // De dónde se obtuvo este precio (ej: "amm_oracle_apt", "coingecko_api", "internal_calc")
+  lastUpdatedAt   DateTime @updatedAt // Actualizado automáticamente por Prisma cuando la fila cambia.
+                                      // O puedes gestionarlo manualmente si el cron job escribe la hora de la API.
+
+  // Opcional: relación directa con Token para facilitar joins si es necesario, aunque no estrictamente
+  // token           Token    @relation(fields: [network, tokenAddress], references: [network, id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([network, tokenAddress], name: "unique_current_token_price_per_network") // Solo un precio "actual" por token
+  @@index([network, lastUpdatedAt]) // Para buscar precios actualizados recientemente
+  @@map("token_prices")
+}
+
+// --- AMM tables
+
+model Ammpair {
+  id        Int      @id @default(autoincrement())
+  network   String   // CAMBIADO de chainId a network (Red donde se creó el par)
+  pair      String
+  creator   String
+  verified  Boolean  @default(false)
+  displayOrder  Int?      // Nuevo campo para el orden
+  token0Network String   // CAMBIADO de token0ChainId a token0Network
+  token0Address String // Dirección del token 0
+  token1Network String   // CAMBIADO de token1ChainId a token1Network
+  token1Address String // Dirección del token 1
+  token0        Token    @relation("Token0", fields: [token0Network, token0Address], references: [network, id]) // CAMBIADO
+  token1        Token    @relation("Token1", fields: [token1Network, token1Address], references: [network, id]) // CAMBIADO
+
+  reserve0      String? // Cantidad de token0 en la reserva del pool (formato raw/base units)
+  reserve1      String? // Cantidad de token1 en la reserva del pool (formato raw/base units)
+  tvlUsd        String? // Valor Total Bloqueado en USD (ej: "10500.75")
+
+  volumeToken0_24h String? // Volumen de token0 en las últimas 24h (formato raw/base units)
+  volumeToken1_24h String? // Volumen de token1 en las últimas 24h (formato raw/base units)
+  volumeUsd24h     String? // Volumen en USD en las últimas 24h
+  feesUsd24h       String?
+  lpFeePercent     String? // Porcentaje de fee para proveedores de liquidez (ej: "0.3" para 0.3%)
+  apr24h           String? 
+  apyCalculated    String? 
+
+  lastStatsUpdate  DateTime? 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt // Asegúrate de este cambio
+
+  @@unique([network, pair])
+  @@index([network])
+  @@index([token0Network, token0Address])
+  @@index([token1Network, token1Address])
+  @@index([network, creator])
+  @@index([network, displayOrder])
+  @@index([network, verified, displayOrder])
+  @@index([network, tvlUsd])
+  @@index([network, volumeUsd24h])
+  @@index([network, apr24h])
+}
+
+// --- Staking tables
 
 model StakingPool {
   id                          Int      @id @default(autoincrement())
@@ -355,7 +449,7 @@ model StakingPool {
   userStakes                  UserStake[] // <--- ¡ESTA LÍNEA ES LA QUE FALTA!
 
   createdAt                   DateTime @default(now())
-  updatedAt                   DateTime @updatedAt
+  updatedAt                   DateTime @default(now()) @updatedAt // Asegúrate de este cambio
 
 
   @@unique([network, creatorAddress, stakeTokenAddress, rewardTokenAddress])
@@ -368,30 +462,53 @@ model StakingPool {
   @@index([network, boostConfigCollectionOwner]) // Si buscas pools por colección de boost
 }
 
-model UserStake {
-  id                 Int      @id @default(autoincrement())
+// --- Game Tables
 
-  // Relación con StakingPool
-  poolId             Int
-  stakingPool        StakingPool @relation(fields: [poolId], references: [id], onDelete: Cascade) // Si se borra el pool, se borran los stakes
+model GameResult {
+  id            Int      @id @default(autoincrement())
+  network       String   // CAMBIADO de chainId a network
+  nonce         BigInt   // No es único globalmente
+  player        String
+  playerMove    Int
+  houseMove     Int
+  betAmount     BigInt
+  outcome       Int
+  payoutAmount  BigInt
+  coinTypeName  String
+  season        BigInt
+  timestamp     BigInt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt // Asegúrate de este cambio
 
-  // Relación con User
-  userNetwork        String
-  userAddress        String
-  user               User     @relation(fields: [userNetwork, userAddress], references: [network, walletAddress], onDelete: Cascade) // Si se borra el user, se borran sus stakes
+  @@unique([network, nonce]) // CAMBIADO de chainId a network
+  @@index([network])       // CAMBIADO de chainId a network
+  @@index([network, player]) // CAMBIADO
+  @@index([network, season]) // CAMBIADO
+  @@index([network, timestamp]) // CAMBIADO
+}
 
-  stakedAmount       String   // Cantidad de stakeToken apostada por el usuario (formato string para precisión)
-  rewardDebt         String   @default("0") // Recompensa ya reclamada o contabilizada para este stake (formato string)
-                                        // Ayuda a calcular recompensas pendientes: (pool.accRewardPerShare * stakedAmount) - rewardDebt (simplificado)
-  lastClaimTimestamp BigInt?  // Timestamp de la última vez que el usuario reclamó recompensas de este stake (opcional, depende de tu lógica de claim)
+model VRFCallback {
+  id            Int      @id @default(autoincrement())
+  network       String   // 'testnet' o 'mainnet'
+  callerAddress String
+  nonce         String   // Asumimos que nonce es único por callerAddress dentro de una red
+  randomNumbers String[]
+  timestamp     BigInt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt // Asegúrate de este cambio
 
+  @@unique([network, callerAddress, nonce])
+  @@index([network])
+  @@index([network, callerAddress])
+  @@index([network, nonce])
+  @@index([network, timestamp])
+  // @@index([chainId]) // Eliminado si chainId fue eliminado de VRFCallback
+}
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+model BlockProgress {
+  network         String   @id // 'testnet' o 'mainnet'
+  lastBlockHeight BigInt
+  updatedAt       DateTime @default(now()) @updatedAt // Asegúrate de este cambio
 
-  @@unique([poolId, userNetwork, userAddress]) // Un usuario solo tiene una entrada de stake por pool
-  @@map("user_stakes")
-  @@index([poolId])
-  @@index([userNetwork, userAddress])
-  @@index([poolId, userNetwork, userAddress, stakedAmount]) // Para consultas específicas de usuario y su cantidad
+  @@map("block_progress") // Buena práctica para nombrar la tabla explícitamente
 }

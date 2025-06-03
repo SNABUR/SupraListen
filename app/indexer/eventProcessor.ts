@@ -10,9 +10,6 @@ const MODULE_PATH_GAME = `${process.env.NEXT_PUBLIC_GAME_ADDRESS}::${process.env
 // ¡OJO AQUÍ! process.env.NEXT_PUBLIC_STAKING_ADDRESS se repite. Debería ser MODULE_NAME para staking
 const MODULE_PATH_STAKING = `${process.env.NEXT_PUBLIC_STAKING_ADDRESS}::${process.env.NEXT_PUBLIC_STAKING_MODULE}`; // Asumo que tienes una variable para el nombre del módulo de staking
 
-const MODULE_PATH_METADATA = `${process.env.NEXT_PUBLIC_FA_ADDRESS}::${process.env.NEXT_PUBLIC_PAIR_MODULE}`; // Asumo que tienes una variable para el nombre del módulo de metadatos
-const MODULE_PATH_STAKE_FA = `${process.env.NEXT_PUBLIC_STAKING_ADDRESS}::${process.env.NEXT_PUBLIC_STAKING_ROUTE}`; // Asumo que tienes una variable para el nombre del módulo de metadatos
-
 // Interfaz RpcEvent (Asegúrate de que esta interfaz ahora use 'network' o ajústalo)
 export interface RpcEvent {
   type: string;
@@ -294,7 +291,7 @@ async function getOrCreateToken(
   // 1. Obtener metadatos del propio tokenAddress (nombre, símbolo, decimales)
   try {
     if (!tokenAddress.includes("::")) { // Es una dirección 0x... (potencialmente FA)
-        const metadataResponse = await callViewFunction(network, MODULE_PATH_METADATA, "metadata", ["0x1::object::ObjectCore"], [tokenAddress]);
+        const metadataResponse = await callViewFunction(network, "0x1::fungible_asset", "metadata", ["0x1::object::ObjectCore"], [tokenAddress]);
         if (metadataResponse && metadataResponse.result && metadataResponse.result[0]) {
             tokenDataFromRpc = metadataResponse.result[0];
             if (typeof tokenDataFromRpc.name === 'string' &&
@@ -339,7 +336,7 @@ async function getOrCreateToken(
   // Esta sección solo se ejecuta si tokenAddress es 0x..., no si es A::B::C
   if (!tokenAddress.includes("::")) {
     try {
-        const wrappedResponse = await callViewFunction(network, MODULE_PATH_STAKE_FA, "get_original_from_address", [], [tokenAddress]);
+        const wrappedResponse = await callViewFunction(network, MODULE_PATH_STAKING, "get_metadata", [], [tokenAddress]);
         if (wrappedResponse && wrappedResponse.result && wrappedResponse.result.length > 0) {
             const potentialOriginalAddress = wrappedResponse.result[0];
             if (typeof potentialOriginalAddress === 'string' &&

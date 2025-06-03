@@ -1,8 +1,9 @@
 // src/lib/TaskProcessor.ts
 import { createLogger } from '../app/indexer/utils';
 import cron, { ScheduledTask } from 'node-cron';
-import { executeGetReservesForAllPairs } from './tasks/executeGetReserves'; // Para AMM
-import { executeGetTotalStakedForAllPools } from './tasks/executeGetTotalStaked'; // Para StakingPools
+import { executeGetReservesForAllPairs } from './tasks/executeGetReserves';
+import { executeGetTotalStakedForAllPools } from './tasks/executeGetTotalStaked';
+import { executeUpdateAmmData } from './tasks/executeUpdateAmmData';
 import prismadb from '@/lib/prismadb';
 
 const logger = createLogger('scheduled-tasks');
@@ -18,14 +19,49 @@ interface SchedulerSetupConfig {
   mainnet?: NetworkConfig;
 }
 
-// Usaremos claves más descriptivas para los activeJobs si tenemos múltiples tipos de tareas por red
-// Ejemplo: 'Testnet-AMMReserves', 'Testnet-StakingTotal'
 let activeJobs: Map<string, ScheduledTask> = new Map();
 
+const DELAY_BETWEEN_SUB_TASKS_MS = 10000; // 10 segundos de delay entre sub-tareas
+
+// Función helper para introducir delays
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Orquesta la ejecución secuencial de todas las tareas de actualización para una red.
+ */
+async function runUpdateCycleForNetwork(networkConfig: NetworkConfig) {
+  logger.info(`Starting update cycle for ${networkConfig.networkName}...`);
+
+  try {
+    logger.info(`[${networkConfig.networkName}] Executing GetReservesForAllPairs...`);
+    await executeGetReservesForAllPairs(prismadb, networkConfig);
+    logger.info(`[${networkConfig.networkName}] GetReservesForAllPairs COMPLETED.`);
+
+    await delay(DELAY_BETWEEN_SUB_TASKS_MS); // Espera 10 segundos
+
+    logger.info(`[${networkConfig.networkName}] Executing GetTotalStakedForAllPools...`);
+    await executeGetTotalStakedForAllPools(prismadb, networkConfig);
+    logger.info(`[${networkConfig.networkName}] GetTotalStakedForAllPools COMPLETED.`);
+
+    await delay(DELAY_BETWEEN_SUB_TASKS_MS); // Espera 10 segundos
+
+    logger.info(`[${networkConfig.networkName}] Executing UpdateAmmData (TVL calculations)...`);
+    await executeUpdateAmmData(prismadb, networkConfig); // Esta ya calcula TVL y actualiza ProtocolStats
+    logger.info(`[${networkConfig.networkName}] UpdateAmmData COMPLETED.`);
+
+    logger.info(`Update cycle for ${networkConfig.networkName} FINISHED successfully.`);
+
+  } catch (error) {
+    logger.error(`Error during update cycle for ${networkConfig.networkName}:`, error);
+    // Aquí podrías añadir notificaciones o reintentos si es necesario
+  }
+}
+
 export function startScheduledTasks(setupConfig: SchedulerSetupConfig): void {
-  if (activeJobs.size > 0) { // Esta condición podría necesitar ser más granular si reinicias tareas individuales
+  if (activeJobs.size > 0) {
     logger.info('Scheduled tasks might already be initialized. Check activeJobs map if issues.');
-    // return; // Comentado para permitir la adición de nuevas tareas si el procesador ya está "iniciado"
   }
 
   logger.info('Initializing/Updating scheduled tasks...');
@@ -44,34 +80,26 @@ export function startScheduledTasks(setupConfig: SchedulerSetupConfig): void {
   }
 
   networksToProcess.forEach(networkConfig => {
-    const ammTaskKey = `${networkConfig.networkName}-AMMReserves`;
-    const stakingTaskKey = `${networkConfig.networkName}-StakingTotal`;
+    const masterUpdateTaskKey = `${networkConfig.networkName}-MasterUpdateCycle`;
 
-    // Tarea para AMM Reserves
-    if (!activeJobs.has(ammTaskKey)) {
-      logger.info(`Setting up AMM reserve update task for ${networkConfig.networkName}`);
-      const ammJob: ScheduledTask = cron.schedule('*/60 * * * *', async () => { // Cada 1 minuto
-        logger.info(`Triggering AMM reserve update task for ${networkConfig.networkName} (cron)`);
-        await executeGetReservesForAllPairs(prismadb, networkConfig);
-      }, { timezone: "UTC" });
-      activeJobs.set(ammTaskKey, ammJob);
-      logger.info(`AMM reserve update task for ${networkConfig.networkName} scheduled.`);
-    } else {
-      logger.info(`AMM reserve update task for ${networkConfig.networkName} is already scheduled.`);
-    }
+    if (!activeJobs.has(masterUpdateTaskKey)) {
+      logger.info(`Setting up Master Update Cycle task for ${networkConfig.networkName}`);
 
-    // Tarea para Staking Pool Total Staked
-    if (!activeJobs.has(stakingTaskKey)) {
-      logger.info(`Setting up Staking total staked update task for ${networkConfig.networkName}`);
-      // Podrías usar un intervalo diferente si es necesario, ej: '*/5 * * * *' para cada 5 minutos
-      const stakingJob: ScheduledTask = cron.schedule('*/60 * * * *', async () => { // Cada 1 minuto
-        logger.info(`Triggering Staking total staked update task for ${networkConfig.networkName} (cron)`);
-        await executeGetTotalStakedForAllPools(prismadb, networkConfig);
+      // Configura esta tarea para que se ejecute cada 30 minutos (o la frecuencia deseada)
+      // Ejemplo: '*/30 * * * *' (cada 30 minutos: a :00 y :30 de cada hora)
+      // Ejemplo: '0 * * * *' (cada hora, al inicio de la hora)
+      const schedule = '*/30 * * * *'; // <--- AJUSTA ESTE SCHEDULE A TU NECESIDAD
+
+      const job: ScheduledTask = cron.schedule(schedule, async () => {
+        logger.info(`Triggering Master Update Cycle for ${networkConfig.networkName} (cron: ${schedule})`);
+        // Llamamos a la función que orquesta todas las sub-tareas secuencialmente
+        await runUpdateCycleForNetwork(networkConfig);
       }, { timezone: "UTC" });
-      activeJobs.set(stakingTaskKey, stakingJob);
-      logger.info(`Staking total staked update task for ${networkConfig.networkName} scheduled.`);
+
+      activeJobs.set(masterUpdateTaskKey, job);
+      logger.info(`Master Update Cycle task for ${networkConfig.networkName} scheduled with cron: ${schedule}.`);
     } else {
-      logger.info(`Staking total staked update task for ${networkConfig.networkName} is already scheduled.`);
+      logger.info(`Master Update Cycle task for ${networkConfig.networkName} is already scheduled.`);
     }
   });
 
