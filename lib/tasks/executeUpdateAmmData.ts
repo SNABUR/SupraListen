@@ -1,40 +1,105 @@
 // src/lib/tasks/executeUpdateAmmData.ts
-import { PrismaClient, TokenPrice, Token, Ammpair, StakingPool } from '@prisma/client';
-import { NetworkConfig } from '../TaskProcessor'; // Asumiendo que TaskProcessor exporta esto
-import { createLogger } from '@/app/indexer/utils'; // Asegúrate que la ruta sea correcta
-import Decimal from 'decimal.js'; // Para cálculos precisos
+import { PrismaClient, StakingPool } from '@prisma/client'; // Ammpair, Token, TokenPrice no son necesarios directamente en la firma de la función externa
+import { NetworkConfig } from '../TaskProcessor';
+import { createLogger } from '@/app/indexer/utils';
+import Decimal from 'decimal.js';
 
 const logger = createLogger('executeUpdateAmmData-task');
+const SECONDS_IN_YEAR = new Decimal(365 * 24 * 60 * 60);
+const CONTRACT_RPS_SCALE_FACTOR = new Decimal("1000000000000"); // Tu factor de 10^12
 
-// Helper para convertir montos raw a valor con decimales
+// Helper para convertir montos raw a valor con decimales (Decimal)
 function toDisplayAmount(rawAmount: string | bigint | null | undefined, decimals: number | null | undefined): Decimal {
-  if (rawAmount === null || rawAmount === undefined || decimals === null || decimals === undefined) {
+  if (rawAmount === null || rawAmount === undefined || decimals === null || decimals === undefined || decimals < 0) {
+    // logger.warn(`Invalid input for toDisplayAmount: rawAmount=${rawAmount}, decimals=${decimals}`);
     return new Decimal(0);
   }
   try {
-    return new Decimal(rawAmount.toString()).div(new Decimal(10).pow(decimals));
+    // Asegurarse que rawAmount es un string para Decimal.js
+    const amountStr = typeof rawAmount === 'bigint' ? rawAmount.toString() : String(rawAmount);
+    return new Decimal(amountStr).div(new Decimal(10).pow(decimals));
   } catch (error) {
     logger.error(`Error converting rawAmount: ${rawAmount} with decimals: ${decimals}`, error);
     return new Decimal(0);
   }
 }
 
+// Nueva función para calcular el APR de un Staking Pool
+function calculateStakingPoolApr(
+  pool: StakingPool, // Prisma StakingPool type
+  pricesMap: Map<string, Decimal>, // tokenAddress -> priceUsd
+  decimalsMap: Map<string, number> // tokenAddress -> decimals
+): string | null {
+  try {
+    const rewardTokenAddress = pool.rewardTokenAddress;
+    const stakeTokenAddress = pool.stakeTokenAddress;
+
+    const priceRewardTokenUsd = pricesMap.get(rewardTokenAddress);
+    // const decimalsRewardToken = decimalsMap.get(rewardTokenAddress); // Ya no se usa directamente para RPS si el factor lo maneja
+
+    const priceStakeTokenUsd = pricesMap.get(stakeTokenAddress);
+    const decimalsStakeToken = decimalsMap.get(stakeTokenAddress); // Sigue siendo necesario para el stakeToken
+
+    // Validaciones esenciales
+    if (!priceRewardTokenUsd /*|| decimalsRewardToken === undefined (ya no es mandatorio aquí si el factor es global) */ ||
+        !priceStakeTokenUsd || decimalsStakeToken === undefined) {
+      logger.warn(`Pool ${pool.id}: Missing price or decimals for tokens. RewardPrice: ${!!priceRewardTokenUsd}, StakePrice: ${!!priceStakeTokenUsd}, StakeDecimals: ${decimalsStakeToken !== undefined}`);
+      return null;
+    }
+
+    if (new Decimal(pool.rewardPerSec).isZero()) {
+      return '0.00';
+    }
+    
+    if (new Decimal(pool.totalStakedAmount).isZero() || priceStakeTokenUsd.isZero()) {
+      return '0.00';
+    }
+
+    // 1. Calcular recompensas por segundo en "tokens enteros de recompensa"
+    //    dividiendo por el CONTRACT_RPS_SCALE_FACTOR.
+    const rewardPerSec_raw = new Decimal(pool.rewardPerSec);
+    const rewardPerSec_tokens = rewardPerSec_raw.div(CONTRACT_RPS_SCALE_FACTOR); // <--- CAMBIO IMPORTANTE
+    
+    const annualRewards_tokens = rewardPerSec_tokens.mul(SECONDS_IN_YEAR);
+
+    // 2. Calcular valor USD de las recompensas anuales
+    const annualRewards_Usd = annualRewards_tokens.mul(priceRewardTokenUsd);
+
+    // 3. Calcular total stakeado en tokens de stake (enteros)
+    //    Esto sigue usando toDisplayAmount porque totalStakedAmount está en unidades base del stakeToken
+    const totalStaked_tokens = toDisplayAmount(pool.totalStakedAmount, decimalsStakeToken);
+    
+    // 4. Calcular valor USD del total stakeado
+    const totalStaked_Usd = totalStaked_tokens.mul(priceStakeTokenUsd);
+
+    // 5. Calcular APR
+    if (totalStaked_Usd.isZero()) {
+        return '0.00';
+    }
+
+    const apr = annualRewards_Usd.div(totalStaked_Usd).mul(100);
+
+    if (apr.isNaN() || !apr.isFinite()) {
+        logger.warn(`Pool ${pool.id}: Calculated APR is NaN or Infinite. Inputs: annualRewards_Usd=${annualRewards_Usd}, totalStaked_Usd=${totalStaked_Usd}`);
+        return null;
+    }
+
+    return apr.toFixed(2);
+
+  } catch (error) {
+    logger.error(`Error calculating APR for pool ${pool.id}:`, error);
+    return null;
+  }
+}
+
 
 export async function executeUpdateAmmData(prisma: PrismaClient, config: NetworkConfig): Promise<void> {
-  logger.info(`Starting TVL and stats update for network: ${config.networkName}`);
+  logger.info(`Starting TVL, stats, and APR update for network: ${config.networkName}`);
 
   try {
     // --- 1. Obtener todos los tokens con sus precios y decimales ---
-    // Necesitamos los precios actuales y los decimales para las conversiones
-    const tokensWithPricesAndDetails = await prisma.token.findMany({
+    const tokensWithDetails = await prisma.token.findMany({ // Renombrado para claridad
       where: { network: config.networkName },
-      include: {
-        // Suponiendo que tienes una relación o una forma de obtener el precio actual.
-        // Si TokenPrice es una tabla separada, podríamos necesitar un join o una consulta separada.
-        // Por ahora, asumimos que priceUsdCurrent está en Token y se actualiza de alguna manera.
-        // Si no, tendríamos que consultar TokenPrice por separado.
-        // Vamos a hacerlo consultando TokenPrice explícitamente.
-      },
     });
 
     const tokenPrices = await prisma.tokenPrice.findMany({
@@ -44,20 +109,20 @@ export async function executeUpdateAmmData(prisma: PrismaClient, config: Network
     // Crear mapas para acceso rápido
     const pricesMap = new Map<string, Decimal>(); // tokenAddress -> priceUsd
     tokenPrices.forEach(tp => {
-      if (tp.priceUsd) {
-        pricesMap.set(tp.tokenAddress, tp.priceUsd);
+      if (tp.priceUsd) { // priceUsd es Decimal? o string? Asegúrate de que sea Decimal
+        pricesMap.set(tp.tokenAddress, new Decimal(tp.priceUsd.toString())); // Convertir a Decimal si es necesario
       }
     });
 
     const decimalsMap = new Map<string, number>(); // tokenAddress -> decimals
-    tokensWithPricesAndDetails.forEach(t => {
+    tokensWithDetails.forEach(t => {
       if (t.decimals !== null) {
         decimalsMap.set(t.id, t.decimals); // t.id es tokenAddress
       }
     });
 
     let totalAmmTvlUsd = new Decimal(0);
-    const ammPairUpdates: any[] = []; // Para batch update
+    const ammPairUpdates: any[] = [];
 
     // --- 2. Calcular y actualizar TVL para Ammpairs ---
     const ammPairs = await prisma.ammpair.findMany({
@@ -82,42 +147,46 @@ export async function executeUpdateAmmData(prisma: PrismaClient, config: Network
         const amount0 = toDisplayAmount(pair.reserve0, decimals0);
         pairTvlUsd = pairTvlUsd.plus(amount0.mul(price0Usd));
       } else {
-        logger.warn(`Missing price or decimals for token0 ${token0Address} in pair ${pair.pair}`);
+        if (!price0Usd) logger.warn(`Missing price for token0 ${token0Address} in pair ${pair.pair}`);
+        if (decimals0 === undefined) logger.warn(`Missing decimals for token0 ${token0Address} in pair ${pair.pair}`);
       }
 
       if (pair.reserve1 && price1Usd && decimals1 !== undefined) {
         const amount1 = toDisplayAmount(pair.reserve1, decimals1);
         pairTvlUsd = pairTvlUsd.plus(amount1.mul(price1Usd));
       } else {
-        logger.warn(`Missing price or decimals for token1 ${token1Address} in pair ${pair.pair}`);
+        if (!price1Usd) logger.warn(`Missing price for token1 ${token1Address} in pair ${pair.pair}`);
+        if (decimals1 === undefined) logger.warn(`Missing decimals for token1 ${token1Address} in pair ${pair.pair}`);
       }
 
       ammPairUpdates.push(
         prisma.ammpair.update({
           where: { id: pair.id },
           data: {
-            tvlUsd: pairTvlUsd.toFixed(6), // Guardar con 6 decimales de precisión
+            tvlUsd: pairTvlUsd.toFixed(6),
             lastStatsUpdate: new Date(),
           },
         })
       );
       totalAmmTvlUsd = totalAmmTvlUsd.plus(pairTvlUsd);
     }
-    logger.info(`Total AMM TVL for ${config.networkName}: ${totalAmmTvlUsd.toFixed(6)} USD`);
+    if (ammPairs.length > 0) {
+        logger.info(`Total AMM TVL for ${config.networkName}: ${totalAmmTvlUsd.toFixed(6)} USD`);
+    }
 
 
-    // --- 3. Calcular y actualizar TVL para StakingPools ---
+    // --- 3. Calcular y actualizar TVL y APR para StakingPools ---
     let totalStakingTvlUsd = new Decimal(0);
     const stakingPoolUpdates: any[] = [];
 
+    // Asegúrate de incluir las relaciones necesarias si no están en los maps,
+    // pero con los maps ya deberíamos tener todo.
     const stakingPools = await prisma.stakingPool.findMany({
       where: { network: config.networkName },
-      // include: { stakeToken: true } // Si quieres acceder a stakeToken.decimals directamente
     });
     logger.info(`Processing ${stakingPools.length} Staking pools for ${config.networkName}`);
 
     for (const pool of stakingPools) {
-      // totalStakedAmount ya debería estar actualizado por executeGetTotalStakedForAllPools
       const stakeTokenAddress = pool.stakeTokenAddress;
       const priceStakeTokenUsd = pricesMap.get(stakeTokenAddress);
       const decimalsStakeToken = decimalsMap.get(stakeTokenAddress);
@@ -128,33 +197,37 @@ export async function executeUpdateAmmData(prisma: PrismaClient, config: Network
         const amountStaked = toDisplayAmount(pool.totalStakedAmount, decimalsStakeToken);
         poolTvlUsd = amountStaked.mul(priceStakeTokenUsd);
       } else {
-        logger.warn(`Missing price or decimals for stake token ${stakeTokenAddress} in pool ${pool.id}`);
+        // logger.warn(`Pool ${pool.id}: Missing price or decimals for stake token ${stakeTokenAddress} for TVL calculation.`);
       }
+
+      // Calcular APR (que se guardará en cachedApy)
+      const apr = calculateStakingPoolApr(pool, pricesMap, decimalsMap);
 
       stakingPoolUpdates.push(
         prisma.stakingPool.update({
           where: { id: pool.id },
           data: {
-            cachedTvlUsd: poolTvlUsd.toFixed(6),
-            // cachedStakerCount: ... (si lo calculas aquí también)
+            cachedTvlUsd: poolTvlUsd.toFixed(2),
+            cachedApy: apr, // Guardamos el APR calculado aquí
           },
         })
       );
       totalStakingTvlUsd = totalStakingTvlUsd.plus(poolTvlUsd);
     }
-    logger.info(`Total Staking TVL for ${config.networkName}: ${totalStakingTvlUsd.toFixed(6)} USD`);
+    if (stakingPools.length > 0) {
+        logger.info(`Total Staking TVL for ${config.networkName}: ${totalStakingTvlUsd.toFixed(6)} USD`);
+    }
+
 
     // --- 4. Actualizar ProtocolStats ---
     const now = new Date();
-    // Crear un timestamp para el snapshot, ej., al inicio de la hora actual
     const snapshotTimestamp = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
 
     const totalPlatformTvlUsd = totalAmmTvlUsd.plus(totalStakingTvlUsd);
-    // Aquí podrías añadir virtualPoolsTvlUsd si lo calculas de forma similar
 
     const protocolStatsUpdate = prisma.protocolStats.upsert({
       where: {
-        unique_protocol_stats_snapshot: { // Usando el nombre de tu constraint único
+        unique_protocol_stats_snapshot: {
           network: config.networkName,
           timestamp: snapshotTimestamp,
         }
@@ -163,8 +236,6 @@ export async function executeUpdateAmmData(prisma: PrismaClient, config: Network
         totalTvlUsd: totalPlatformTvlUsd.toFixed(6),
         ammTvlUsd: totalAmmTvlUsd.toFixed(6),
         stakingTvlUsd: totalStakingTvlUsd.toFixed(6),
-        // virtualPoolsTvlUsd: ... (si aplica)
-        // También podrías actualizar otros campos como ammVolume24hUsd si los calculas aquí
       },
       create: {
         network: config.networkName,
@@ -172,21 +243,26 @@ export async function executeUpdateAmmData(prisma: PrismaClient, config: Network
         totalTvlUsd: totalPlatformTvlUsd.toFixed(6),
         ammTvlUsd: totalAmmTvlUsd.toFixed(6),
         stakingTvlUsd: totalStakingTvlUsd.toFixed(6),
-        // virtualPoolsTvlUsd: ... (si aplica)
       },
     });
 
     // --- 5. Ejecutar todas las actualizaciones en una transacción ---
-    logger.info('Executing database updates in a transaction...');
-    await prisma.$transaction([
-      ...ammPairUpdates,
-      ...stakingPoolUpdates,
-      protocolStatsUpdate, // Esto es una sola operación de upsert
-    ]);
+    const updatesToExecute = [...ammPairUpdates, ...stakingPoolUpdates];
+    if (updatesToExecute.length > 0) {
+        logger.info(`Executing ${updatesToExecute.length} AMM/Staking pool updates and 1 ProtocolStats update in a transaction...`);
+        await prisma.$transaction([
+          ...updatesToExecute,
+          protocolStatsUpdate,
+        ]);
+    } else {
+        logger.info('No AMM/Staking pool updates to execute. Updating ProtocolStats only...');
+        await prisma.$transaction([protocolStatsUpdate]); // Aún actualiza ProtocolStats
+    }
 
-    logger.info(`Successfully updated TVL and stats for network: ${config.networkName}`);
+
+    logger.info(`Successfully updated TVL, stats, and APRs for network: ${config.networkName}`);
 
   } catch (error) {
-    logger.error(`Error during TVL and stats update for ${config.networkName}:`, error);
+    logger.error(`Error during TVL, stats, and APR update for ${config.networkName}:`, error);
   }
 }
