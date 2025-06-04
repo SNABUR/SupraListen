@@ -88,7 +88,7 @@ export function startScheduledTasks(setupConfig: SchedulerSetupConfig): void {
       // Configura esta tarea para que se ejecute cada 30 minutos (o la frecuencia deseada)
       // Ejemplo: '*/30 * * * *' (cada 30 minutos: a :00 y :30 de cada hora)
       // Ejemplo: '0 * * * *' (cada hora, al inicio de la hora)
-      const schedule = '*/30 * * * *'; // <--- AJUSTA ESTE SCHEDULE A TU NECESIDAD
+      const schedule = '0 * * * *'; // <--- AJUSTA ESTE SCHEDULE A TU NECESIDAD
 
       const job: ScheduledTask = cron.schedule(schedule, async () => {
         logger.info(`Triggering Master Update Cycle for ${networkConfig.networkName} (cron: ${schedule})`);
