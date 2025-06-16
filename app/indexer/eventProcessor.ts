@@ -4,7 +4,7 @@ import { callViewFunction } from '../../lib/viewFunction/useView'; // Asumo que 
 
 const logger = createLogger('eventProcessor');
 // Estas variables de entorno deben apuntar a las direcciones correctas
-const MODULE_PATH = `${process.env.NEXT_PUBLIC_SPIKE_ADR}::${process.env.NEXT_PUBLIC_MODULE_NAME}`;
+const MODULE_PATH = `${process.env.NEXT_PUBLIC_SPIKE_FUN_ADR}::${process.env.NEXT_PUBLIC_SPIKE_FUN_MODULE}`;
 const MODULE_PATH_AMM = `${process.env.NEXT_PUBLIC_AMM_ADDRESS}::${process.env.NEXT_PUBLIC_SUPRA_AMM_FACTORY_MODULE}`;
 const MODULE_PATH_GAME = `${process.env.NEXT_PUBLIC_GAME_ADDRESS}::${process.env.NEXT_PUBLIC_GAME_MODULE}`;
 // ¡OJO AQUÍ! process.env.NEXT_PUBLIC_STAKING_ADDRESS se repite. Debería ser MODULE_NAME para staking
@@ -113,6 +113,9 @@ export async function processEvents(events: RpcEvent[], tx: TransactionClient) {
           break;
         case `${MODULE_PATH}::PumpEvent`:
           await processPoolsDB(event, tx);
+          break;
+        case `${MODULE_PATH}::TransferEvent`:
+          await processMigrationEvent(event, tx);
           break;
         case `${MODULE_PATH_AMM}::PairCreatedEvent`:
           await processPairAMM(event, tx);
@@ -243,6 +246,8 @@ async function processPoolsDB(event: RpcEvent, tx: TransactionClient) {
       tokenAddress: event.data.token_address, // Este es el tokenAddress del pool, no una relación directa a Token aquí
       tokenDecimals: event.data.token_decimals,
       twitter: event.data.twitter,
+      github: event.data.github || null, // Usar los nuevos campos
+      stream: event.data.stream || null,
       uri: event.data.uri,
       website: event.data.website,
     }
@@ -250,10 +255,41 @@ async function processPoolsDB(event: RpcEvent, tx: TransactionClient) {
   logger.info(`[${event.network}] Processed PumpEvent, created/updated PoolsDB for ${event.data.name}`);
 }
 
-// getOrCreateToken ahora usa 'network'
-// En eventProcessor.ts
+// Añade esta función a tu archivo eventProcessor.ts
 
-// En eventProcessor.ts
+async function processMigrationEvent(event: RpcEvent, tx: TransactionClient) {
+  logger.debug(`[${event.network}] Processing MigrationEvent (from TransferEvent)`, event.data);
+
+  // 1. Crear el registro en la nueva tabla MigrationEvent
+  await tx.migrationEvent.create({
+    data: {
+      network: event.network,
+      transactionHash: event.transactionHash || 'unknown_tx', // Asegúrate de tener valores por defecto
+      sequenceNumber: event.sequence_number,
+      tokenAddress: event.data.token_address,
+      migratorAddress: event.data.user,
+      supraAmountAddedToLp: BigInt(event.data.supra_amount),
+      tokenAmountAddedToLp: BigInt(event.data.token_amount),
+      tokenAmountBurned: BigInt(event.data.burned_amount),
+      virtualSupraReservesAtMigration: BigInt(event.data.virtual_supra_reserves),
+      virtualTokenReservesAtMigration: BigInt(event.data.virtual_token_reserves),
+      timestamp: BigInt(event.timestamp),
+    },
+  });
+
+  // 2. ACTUALIZAR el estado del pool correspondiente en PoolsDB
+  // La migración marca el pool como completado.
+  const pool = await tx.poolsDB.findUnique({
+    where: {
+      network_tokenAddress: {
+        network: event.network,
+        tokenAddress: event.data.token_address,
+      },
+    },
+  });
+
+  logger.info(`[${event.network}] Processed MigrationEvent for pool ${event.data.token_address}`);
+}
 
 async function getOrCreateToken(
   tokenAddress: string, // Este es el 'id' del token que estamos procesando

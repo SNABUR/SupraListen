@@ -9,8 +9,8 @@ export const CHAIN_ID_SUPRA_TESTNET = process.env.NEXT_PUBLIC_SUPRA_TESTNET ?? '
 export const CHAIN_ID_SUPRA_MAINNET = process.env.NEXT_PUBLIC_SUPRA_MAINNET ?? 'supra-mainnet';
 
 
-const PUMP_SUP_ADDRESS = process.env.NEXT_PUBLIC_SPIKE_ADR!
-const PUMP_SUP_MODULE = process.env.NEXT_PUBLIC_MODULE_NAME!
+const SPIKE_FUN_ADDRESS = process.env.NEXT_PUBLIC_SPIKE_FUN_ADR!
+const SPIKE_FUN_MODULE = process.env.NEXT_PUBLIC_SPIKE_FUN_MODULE!
 const AMM_ADDRESS = process.env.NEXT_PUBLIC_AMM_ADDRESS!
 const AMM_MODULE = process.env.NEXT_PUBLIC_SUPRA_AMM_FACTORY_MODULE!
 const GAME_ADDRESS = process.env.NEXT_PUBLIC_GAME_ADDRESS!
@@ -81,8 +81,9 @@ export async function fetchBlockEvents(
 
   // Define event types (could be dynamic or configurable if needed)
   const eventTypesToFetch = [
-    `${PUMP_SUP_ADDRESS}::${PUMP_SUP_MODULE}::TradeEvent`,
-    `${PUMP_SUP_ADDRESS}::${PUMP_SUP_MODULE}::PumpEvent`,
+    `${SPIKE_FUN_ADDRESS}::${SPIKE_FUN_MODULE}::TradeEvent`,
+    `${SPIKE_FUN_ADDRESS}::${SPIKE_FUN_MODULE}::PumpEvent`,
+    `${SPIKE_FUN_ADDRESS}::${SPIKE_FUN_MODULE}::TransferEvent`,
     // `${PUMP_SUP_ADDRESS}::${PUMP_SUP_MODULE}::TransferEvent`, // Assuming these are not critical for now or handled elsewhere
     // `${PUMP_SUP_ADDRESS}::${PUMP_SUP_MODULE}::UnfreezeEvent`,
     `${AMM_ADDRESS}::${AMM_MODULE}::PairCreatedEvent`,

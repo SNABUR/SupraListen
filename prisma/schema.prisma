@@ -105,9 +105,12 @@ model PoolsDB {
   symbol                      String
   telegram                    String
   tokenAddress                String   // Dirección del token del pool
+  trustPool                   TrustPool? // Relación uno a uno opcional
   tokenDecimals               Int
   twitter                     String
   uri                         String
+  github                      String?
+  stream                      String?
   website                     String
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @default(now()) @updatedAt // Asegúrate de este cambio
@@ -121,6 +124,49 @@ model PoolsDB {
   @@index([network, dev])
   @@index([network, pool]) // Sigue siendo bueno tener un índice en 'pool' para búsquedas
   @@index([network, displayOrder])
+}
+
+model TrustPool {
+  id                    Int      @id @default(autoincrement())
+  network               String
+  
+  poolDbId              Int      @unique
+  pool                  PoolsDB  @relation(fields: [poolDbId], references: [id], onDelete: Cascade)
+
+  tokenAddress          String 
+  isActive              Boolean  @default(true)
+  
+  totalStakedAmount     String   @default("0")
+  stakerCount           Int      @default(0)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now()) @updatedAt
+
+  @@index([network, tokenAddress])
+  @@map("trust_pools")
+}
+
+model MigrationEvent {
+  id Int @id @default(autoincrement())
+  network String 
+  transactionHash String
+  sequenceNumber String
+
+  tokenAddress String
+  migratorAddress String
+  supraAmountAddedToLp BigInt
+  tokenAmountAddedToLp BigInt
+  tokenAmountBurned BigInt 
+  virtualSupraReservesAtMigration BigInt
+  virtualTokenReservesAtMigration BigInt
+  
+  timestamp BigInt
+  createdAt DateTime @default(now())
+
+  @@unique([network, transactionHash, sequenceNumber])
+  @@index([network, tokenAddress])
+  @@index([network, migratorAddress])
+  @@map("migration_events")
 }
 
 model Image {
