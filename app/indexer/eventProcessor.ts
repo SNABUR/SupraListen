@@ -262,7 +262,7 @@ async function processMigrationEvent(event: RpcEvent, tx: TransactionClient) {
   logger.debug(`[${event.network}] Processing MigrationEvent (from TransferEvent)`, event.data);
 
   // 1. Crear el registro en la nueva tabla MigrationEvent
-  await tx.migrationEvent.create({
+  await tx.migration_events.create({
     data: {
       network: event.network,
       transactionHash: event.transactionHash || 'unknown_tx', // Asegúrate de tener valores por defecto
@@ -296,13 +296,13 @@ async function getOrCreateToken(
   tokenAddress: string, // Este es el 'id' del token que estamos procesando
   network: string,
   tx: TransactionClient
-): Promise<import('@prisma/client').Token> {
+): Promise<import('@prisma/client').tokens> {
   if (!tokenAddress) {
     logger.error(`[${network}] Attempted to get or create token with null or undefined address.`);
     throw new Error(`Token address cannot be null or undefined for network ${network}`);
   }
 
-  let token = await tx.token.findUnique({
+  let token = await tx.tokens.findUnique({
     where: { network_id: { network: network, id: tokenAddress } },
   });
 
@@ -448,7 +448,7 @@ async function getOrCreateToken(
   if (!token) {
     logger.info(`[${network}] Creating new token entry for ${tokenAddress} with standard: ${determinedMetadataStandard}.`);
     try {
-      token = await tx.token.create({
+      token = await tx.tokens.create({
         data: {
           network: network,
           id: tokenAddress,
@@ -459,7 +459,7 @@ async function getOrCreateToken(
     } catch (e: any) {
       if (e.code === 'P2002' && e.meta?.target?.includes('network_id')) {
         logger.warn(`[${network}] Race condition: Token ${tokenAddress} created concurrently. Fetching existing.`);
-        token = await tx.token.findUniqueOrThrow({ // Si falla aquí, algo está muy mal
+        token = await tx.tokens.findUniqueOrThrow({ // Si falla aquí, algo está muy mal
           where: { network_id: { network: network, id: tokenAddress } },
         });
         // Si hubo race condition, el token ya existe. Procedemos a actualizarlo si es necesario.
@@ -487,7 +487,7 @@ async function getOrCreateToken(
         token.originalCoinType !== dataForDb.originalCoinType  // El tipo original determinado cambió
     )) {
     logger.info(`[${network}] Updating existing token ${tokenAddress}. Current fetched: ${token.metadataFetched}, New success: ${metadataSuccess}. Current standard: ${token.metadataStandard}, New standard: ${dataForDb.metadataStandard}. Current original: ${token.originalCoinType}, New original: ${dataForDb.originalCoinType}`);
-    token = await tx.token.update({
+    token = await tx.tokens.update({
       where: { network_id: { network: network, id: tokenAddress } },
       data: dataForDb, // dataForDb ya tiene los valores correctos para todos los campos
     });
@@ -495,7 +495,7 @@ async function getOrCreateToken(
       // Si ya existía, no se pudieron obtener metadatos antes, y tampoco ahora, solo actualizar timestamp
       logger.warn(`[${network}] Metadata RPC failed again for existing minimal token ${tokenAddress}. Updating attempt time.`);
       if (token.lastMetadataAttempt !== undefined) { // Asegurar que el campo exista en el tipo
-          token = await tx.token.update({
+          token = await tx.tokens.update({
               where: { network_id: { network: network, id: tokenAddress } },
               data: { lastMetadataAttempt: new Date() }
           });
@@ -528,9 +528,16 @@ async function processPairAMM(event: RpcEvent, tx: TransactionClient) {
         
         // Conexión a tokens. Prisma usa los campos `fields` de `@relation`
         // Los campos escalares token0Network, token0Address etc. se llenarán automáticamente.
-        token0: { connect: { network_id: { id: token0.id, network: token0.network } } }, // CAMBIADO
-        token1: { connect: { network_id: { id: token1.id, network: token1.network } } }, // CAMBIADO
-
+        token0: {
+          connect: {
+            network_id: { id: token0.id, network: token0.network } 
+          }
+        },
+        token1: {
+          connect: {
+            network_id: { id: token1.id, network: token1.network } 
+          }
+        },
         // Ya no necesitas definir explícitamente token0Network, token0Address, etc., si usas `connect`.
         // Si prefieres definirlos explícitamente (y no usar `connect` para el objeto Token completo), sería:
         // token0Network: token0.network,
@@ -663,7 +670,7 @@ async function handleRegisterPoolEvent(event: RpcEvent, tx: TransactionClient) {
 
     try {
       logger.info(`[${currentNetwork}] Attempting to create StakingPool in DB for C:${creator_addr_from_key} S:${stake_addr_from_key} R:${reward_addr_from_key}`);
-      await tx.stakingPool.create({
+      await tx.staking_pools.create({
         data: {
           network: currentNetwork,
           creatorAddress: creator_addr_from_key,
@@ -711,20 +718,20 @@ async function getOrCreateMinimalUser(
   address: string,
   network: string,
   tx: TransactionClient
-): Promise<import('@prisma/client').User> { // Usar el tipo exacto de Prisma
+): Promise<import('@prisma/client').users> { // Usar el tipo exacto de Prisma
   if (!address) {
     logger.error(`[${network}] Attempted to get or create minimal user with null or undefined address.`);
     throw new Error(`User address cannot be null or undefined for network ${network}`);
   }
 
-  let user = await tx.user.findUnique({
+  let user = await tx.users.findUnique({
     where: { network_walletAddress: { network: network, walletAddress: address } },
   });
 
   if (!user) {
     logger.info(`[${network}] Minimal user entry for ${address} not found. Creating...`);
     try {
-      user = await tx.user.create({
+      user = await tx.users.create({
         data: {
           network: network,
           walletAddress: address,
@@ -736,7 +743,7 @@ async function getOrCreateMinimalUser(
     } catch (e: any) {
       if (e.code === 'P2002' && e.meta?.target?.includes('network_walletAddress')) { // Error de unicidad específico
         logger.warn(`[${network}] Race condition: Minimal user ${address} created concurrently. Fetching existing.`);
-        user = await tx.user.findUniqueOrThrow({
+        user = await tx.users.findUniqueOrThrow({
           where: { network_walletAddress: { network: network, walletAddress: address } },
         });
       } else {

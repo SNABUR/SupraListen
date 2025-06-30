@@ -33,8 +33,8 @@ model Ammpair {
   volumeToken1_24h                                   String?
   volumeUsd24h                                       String?
   feesUsd24h                                         String?
-  tokens_Ammpair_token0Network_token0AddressTotokens tokens    @relation("Ammpair_token0Network_token0AddressTotokens", fields: [token0Network, token0Address], references: [network, id])
-  tokens_Ammpair_token1Network_token1AddressTotokens tokens    @relation("Ammpair_token1Network_token1AddressTotokens", fields: [token1Network, token1Address], references: [network, id])
+  token0          tokens   @relation("AmmpairToToken0", fields: [token0Network, token0Address], references: [network, id])
+  token1          tokens   @relation("AmmpairToToken1", fields: [token1Network, token1Address], references: [network, id])
 
   @@unique([network, pair])
   @@index([network, apr24h])
@@ -376,8 +376,8 @@ model tokens {
   totalSupply                                                               String?
   updatedAt                                                                 DateTime        @default(now())
   volume24hUsd                                                              String?
-  Ammpair_Ammpair_token0Network_token0AddressTotokens                       Ammpair[]       @relation("Ammpair_token0Network_token0AddressTotokens")
-  Ammpair_Ammpair_token1Network_token1AddressTotokens                       Ammpair[]       @relation("Ammpair_token1Network_token1AddressTotokens")
+  ammpairsAsToken0                                                          Ammpair[]       @relation("AmmpairToToken0")
+  ammpairsAsToken1                                                          Ammpair[]       @relation("AmmpairToToken1")
   staking_pools_staking_pools_rewardTokenNetwork_rewardTokenAddressTotokens staking_pools[] @relation("staking_pools_rewardTokenNetwork_rewardTokenAddressTotokens")
   staking_pools_staking_pools_stakeTokenNetwork_stakeTokenAddressTotokens   staking_pools[] @relation("staking_pools_stakeTokenNetwork_stakeTokenAddressTotokens")
 

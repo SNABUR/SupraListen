@@ -40,7 +40,7 @@ export class EventPoller {
 
   async initialize() {
     logger.info(`[${this.pollerId}] Initializing...`);
-    const blockProgress = await prismadb.blockProgress.findUnique({
+    const blockProgress = await prismadb.block_progress.findUnique({
       where: { network: this.pollerId }
     });
 
@@ -64,7 +64,7 @@ export class EventPoller {
       
       logger.info(`[${this.pollerId}] Starting from block ${this.currentBlockHeight}. Creating new progress record with lastBlockHeight ${this.lastSavedBlockHeight}...`);
       try {
-        await prismadb.blockProgress.create({
+        await prismadb.block_progress.create({
           data: {
             network: this.pollerId,
             lastBlockHeight: BigInt(this.lastSavedBlockHeight),
@@ -150,7 +150,7 @@ export class EventPoller {
     }
     try {
       logger.info(`[${this.pollerId}] Saving progress. LastBlockHeight: ${this.highestProcessedBlockInInterval}`);
-      await prismadb.blockProgress.update({
+      await prismadb.block_progress.update({
         where: { network: this.pollerId },
         data: { lastBlockHeight: BigInt(this.highestProcessedBlockInInterval) }
       });
