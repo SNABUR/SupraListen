@@ -750,11 +750,6 @@ async function getOrCreateMinimalUser(
 
 // Tu función para calcular scale (asegúrate que esté definida y sea correcta)
 function calculateScaleLogic(decimals: number): string {
-    // Implementa la lógica de:
-    // let stake_scale_factor = math128::pow(10, (stake_decimals as u128));
-    // let scale = stake_scale_factor * ACCUM_REWARD_SCALE;
-    // Devuelve como string para el campo u128.
-    // ¡Cuidado con la precisión y los números grandes! Usa una librería de BigNumber o BigInt.
     const ACCUM_REWARD_SCALE_MOVE = BigInt("1000000000000"); // Ejemplo de 10^12, ajusta a tu constante real de Move
     let stakeScaleFactor = BigInt(1);
     for (let i = 0; i < decimals; i++) {
