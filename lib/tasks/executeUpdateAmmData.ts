@@ -1,5 +1,5 @@
 // src/lib/tasks/executeUpdateAmmData.ts
-import { PrismaClient, StakingPool } from '@prisma/client'; // Ammpair, Token, TokenPrice no son necesarios directamente en la firma de la función externa
+import { PrismaClient, staking_pools } from '@prisma/client'; // Ammpair, Token, TokenPrice no son necesarios directamente en la firma de la función externa
 import { NetworkConfig } from '../TaskProcessor';
 import { createLogger } from '@/app/indexer/utils';
 import Decimal from 'decimal.js';
@@ -26,7 +26,7 @@ function toDisplayAmount(rawAmount: string | bigint | null | undefined, decimals
 
 // Nueva función para calcular el APR de un Staking Pool
 function calculateStakingPoolApr(
-  pool: StakingPool, // Prisma StakingPool type
+  pool: staking_pools, // Prisma staking_pools type
   pricesMap: Map<string, Decimal>, // tokenAddress -> priceUsd
   decimalsMap: Map<string, number> // tokenAddress -> decimals
 ): string | null {
@@ -98,11 +98,11 @@ export async function executeUpdateAmmData(prisma: PrismaClient, config: Network
 
   try {
     // --- 1. Obtener todos los tokens con sus precios y decimales ---
-    const tokensWithDetails = await prisma.token.findMany({ // Renombrado para claridad
+    const tokensWithDetails = await prisma.tokens.findMany({ // Renombrado para claridad
       where: { network: config.networkName },
     });
 
-    const tokenPrices = await prisma.tokenPrice.findMany({
+    const tokenPrices = await prisma.token_prices.findMany({
       where: { network: config.networkName },
     });
 
@@ -181,7 +181,7 @@ export async function executeUpdateAmmData(prisma: PrismaClient, config: Network
 
     // Asegúrate de incluir las relaciones necesarias si no están en los maps,
     // pero con los maps ya deberíamos tener todo.
-    const stakingPools = await prisma.stakingPool.findMany({
+    const stakingPools = await prisma.staking_pools.findMany({
       where: { network: config.networkName },
     });
     logger.info(`Processing ${stakingPools.length} Staking pools for ${config.networkName}`);
@@ -204,7 +204,7 @@ export async function executeUpdateAmmData(prisma: PrismaClient, config: Network
       const apr = calculateStakingPoolApr(pool, pricesMap, decimalsMap);
 
       stakingPoolUpdates.push(
-        prisma.stakingPool.update({
+        prisma.staking_pools.update({
           where: { id: pool.id },
           data: {
             cachedTvlUsd: poolTvlUsd.toFixed(2),
@@ -225,9 +225,9 @@ export async function executeUpdateAmmData(prisma: PrismaClient, config: Network
 
     const totalPlatformTvlUsd = totalAmmTvlUsd.plus(totalStakingTvlUsd);
 
-    const protocolStatsUpdate = prisma.protocolStats.upsert({
+    const protocolStatsUpdate = prisma.protocol_stats.upsert({
       where: {
-        unique_protocol_stats_snapshot: {
+        network_timestamp: {
           network: config.networkName,
           timestamp: snapshotTimestamp,
         }

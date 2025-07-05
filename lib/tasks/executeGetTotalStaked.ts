@@ -20,7 +20,7 @@ export async function executeGetTotalStakedForAllPools(prisma: PrismaClient, con
   logger.info(`Starting totalStakedAmount update task for StakingPools on ${config.networkName}`);
 
   try {
-    const stakingPools = await prisma.stakingPool.findMany({
+    const stakingPools = await prisma.staking_pools.findMany({
       where: {
         network: config.networkName,
         // Opcional: podrías añadir `stakesClosed: false` si solo te interesan los pools activos
@@ -56,7 +56,7 @@ export async function executeGetTotalStakedForAllPools(prisma: PrismaClient, con
       if (totalStakedResult && totalStakedResult.length === 1) {
         const totalStakedValue = totalStakedResult[0]; // Extrae el valor string del array
         try {
-          await prisma.stakingPool.update({
+          await prisma.staking_pools.update({
             where: {
               id: pool.id,
             },

@@ -251,6 +251,7 @@ async function processPoolsDB(event: RpcEvent, tx: TransactionClient) {
       uri: event.data.uri,
       website: event.data.website,
       unstakePeriodSeconds: event.data.unstake_period_seconds ? BigInt(event.data.unstake_period_seconds) : null,
+      project_type: event.data.project_type || null,
     }
   });
   logger.info(`[${event.network}] Processed PumpEvent, created/updated PoolsDB for ${event.data.name}`);

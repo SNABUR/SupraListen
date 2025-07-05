@@ -116,6 +116,7 @@ model PoolsDB {
   github                      String?
   stream                      String?
   unstakePeriodSeconds        BigInt?
+  project_type                String?
   comments                    comments[]
   trust_pools                 trust_pools?
 
