@@ -255,6 +255,38 @@ async function processPoolsDB(event: RpcEvent, tx: TransactionClient) {
     }
   });
   logger.info(`[${event.network}] Processed PumpEvent, created/updated PoolsDB for ${event.data.name}`);
+
+  logger.debug(`[${event.network}] Creating initial state entry in TradeEvent for pool ${event.data.token_address}`);
+
+  // Para los campos `creationNumber` y `accountAddress`, usamos los datos del 'guid' del evento original
+  const guidObj = typeof event.guid === 'object' && event.guid !== null 
+    ? event.guid 
+    : { creation_number: 'unknown_pump_event_cn', account_address: 'unknown_pump_event_aa' };
+
+  await tx.tradeEvent.create({
+    data: {
+      // --- Datos de identificación del evento ---
+      network: event.network,
+      type: 'initial_state', // Usamos un tipo especial para identificar que no es un trade real.
+      creationNumber: String(guidObj.creation_number),
+      accountAddress: String(guidObj.account_address),
+      sequenceNumber: event.sequence_number, // Usamos el mismo sequence number del evento de creación.
+      timestamp: BigInt(event.timestamp), // El timestamp de la creación del pool.
+
+      // --- Datos que simulan un "trade" nulo ---
+      isBuy: false,           // No es una compra.
+      supraAmount: BigInt(0), // No se movió Supra.
+      tokenAmount: BigInt(0), // No se movió el token.
+      user: event.data.dev,   // Podemos asignar al desarrollador como el "usuario" de este evento inicial.
+
+      // --- ¡La parte más importante! El estado inicial del pool ---
+      tokenAddress: event.data.token_address,
+      virtualSupraReserves: BigInt(event.data.initial_virtual_supra_reserves),
+      virtualTokenReserves: BigInt(event.data.initial_virtual_token_reserves),
+    }
+  });
+  
+  logger.info(`[${event.network}] Successfully created initial state TradeEvent for pool ${event.data.name}`);
 }
 
 // Añade esta función a tu archivo eventProcessor.ts
