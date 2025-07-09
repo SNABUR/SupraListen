@@ -237,28 +237,26 @@ model likes {
   @@index([network])
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model migration_events {
-  id                              Int      @id @default(autoincrement())
-  network                         String
-  transactionHash                 String
-  sequenceNumber                  String
-  tokenAddress                    String
-  migratorAddress                 String
-  supraAmountAddedToLp            BigInt
-  tokenAmountAddedToLp            BigInt
-  tokenAmountBurned               BigInt
-  virtualSupraReservesAtMigration BigInt
-  virtualTokenReservesAtMigration BigInt
-  timestamp                       BigInt
-  createdAt                       DateTime @default(now())
+  id                     Int      @id @default(autoincrement())
+  network                String
+  transactionHash        String
+  sequenceNumber         String
+  token_address          String
+  migrator               String
+  supra_sent_to_lp       BigInt
+  tokens_sent_to_lp      BigInt
+  dev_reward_staked      BigInt
+  staking_pool_reward    BigInt
+  migrator_reward        BigInt
+  excess_supra_collected BigInt
+  createdAt              DateTime @default(now())
 
   @@unique([network, transactionHash, sequenceNumber])
-  @@index([network, migratorAddress])
-  @@index([network, tokenAddress])
+  @@index([network, migrator])
+  @@index([network, token_address])
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model protocol_stats {
   id                    Int      @id @default(autoincrement())
   network               String

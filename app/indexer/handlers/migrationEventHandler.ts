@@ -17,34 +17,26 @@ export async function handleMigrationEvent(event: RpcEvent, tx: TransactionClien
   });
 
   if (existingEvent) {
-    logger.debug(`[${event.network}] MigrationEvent already exists. Skipping creation.`);
+    logger.debug(`[${event.network}] MigrationEvent with txHash ${event.transactionHash} already exists. Skipping creation.`);
     return;
   }
 
+  // Asumiendo que event.data ahora coincide con la nueva estructura
   await tx.migration_events.create({
     data: {
       network: event.network,
       transactionHash: event.transactionHash || 'unknown_tx',
       sequenceNumber: event.sequence_number,
-      tokenAddress: event.data.token_address,
-      migratorAddress: event.data.user,
-      supraAmountAddedToLp: BigInt(event.data.supra_amount),
-      tokenAmountAddedToLp: BigInt(event.data.token_amount),
-      tokenAmountBurned: BigInt(event.data.burned_amount),
-      virtualSupraReservesAtMigration: BigInt(event.data.virtual_supra_reserves),
-      virtualTokenReservesAtMigration: BigInt(event.data.virtual_token_reserves),
-      timestamp: BigInt(event.timestamp),
+      token_address: event.data.token_address,
+      migrator: event.data.migrator,
+      supra_sent_to_lp: BigInt(event.data.supra_sent_to_lp),
+      tokens_sent_to_lp: BigInt(event.data.tokens_sent_to_lp),
+      dev_reward_staked: BigInt(event.data.dev_reward_staked),
+      staking_pool_reward: BigInt(event.data.staking_pool_reward),
+      migrator_reward: BigInt(event.data.migrator_reward),
+      excess_supra_collected: BigInt(event.data.excess_supra_collected),
     },
   });
 
-  const pool = await tx.poolsDB.findUnique({
-    where: {
-      network_tokenAddress: {
-        network: event.network,
-        tokenAddress: event.data.token_address,
-      },
-    },
-  });
-
-  logger.info(`[${event.network}] Processed MigrationEvent for pool ${event.data.token_address}`);
+  logger.info(`[${event.network}] Processed MigrationEvent for migrator ${event.data.migrator} and token ${event.data.token_address}`);
 }

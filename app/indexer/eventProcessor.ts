@@ -17,7 +17,7 @@ const MODULE_PATH_AMM = `${process.env.NEXT_PUBLIC_AMM_ADDRESS}::${process.env.N
 const MODULE_PATH_GAME = `${process.env.NEXT_PUBLIC_GAME_ADDRESS}::${process.env.NEXT_PUBLIC_GAME_MODULE}`;
 const MODULE_PATH_STAKING = `${process.env.NEXT_PUBLIC_STAKING_ADDRESS}::${process.env.NEXT_PUBLIC_STAKING_MODULE}`;
 
-export async function processEvents(events: RpcEvent[]) {
+export async function processEvents(events: RpcEvent[], tx: any) {
   logger.debug(`Processing ${events.length} RpcEvents in current batch.`);
 
   for (const event of events) {
@@ -65,7 +65,7 @@ export async function processEvents(events: RpcEvent[]) {
             case `${MODULE_PATH}::PumpEvent`:
                 await handlePumpEvent(event, tx);
                 break;
-            case `${MODULE_PATH}::TransferEvent`:
+            case `${MODULE_PATH}::MigrationToAmmEvent`:
                 await handleMigrationEvent(event, tx);
                 break;
             case `${MODULE_PATH_AMM}::PairCreatedEvent`:
