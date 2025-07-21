@@ -274,6 +274,14 @@ model protocol_stats {
   @@index([network, timestamp])
 }
 
+enum PoolType {
+  MEME
+  LP
+  DAO
+  BIG_DAO
+  GENERAL
+}
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model staking_pools {
   id                                                                 Int           @id @default(autoincrement())
@@ -303,6 +311,7 @@ model staking_pools {
   cachedApy                                                          String?
   cachedStakerCount                                                  Int?
   cachedTvlUsd                                                       String?
+  poolType                                                           PoolType      @default(MEME)
   totalStakedAmount                                                  String        @default("0")
   boostConfigCollectionName                                          String?
   boostConfigCollectionOwner                                         String?
