@@ -53,7 +53,7 @@ export async function getOrCreateToken(
         logger.info(`[${network}] Token ${tokenAddress} appears to be Coin-Legacy. FA metadata call skipped. Attempting to fetch Coin-Legacy specific info.`);
         if (tokenAddress === `${process.env.NEXT_PUBLIC_SUI_ADDRESS}::supra_coin::SupraCoin` ||
             tokenAddress === `0x1::supra_coin::SupraCoin`) {
-            tokenDataFromRpc = { name: "Supra Coin", symbol: "SUPRA", decimals: 18 };
+            tokenDataFromRpc = { name: "Supra Coin", symbol: "SUPRA", decimals: 8 };
             metadataSuccess = true;
             logger.info(`[${network}] Hardcoded/known metadata for Coin-Legacy ${tokenAddress} applied.`);
         } else {

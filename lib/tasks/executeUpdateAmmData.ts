@@ -35,15 +35,15 @@ function calculateStakingPoolApr(
     const stakeTokenAddress = pool.stakeTokenAddress;
 
     const priceRewardTokenUsd = pricesMap.get(rewardTokenAddress);
-    // const decimalsRewardToken = decimalsMap.get(rewardTokenAddress); // Ya no se usa directamente para RPS si el factor lo maneja
+    const decimalsRewardToken = decimalsMap.get(rewardTokenAddress); // Ya no se usa directamente para RPS si el factor lo maneja
 
     const priceStakeTokenUsd = pricesMap.get(stakeTokenAddress);
     const decimalsStakeToken = decimalsMap.get(stakeTokenAddress); // Sigue siendo necesario para el stakeToken
 
     // Validaciones esenciales
-    if (!priceRewardTokenUsd /*|| decimalsRewardToken === undefined (ya no es mandatorio aquí si el factor es global) */ ||
-        !priceStakeTokenUsd || decimalsStakeToken === undefined) {
-      logger.warn(`Pool ${pool.id}: Missing price or decimals for tokens. RewardPrice: ${!!priceRewardTokenUsd}, StakePrice: ${!!priceStakeTokenUsd}, StakeDecimals: ${decimalsStakeToken !== undefined}`);
+    if (!priceRewardTokenUsd || decimalsRewardToken === undefined || // <-- CORRECCIÓN: Ahora es mandatorio
+       !priceStakeTokenUsd || decimalsStakeToken === undefined) {
+      logger.warn(`Pool ${pool.id}: Missing price or decimals for tokens. RewardPrice: ${!!priceRewardTokenUsd}, RewardDecimals: ${decimalsRewardToken !== undefined}, StakePrice: ${!!priceStakeTokenUsd}, StakeDecimals: ${decimalsStakeToken !== undefined}`);
       return null;
     }
 
@@ -58,12 +58,11 @@ function calculateStakingPoolApr(
     // 1. Calcular recompensas por segundo en "tokens enteros de recompensa"
     //    dividiendo por el CONTRACT_RPS_SCALE_FACTOR.
     const rewardPerSec_raw = new Decimal(pool.rewardPerSec);
-    const rewardPerSec_tokens = rewardPerSec_raw.div(CONTRACT_RPS_SCALE_FACTOR); // <--- CAMBIO IMPORTANTE
-    
-    const annualRewards_tokens = rewardPerSec_tokens.mul(SECONDS_IN_YEAR);
+    const rewardPerSec_base_units = rewardPerSec_raw.div(CONTRACT_RPS_SCALE_FACTOR);
+    const rewardPerSec_full_tokens = toDisplayAmount(rewardPerSec_base_units.toFixed(), decimalsRewardToken);
+    const annualRewards_full_tokens = rewardPerSec_full_tokens.mul(SECONDS_IN_YEAR);
 
-    // 2. Calcular valor USD de las recompensas anuales
-    const annualRewards_Usd = annualRewards_tokens.mul(priceRewardTokenUsd);
+    const annualRewards_Usd = annualRewards_full_tokens.mul(priceRewardTokenUsd);
 
     // 3. Calcular total stakeado en tokens de stake (enteros)
     //    Esto sigue usando toDisplayAmount porque totalStakedAmount está en unidades base del stakeToken
