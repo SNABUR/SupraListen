@@ -119,6 +119,7 @@ model PoolsDB {
   project_type                String?
   comments                    comments[]
   trust_pools                 trust_pools?
+  holders                     token_holders[]
 
   @@unique([network, id])
   @@unique([network, tokenAddress])
@@ -446,6 +447,26 @@ model users {
   likes         likes[]
   staking_pools staking_pools[]
   user_stakes   user_stakes[]
+  token_balances token_holders[]
 
   @@id([network, walletAddress])
+}
+
+model token_holders {
+  // Clave primaria compuesta: Un usuario solo tiene un registro de balance por token.
+  @@id([network, userWalletAddress, tokenAddress])
+
+  network           String
+  userWalletAddress String
+  tokenAddress      String
+
+  // El balance LÍQUIDO actual del usuario. Usamos String para manejar BigInt sin problemas.
+  balance           BigInt   @default(0)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relaciones para facilitar las consultas
+  user              users    @relation(fields: [network, userWalletAddress], references: [network, walletAddress], onDelete: Cascade)
+  pool              PoolsDB  @relation(fields: [network, tokenAddress], references: [network, tokenAddress], onDelete: Cascade)
 }

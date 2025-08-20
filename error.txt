@@ -1,1 +1,123 @@
-{"data":{"pool_key":{"stake_addr":"0x61f7920106c1a1d153a36de9704e9f6187ccc956b1953d8a07a1e19ac7a37348","reward_addr":"0x61f7920106c1a1d153a36de9704e9f6187ccc956b1953d8a07a1e19ac7a37348","creator_addr":"0x6e3e09ab7fd0145d7befc0c68d6944ddc1a90fd45b8a6d28c76d8c48bed676b0"},"is_dynamic":false,"boost_enabled":true,"start_timestamp":"1755146798","boost_config_percent":{"vec":["13"]},"initial_end_timestamp":"1770914798","initial_reward_per_sec":"317097919837645865","boost_config_collection_name":{"vec":["REPANDA NFT CLUB"]},"boost_config_collection_owner":{"vec":["0xedc967fef227b13f51054e4cc660f13049f2552bcd4d437a7a69d126b0d3aa13"]}},"guid":{"account_address":"0x45c9a1d622eeeb723b6eddc1f4b7c0d07bc7b6fa615f7449dab95c526a298f30","creation_number":"261"},"type":"0x3045d27b5fada1e30897a741fb184e48ef0bff3717aea23918ebc1e5c7153083::stake_fa::PoolRegisteredEvent","sequence_number":"0"}
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 29341712-29341722
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 20633374
+[poller] INFO: [supra-mainnet] Updated latest block height from 20633371 to 20633374
+[poller] INFO: [supra-mainnet] Processing blocks 20632567 to 20632576 (Latest: 20633374)
+[rpcClient] DEBUG: Fetched 1 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 20632567-20632577
+[poller] INFO: [supra-mainnet] Fetched 1 events from blocks 20632567-20632576.
+prisma:query SELECT 1
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 29343958
+[poller] INFO: [supra-testnet] Updated latest block height from 29343953 to 29343958
+[poller] INFO: [supra-testnet] Processing blocks 29341722 to 29341731 (Latest: 29343958)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+[eventProcessor] DEBUG: Processing 1 RpcEvents in current batch.
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 29341722-29341732
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+[eventProcessor] DEBUG: Starting transaction for event: Tx:unknown_tx_for_0x2e1e06a4d4d16fb89474347f51370e06318100d01982f57d6d1d7f8293e795b5::spike_fun::TradeEvent_block_20632567 Seq:268 Type:0x2e1e06a4d4d16fb89474347f51370e06318100d01982f57d6d1d7f8293e795b5::spike_fun::TradeEvent Net:supra-mainnet
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 29343964
+[poller] INFO: [supra-testnet] Updated latest block height from 29343958 to 29343964
+[poller] INFO: [supra-testnet] Processing blocks 29341732 to 29341741 (Latest: 29343964)
+prisma:query INSERT INTO "public"."EventTracking" ("eventType","blockHeight","transactionHash","processed","error","createdAt","updatedAt","network","sequenceNumber") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT ("network","transactionHash","sequenceNumber","eventType") DO UPDATE SET "error" = $10, "processed" = $11 WHERE (("public"."EventTracking"."network" = $12 AND "public"."EventTracking"."transactionHash" = $13 AND "public"."EventTracking"."sequenceNumber" = $14 AND "public"."EventTracking"."eventType" = $15) AND 1=1) RETURNING "public"."EventTracking"."id", "public"."EventTracking"."eventType", "public"."EventTracking"."blockHeight", "public"."EventTracking"."transactionHash", "public"."EventTracking"."processed", "public"."EventTracking"."error", "public"."EventTracking"."createdAt", "public"."EventTracking"."updatedAt", "public"."EventTracking"."network", "public"."EventTracking"."sequenceNumber"
+[tradeEventHandler] DEBUG: [supra-mainnet] Processing TradeEvent {"creator_fee":"300000","is_buy":true,"platform_fee":"400000","supra_amount":"100000000","timestamp":"1755654575","token_address":"0xa6c2bd70d06129390cd3d60e03baa06db770c5acbc1b3d3229ea4f7493328554","token_amount":"13650392139","user":"0x6e3e09ab7fd0145d7befc0c68d6944ddc1a90fd45b8a6d28c76d8c48bed676b0","virtual_supra_reserves":"1784233344426015","virtual_token_reserves":"243554834549847369"}
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 29341732-29341742
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+prisma:query SELECT "public"."TradeEvent"."id" FROM "public"."TradeEvent" WHERE (("public"."TradeEvent"."network" = $1 AND "public"."TradeEvent"."creationNumber" = $2 AND "public"."TradeEvent"."sequenceNumber" = $3 AND "public"."TradeEvent"."type" = $4) AND 1=1) LIMIT $5 OFFSET $6
+[tradeEventHandler] INFO: [supra-mainnet] TradeEvent does not exist. CREATING...
+prisma:query INSERT INTO "public"."TradeEvent" ("type","creationNumber","accountAddress","sequenceNumber","timestamp","isBuy","supraAmount","tokenAddress","tokenAmount","user","virtualSupraReserves","virtualTokenReserves","createdAt","updatedAt","network") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING "public"."TradeEvent"."id", "public"."TradeEvent"."type", "public"."TradeEvent"."creationNumber", "public"."TradeEvent"."accountAddress", "public"."TradeEvent"."sequenceNumber", "public"."TradeEvent"."timestamp", "public"."TradeEvent"."isBuy", "public"."TradeEvent"."supraAmount", "public"."TradeEvent"."tokenAddress", "public"."TradeEvent"."tokenAmount", "public"."TradeEvent"."user", "public"."TradeEvent"."virtualSupraReserves", "public"."TradeEvent"."virtualTokenReserves", "public"."TradeEvent"."createdAt", "public"."TradeEvent"."updatedAt", "public"."TradeEvent"."network"
+[tradeEventHandler] INFO: [supra-mainnet] Successfully created TradeEvent for user 0x6e3e09ab7fd0145d7befc0c68d6944ddc1a90fd45b8a6d28c76d8c48bed676b0
+[tradeEventHandler] INFO: [supra-mainnet] Updating token holder balance for user 0x6e3e09ab7fd0145d7befc0c68d6944ddc1a90fd45b8a6d28c76d8c48bed676b0
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 29343968
+[poller] INFO: [supra-testnet] Updated latest block height from 29343964 to 29343968
+[poller] INFO: [supra-testnet] Processing blocks 29341742 to 29341751 (Latest: 29343968)
+prisma:query SELECT "public"."users"."network", "public"."users"."walletAddress" FROM "public"."users" WHERE (("public"."users"."network" = $1 AND "public"."users"."walletAddress" = $2) AND 1=1) OFFSET $3
+prisma:query SELECT "public"."users"."network", "public"."users"."walletAddress", "public"."users"."username", "public"."users"."avatarUrl", "public"."users"."createdAt", "public"."users"."updatedAt", "public"."users"."nonce" FROM "public"."users" WHERE (("public"."users"."network" = $1 AND "public"."users"."walletAddress" = $2) AND (("public"."users"."network" = $3 AND "public"."users"."walletAddress" = $4) AND 1=1)) LIMIT $5 OFFSET $6
+prisma:query SELECT "public"."users"."network", "public"."users"."walletAddress", "public"."users"."username", "public"."users"."avatarUrl", "public"."users"."createdAt", "public"."users"."updatedAt", "public"."users"."nonce" FROM "public"."users" WHERE ("public"."users"."network" = $1 AND "public"."users"."walletAddress" = $2) LIMIT $3 OFFSET $4
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 29341742-29341752
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+prisma:query INSERT INTO "public"."token_holders" ("network","userWalletAddress","tokenAddress","balance","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT ("network","userWalletAddress","tokenAddress") DO UPDATE SET "balance" = ("public"."token_holders"."balance" + $7), "updatedAt" = $8 WHERE (("public"."token_holders"."network" = $9 AND "public"."token_holders"."userWalletAddress" = $10 AND "public"."token_holders"."tokenAddress" = $11) AND 1=1) RETURNING "public"."token_holders"."network", "public"."token_holders"."userWalletAddress", "public"."token_holders"."tokenAddress", "public"."token_holders"."balance", "public"."token_holders"."createdAt", "public"."token_holders"."updatedAt"
+[tradeEventHandler] INFO: [supra-mainnet] Successfully updated token holder balance for user 0x6e3e09ab7fd0145d7befc0c68d6944ddc1a90fd45b8a6d28c76d8c48bed676b0
+prisma:query ROLLBACK
+prisma:query UPDATE "public"."EventTracking" SET "processed" = $1, "error" = $2 WHERE ("public"."EventTracking"."id" = $3 AND 1=1) RETURNING "public"."EventTracking"."id", "public"."EventTracking"."eventType", "public"."EventTracking"."blockHeight", "public"."EventTracking"."transactionHash", "public"."EventTracking"."processed", "public"."EventTracking"."error", "public"."EventTracking"."createdAt", "public"."EventTracking"."updatedAt", "public"."EventTracking"."network", "public"."EventTracking"."sequenceNumber"
+[eventProcessor] INFO: Successfully processed and committed transaction for event Tx:unknown_tx_for_0x2e1e06a4d4d16fb89474347f51370e06318100d01982f57d6d1d7f8293e795b5::spike_fun::TradeEvent_block_20632567 Seq:268 Type:0x2e1e06a4d4d16fb89474347f51370e06318100d01982f57d6d1d7f8293e795b5::spike_fun::TradeEvent Net:supra-mainnet.
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 29343973
+[poller] INFO: [supra-testnet] Updated latest block height from 29343968 to 29343973
+[poller] INFO: [supra-testnet] Processing blocks 29341752 to 29341761 (Latest: 29343973)
+prisma:query COMMIT
+[eventProcessor] INFO: Finished processing batch of 1 events.
+[poller] ERROR: [supra-mainnet] Error processing batch 20632567-20632576: PrismaClientKnownRequestError: Transaction API error: Transaction already closed: A commit cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5467 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+    at _r.transaction (D:\Crystara\node_modules\@prisma\client\runtime\library.js:111:12086)
+    at async Proxy._transactionWithCallback (D:\Crystara\node_modules\@prisma\client\runtime\library.js:130:8018)
+    at async EventPoller.processBatch (webpack-internal:///(rsc)/./app/indexer/poller.ts:179:17)
+    at async EventPoller.start (webpack-internal:///(rsc)/./app/indexer/poller.ts:94:21)
+    at async Promise.all (index 1)
+    at async startIndexer (webpack-internal:///(rsc)/./app/indexer/index.ts:92:13)
+    at async GET (webpack-internal:///(rsc)/./app/api/indexer/route.ts:22:9)
+    at async AppRouteRouteModule.do (D:\Crystara\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:26:34112)
+    at async AppRouteRouteModule.handle (D:\Crystara\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:26:41338)
+    at async doRender (D:\Crystara\node_modules\next\dist\server\base-server.js:1518:42)
+    at async DevServer.renderToResponseWithComponentsImpl (D:\Crystara\node_modules\next\dist\server\base-server.js:1920:28)
+    at async DevServer.renderPageComponent (D:\Crystara\node_modules\next\dist\server\base-server.js:2408:24)
+    at async DevServer.renderToResponseImpl (D:\Crystara\node_modules\next\dist\server\base-server.js:2445:32)
+    at async DevServer.pipeImpl (D:\Crystara\node_modules\next\dist\server\base-server.js:1008:25)
+    at async NextNodeServer.handleCatchallRenderRequest (D:\Crystara\node_modules\next\dist\server\next-server.js:305:17)
+    at async DevServer.handleRequestImpl (D:\Crystara\node_modules\next\dist\server\base-server.js:900:17)
+    at async D:\Crystara\node_modules\next\dist\server\dev\next-dev-server.js:371:20
+    at async Span.traceAsyncFn (D:\Crystara\node_modules\next\dist\trace\trace.js:157:20)
+    at async DevServer.handleRequest (D:\Crystara\node_modules\next\dist\server\dev\next-dev-server.js:368:24)
+    at async invokeRender (D:\Crystara\node_modules\next\dist\server\lib\router-server.js:237:21)
+    at async handleRequest (D:\Crystara\node_modules\next\dist\server\lib\router-server.js:428:24)
+    at async requestHandlerImpl (D:\Crystara\node_modules\next\dist\server\lib\router-server.js:452:13)
+    at async Server.requestListener (D:\Crystara\node_modules\next\dist\server\lib\start-server.js:158:13)
+[poller] ERROR: [supra-mainnet] Error in polling loop: Transaction API error: Transaction already closed: A commit cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5467 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 29341752-29341762
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 29343977
+[poller] INFO: [supra-testnet] Updated latest block height from 29343973 to 29343977
+[poller] INFO: [supra-testnet] Processing blocks 29341762 to 29341771 (Latest: 29343977)
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 29341762-29341772
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 29343980
+[poller] INFO: [supra-testnet] Updated latest block height from 29343977 to 29343980
+[poller] INFO: [supra-testnet] Processing blocks 29341772 to 29341781 (Latest: 29343980)
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 29341772-29341782
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 20633391
+[poller] INFO: [supra-mainnet] Updated latest block height from 20633374 to 20633391
+[poller] INFO: [supra-mainnet] Processing blocks 20632567 to 20632576 (Latest: 20633391)
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 29343988
+[poller] INFO: [supra-testnet] Updated latest block height from 29343980 to 29343988
+[poller] INFO: [supra-testnet] Processing blocks 29341782 to 29341791 (Latest: 29343988)
+[rpcClient] DEBUG: Fetched 1 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 20632567-20632577
+[poller] INFO: [supra-mainnet] Fetched 1 events from blocks 20632567-20632576.
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+[eventProcessor] DEBUG: Processing 1 RpcEvents in current batch.
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 29341782-29341792
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+[eventProcessor] DEBUG: Starting transaction for event: Tx:unknown_tx_for_0x2e1e06a4d4d16fb89474347f51370e06318100d01982f57d6d1d7f8293e795b5::spike_fun::TradeEvent_block_20632567 Seq:268 Type:0x2e1e06a4d4d16fb89474347f51370e06318100d01982f57d6d1d7f8293e795b5::spike_fun::TradeEvent Net:supra-mainnet
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 29343993
+[poller] INFO: [supra-testnet] Updated latest block height from 29343988 to 29343993
+[poller] INFO: [supra-testnet] Processing blocks 29341792 to 29341801 (Latest: 29343993)
+prisma:query INSERT INTO "public"."EventTracking" ("eventType","blockHeight","transactionHash","processed","error","createdAt","updatedAt","network","sequenceNumber") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT ("network","transactionHash","sequenceNumber","eventType") DO UPDATE SET "error" = $10, "processed" = $11 WHERE (("public"."EventTracking"."network" = $12 AND "public"."EventTracking"."transactionHash" = $13 AND "public"."EventTracking"."sequenceNumber" = $14 AND "public"."EventTracking"."eventType" = $15) AND 1=1) RETURNING "public"."EventTracking"."id", "public"."EventTracking"."eventType", "public"."EventTracking"."blockHeight", "public"."EventTracking"."transactionHash", "public"."EventTracking"."processed", "public"."EventTracking"."error", "public"."EventTracking"."createdAt", "public"."EventTracking"."updatedAt", "public"."EventTracking"."network", "public"."EventTracking"."sequenceNumber"
+[tradeEventHandler] DEBUG: [supra-mainnet] Processing TradeEvent {"creator_fee":"300000","is_buy":true,"platform_fee":"400000","supra_amount":"100000000","timestamp":"1755654575","token_address":"0xa6c2bd70d06129390cd3d60e03baa06db770c5acbc1b3d3229ea4f7493328554","token_amount":"13650392139","user":"0x6e3e09ab7fd0145d7befc0c68d6944ddc1a90fd45b8a6d28c76d8c48bed676b0","virtual_supra_reserves":"1784233344426015","virtual_token_reserves":"243554834549847369"}
+prisma:query SELECT "public"."TradeEvent"."id" FROM "public"."TradeEvent" WHERE (("public"."TradeEvent"."network" = $1 AND "public"."TradeEvent"."creationNumber" = $2 AND "public"."TradeEvent"."sequenceNumber" = $3 AND "public"."TradeEvent"."type" = $4) AND 1=1) LIMIT $5 OFFSET $6
+[tradeEventHandler] DEBUG: [supra-mainnet] TradeEvent already exists. Skipping creation.
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 29341792-29341802
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+prisma:query UPDATE "public"."EventTracking" SET "processed" = $1, "error" = $2 WHERE ("public"."EventTracking"."id" = $3 AND 1=1) RETURNING "public"."EventTracking"."id", "public"."EventTracking"."eventType", "public"."EventTracking"."blockHeight", "public"."EventTracking"."transactionHash", "public"."EventTracking"."processed", "public"."EventTracking"."error", "public"."EventTracking"."createdAt", "public"."EventTracking"."updatedAt", "public"."EventTracking"."network", "public"."EventTracking"."sequenceNumber"
+[eventProcessor] INFO: Successfully processed and committed transaction for event Tx:unknown_tx_for_0x2e1e06a4d4d16fb89474347f51370e06318100d01982f57d6d1d7f8293e795b5::spike_fun::TradeEvent_block_20632567 Seq:268 Type:0x2e1e06a4d4d16fb89474347f51370e06318100d01982f57d6d1d7f8293e795b5::spike_fun::TradeEvent Net:supra-mainnet.
+prisma:query COMMIT
+[eventProcessor] INFO: Finished processing batch of 1 events.
+prisma:query COMMIT
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 29343995
+[poller] INFO: [supra-testnet] Updated latest block height from 29343993 to 29343995
+[poller] INFO: [supra-testnet] Processing blocks 29341802 to 29341811 (Latest: 29343995)
+[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 20633399
+[poller] INFO: [supra-mainnet] Updated latest block height from 20633391 to 20633399
