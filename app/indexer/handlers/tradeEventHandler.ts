@@ -75,7 +75,7 @@ export async function processTradeEvent(event: RpcEvent, tx: TransactionClient) 
         network: tradeData.network,
         userWalletAddress: tradeData.user,
         tokenAddress: tradeData.tokenAddress,
-        balance: tradeData.tokenAmount, // Pasamos el BigInt directamente
+        balance: tradeData.isBuy ? tradeData.tokenAmount : -tradeData.tokenAmount, // El balance inicial puede ser negativo si es una venta (la BD lo impedirá)
       },
     });
     logger.info(`[${event.network}] Successfully updated token holder balance for user ${tradeData.user}`);
