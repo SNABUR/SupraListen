@@ -338,7 +338,7 @@ model token_price_history {
   id           Int      @id @default(autoincrement())
   network      String
   tokenAddress String
-  timestamp    DateTime
+  timestamp    BigInt
   granularity  String
   open         Decimal? @db.Decimal(36, 18)
   high         Decimal? @db.Decimal(36, 18)

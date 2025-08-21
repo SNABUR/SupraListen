@@ -165,7 +165,7 @@ async function fetchEventsByTypes(
             type: eventType,
             guid: event.guid, // Asumir que event.guid es la estructura correcta o string
             sequence_number: String(event.sequence_number), // Convertir a string para coincidir con EventPayload
-            timestamp: Number(event.data.timestamp ?? Math.floor(Date.now() / 1000)), // Asegurar que es número
+            timestamp: Number(event.data.timestamp) || Math.floor(Date.now() / 1000), // Asegurar que es número
             data: event.data,
             network: network,
             blockHeight: event.block_height ?? startBlock,

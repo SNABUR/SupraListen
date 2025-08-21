@@ -9,24 +9,13 @@ const logger = createLogger('executeProcessOHLC');
 // Agrupa los trades por intervalo de tiempo (ej. 1 minuto)
 function groupTradesByInterval(trades: any[], intervalMinutes = 1) {
     const groups = new Map<string, any[]>();
-    let logCount = 0; // Contador para limitar los logs de depuración
+    const intervalSeconds = BigInt(intervalMinutes * 60);
 
     trades.forEach(trade => {
-        // Logging de depuración para el timestamp
-        if (logCount < 5) {
-            console.log(`DEBUG: Original timestamp from DB: ${trade.timestamp}`);
-        }
+        const tradeTimestamp = BigInt(trade.timestamp);
+        const intervalStartTimestamp = tradeTimestamp - (tradeTimestamp % intervalSeconds);
 
-        const tradeTime = new Date(Number(trade.timestamp) * 1000);
-        const intervalStart = new Date(tradeTime);
-        intervalStart.setMinutes(Math.floor(tradeTime.getMinutes() / intervalMinutes) * intervalMinutes, 0, 0);
-
-        if (logCount < 5) {
-            console.log(`DEBUG: Calculated tradeTime: ${tradeTime.toISOString()}, Rounded intervalStart: ${intervalStart.toISOString()}`);
-            logCount++;
-        }
-
-        const key = `${trade.tokenAddress}-${intervalStart.toISOString()}`;
+        const key = `${trade.tokenAddress}-${intervalStartTimestamp.toString()}`;
 
         if (!groups.has(key)) {
             groups.set(key, []);
@@ -71,8 +60,8 @@ export async function executeProcessOHLC(prismadb: PrismaClient, networkConfig: 
         for (const [key, trades] of tradesGrouped.entries()) {
             if (trades.length === 0) continue;
 
-            const [tokenAddress, timestampISO] = key.split('-');
-            const intervalTimestamp = new Date(timestampISO);
+            const [tokenAddress, timestampStr] = key.split('-');
+            const intervalTimestamp = BigInt(timestampStr);
             const granularity = '1m';
 
             const tradesWithPrice = trades.map(t => {
