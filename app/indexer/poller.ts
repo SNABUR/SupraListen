@@ -200,7 +200,7 @@ export class EventPoller {
         // processEvents is wrapped in a transaction by its caller if needed, or handles its own.
         // Here, we are not saving progress block by block, so the transaction for processEvents is self-contained.
         await prismadb.$transaction(async (tx) => { // Transaction for processing events
-            await processEvents(events, tx);
+            await processEvents(events, this.network, tx);
         });
         // logger.info(`[${this.pollerId}] Successfully processed events for blocks up to ${endBlock}.`);
       }

@@ -4,6 +4,7 @@ import cron, { ScheduledTask } from 'node-cron';
 import { executeGetReservesForAllPairs } from './tasks/executeGetReserves';
 import { executeGetTotalStakedForAllPools } from './tasks/executeGetTotalStaked';
 import { executeUpdateAmmData } from './tasks/executeUpdateAmmData';
+import { executeProcessOHLC } from './tasks/executeProcessOHLC'; // IMPORTAMOS LA NUEVA TAREA
 import prismadb from '@/lib/prismadb';
 
 const logger = createLogger('scheduled-tasks');
@@ -62,6 +63,7 @@ async function runUpdateCycleForNetwork(networkConfig: NetworkConfig) {
 export function startScheduledTasks(setupConfig: SchedulerSetupConfig): void {
   if (activeJobs.size > 0) {
     logger.info('Scheduled tasks might already be initialized. Check activeJobs map if issues.');
+    // To prevent duplication on hot-reload, we could stop them first, but for now, we just log.
   }
 
   logger.info('Initializing/Updating scheduled tasks...');
@@ -80,19 +82,13 @@ export function startScheduledTasks(setupConfig: SchedulerSetupConfig): void {
   }
 
   networksToProcess.forEach(networkConfig => {
+    // TAREA PRINCIPAL HORARIA
     const masterUpdateTaskKey = `${networkConfig.networkName}-MasterUpdateCycle`;
-
     if (!activeJobs.has(masterUpdateTaskKey)) {
       logger.info(`Setting up Master Update Cycle task for ${networkConfig.networkName}`);
-
-      // Configura esta tarea para que se ejecute cada 30 minutos (o la frecuencia deseada)
-      // Ejemplo: '*/30 * * * *' (cada 30 minutos: a :00 y :30 de cada hora)
-      // Ejemplo: '0 * * * *' (cada hora, al inicio de la hora)
-      const schedule = '0 * * * *'; // <--- AJUSTA ESTE SCHEDULE A TU NECESIDAD
-
+      const schedule = '0 * * * *'; // Cada hora
       const job: ScheduledTask = cron.schedule(schedule, async () => {
         logger.info(`Triggering Master Update Cycle for ${networkConfig.networkName} (cron: ${schedule})`);
-        // Llamamos a la función que orquesta todas las sub-tareas secuencialmente
         await runUpdateCycleForNetwork(networkConfig);
       }, { timezone: "UTC" });
 
@@ -100,6 +96,22 @@ export function startScheduledTasks(setupConfig: SchedulerSetupConfig): void {
       logger.info(`Master Update Cycle task for ${networkConfig.networkName} scheduled with cron: ${schedule}.`);
     } else {
       logger.info(`Master Update Cycle task for ${networkConfig.networkName} is already scheduled.`);
+    }
+
+    // NUEVA TAREA DE OHLC CADA MINUTO
+    const ohlcTaskKey = `${networkConfig.networkName}-OHLC-Processing`;
+    if (!activeJobs.has(ohlcTaskKey)) {
+      logger.info(`Setting up OHLC Processing task for ${networkConfig.networkName}`);
+      const schedule = '* * * * *'; // Cada minuto
+      const job: ScheduledTask = cron.schedule(schedule, async () => {
+        logger.info(`Triggering OHLC Processing for ${networkConfig.networkName} (cron: ${schedule})`);
+        await executeProcessOHLC(prismadb, networkConfig);
+      }, { timezone: "UTC" });
+
+      activeJobs.set(ohlcTaskKey, job);
+      logger.info(`OHLC Processing task for ${networkConfig.networkName} scheduled with cron: ${schedule}.`);
+    } else {
+      logger.info(`OHLC Processing task for ${networkConfig.networkName} is already scheduled.`);
     }
   });
 

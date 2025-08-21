@@ -149,6 +149,7 @@ model TradeEvent {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @default(now())
   network              String
+  processedForOHLC     Boolean  @default(false)
 
   @@unique([network, creationNumber, sequenceNumber, type])
   @@index([network, accountAddress])
@@ -157,6 +158,7 @@ model TradeEvent {
   @@index([network, tokenAddress])
   @@index([network, type])
   @@index([network, user])
+  @@index([network, processedForOHLC])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -338,11 +340,11 @@ model token_price_history {
   tokenAddress String
   timestamp    DateTime
   granularity  String
-  openUsd      Decimal? @db.Decimal(36, 18)
-  highUsd      Decimal? @db.Decimal(36, 18)
-  lowUsd       Decimal? @db.Decimal(36, 18)
-  closeUsd     Decimal? @db.Decimal(36, 18)
-  volumeUsd    Decimal? @db.Decimal(36, 6)
+  open         Decimal? @db.Decimal(36, 18)
+  high         Decimal? @db.Decimal(36, 18)
+  low          Decimal? @db.Decimal(36, 18)
+  close        Decimal? @db.Decimal(36, 18)
+  volume       Decimal? @db.Decimal(36, 6)
 
   @@unique([network, tokenAddress, timestamp, granularity])
   @@index([network, tokenAddress, granularity, timestamp])
