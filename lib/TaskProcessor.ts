@@ -48,8 +48,8 @@ async function runUpdateCycleForNetwork(networkConfig: NetworkConfig) {
 
     await delay(DELAY_BETWEEN_SUB_TASKS_MS); // Espera 10 segundos
 
-    logger.info(`[${networkConfig.networkName}] Executing UpdateAmmData (TVL calculations)...`);
-    await executeUpdateAmmData(prismadb, networkConfig); // Esta ya calcula TVL y actualiza ProtocolStats
+    logger.info(`[${networkConfig.networkName}] Executing UpdateAmmData (Sync, TVL, APR)...`);
+    await executeUpdateAmmData(prismadb, networkConfig);
     logger.info(`[${networkConfig.networkName}] UpdateAmmData COMPLETED.`);
 
     logger.info(`Update cycle for ${networkConfig.networkName} FINISHED successfully.`);

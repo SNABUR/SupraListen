@@ -8,6 +8,13 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum AmmVersion {
+  V1 // Para versiones antiguas, no se usa actualmente
+  V2 // Para pools de liquidez estándar x*y=k
+  V3 // Para pools de liquidez concentrada
+  V4 // Para pools de liquidez con múltiples activos
+}
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Ammpair {
   id                                                 Int       @id @default(autoincrement())
@@ -15,6 +22,7 @@ model Ammpair {
   creator                                            String
   createdAt                                          DateTime  @default(now())
   updatedAt                                          DateTime  @default(now())
+  version                                            AmmVersion @default(V2) // Asumimos que todos los pools existentes y los nuevos por defecto son V2
   token0Address                                      String
   token1Address                                      String
   network                                            String
@@ -23,6 +31,7 @@ model Ammpair {
   verified                                           Boolean   @default(false)
   displayOrder                                       Int?
   apr24h                                             String?
+  apr7d                                              String?
   apyCalculated                                      String?
   lastStatsUpdate                                    DateTime?
   lpFeePercent                                       String?
@@ -32,11 +41,17 @@ model Ammpair {
   volumeToken0_24h                                   String?
   volumeToken1_24h                                   String?
   volumeUsd24h                                       String?
+  volumeUsd7d                                        String?   // NUEVO: Volumen últimos 7 días
+  volumeUsd30d                                       String?   // NUEVO: Volumen últimos 30 días
   feesUsd24h                                         String?
+  feesUsd7d                                          String?   // NUEVO: Comisiones últimos 7 días
+  feesUsd30d                                         String?   // NUEVO: Comisiones últimos 30 días
+
   token0          tokens   @relation("AmmpairToToken0", fields: [token0Network, token0Address], references: [network, id])
   token1          tokens   @relation("AmmpairToToken1", fields: [token1Network, token1Address], references: [network, id])
 
   @@unique([network, pair])
+  @@index([network, version])
   @@index([network, apr24h])
   @@index([network, creator])
   @@index([network, displayOrder])
@@ -44,6 +59,9 @@ model Ammpair {
   @@index([network, tvlUsd])
   @@index([network, verified, displayOrder])
   @@index([network, volumeUsd24h])
+  @@index([network, volumeUsd7d]) // Añadir índices para los nuevos campos
+  @@index([network, volumeUsd30d])
+  @@index([network, apr7d])
   @@index([token0Network, token0Address])
   @@index([token1Network, token1Address])
 }

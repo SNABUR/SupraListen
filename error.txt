@@ -1,1 +1,2 @@
-{"idx":0,"id":984,"network":"supra-mainnet","tokenAddress":"0xa6c2bd70d06129390cd3d60e03baa06db770c5acbc1b3d3229ea4f7493328554","timestamp":"2025-01-01 00:00:00","granularity":"1m","close":"727451.000000000000000000","high":"727451.000000000000000000","low":"727451.000000000000000000","open":"732579.000000000000000000","volume":"198600000.000000"}
+Property 'pair' does not exist on type '{ id: number; network: string; transactionHash: string; eventIndex: number; blockNumber: bigint; blockTimestamp: Date; sender: string; to: string; amount0In: bigint; amount1In: bigint; amount0Out: bigint; amount1Out: bigint; processedAt: Date; pairId: number; }'.ts(2339)
+any
