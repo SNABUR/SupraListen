@@ -6,7 +6,7 @@ import { NetworkConfig } from '../TaskProcessor'; // Importa la interfaz
 const logger = createLogger('getSwapFee-hook');
 
 
-const MODULE_ADDRESS = process.env.NEXT_PUBLIC_STAKING_ADDRESS; 
+const MODULE_ADDRESS = process.env.NEXT_PUBLIC_AMM_ADDRESS; 
 const MODULE_NAME = process.env.NEXT_PUBLIC_SUPRA_AMM_CONTROLLER_MODULE; 
 
 /**

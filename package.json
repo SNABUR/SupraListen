@@ -7,11 +7,14 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run prisma:generate && next build",
     "start": "tsx server.ts",
     "lint": "next lint",
     "dev:indexer": "tsx watch scripts/run-indexer.ts",
-    "indexer": "tsx scripts/run-indexer.ts"
+    "indexer": "tsx scripts/run-indexer.ts",
+    "prisma:generate:main": "prisma generate --schema=./prisma/main_db/schema.prisma",
+    "prisma:generate:ohlc": "prisma generate --schema=./prisma/ohlc_db/schema.prisma",
+    "prisma:generate": "npm run prisma:generate:main && npm run prisma:generate:ohlc"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",

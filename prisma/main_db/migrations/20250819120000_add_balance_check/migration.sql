@@ -1,0 +1,1 @@
+ALTER TABLE "public"."token_holders" ADD CONSTRAINT "balance_must_be_non_negative" CHECK ("balance" >= 0);

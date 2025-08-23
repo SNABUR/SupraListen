@@ -86,7 +86,8 @@ export function startScheduledTasks(setupConfig: SchedulerSetupConfig): void {
     const masterUpdateTaskKey = `${networkConfig.networkName}-MasterUpdateCycle`;
     if (!activeJobs.has(masterUpdateTaskKey)) {
       logger.info(`Setting up Master Update Cycle task for ${networkConfig.networkName}`);
-      const schedule = '0 * * * *'; // Cada hora
+      //const schedule = '* * * * *'; // CADA MINUTO PARA DEBUG
+      const schedule = '0 0 * * *'; // todos los días a las 00:00
       const job: ScheduledTask = cron.schedule(schedule, async () => {
         logger.info(`Triggering Master Update Cycle for ${networkConfig.networkName} (cron: ${schedule})`);
         await runUpdateCycleForNetwork(networkConfig);

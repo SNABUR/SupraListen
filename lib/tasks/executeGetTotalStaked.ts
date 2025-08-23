@@ -1,5 +1,5 @@
 // src/lib/tasks/executeGetTotalStaked.ts
-import { PrismaClient } from '@prisma/client'; // No necesitas StakingPool aquí si no usas el tipo directamente
+import { PrismaClient } from '../../prisma/generated/main_db';
 import { NetworkConfig } from '../TaskProcessor';
 import { getPoolTotalStaked } from '../functions/getTotalStaked'; // Importa la función correcta
 import { createLogger } from '@/app/indexer/utils';

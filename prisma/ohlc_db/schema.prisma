@@ -1,0 +1,72 @@
+generator ohlc_client {
+    provider = "prisma-client-js"
+    output   = "../generated/ohlc_db"
+}
+
+datasource ohlc_db {
+    provider  = "postgresql"
+    url       = env("CHART_DATABASE_URL")
+    directUrl = env("CHART_DIRECT_URL")
+}
+
+model Token {
+    id      Int    @id @default(autoincrement())
+    network String
+    address        String
+    wrappedAddress String? @unique
+    symbol            String
+    name              String
+    decimals          Int
+    maxSupply         BigInt?
+    circulatingSupply BigInt?
+    pairsAsToken0 Pair[] @relation("token0")
+    pairsAsToken1 Pair[] @relation("token1")
+    groupConfigurations GroupConfiguration[]
+    createdAt DateTime @default(now())
+    @@unique([network, address])
+}
+
+model Pair {
+    id Int @id @default(autoincrement())
+    network String
+    token0Id Int
+    token1Id Int
+    spikeyAmmPairAddress String?
+    spikeyAmmReserve0 BigInt?
+    spikeyAmmReserve1 BigInt?
+    lastStatsUpdate   DateTime?
+    token0 Token @relation("token0", fields: [token0Id], references: [id])
+    token1 Token @relation("token1", fields: [token1Id], references: [id])
+    createdAt DateTime @default(now())
+    @@unique([network, token0Id, token1Id])
+}
+
+model OhlcData {
+    id Int @id @default(autoincrement())
+    network       String
+    ammSource     String
+    timeframe     String
+    timestamp     DateTime
+    open          Decimal
+    high          Decimal
+    low           Decimal
+    close         Decimal
+    volume        Decimal
+    tradeCount    Int
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    token0Address String
+    token1Address String
+    @@unique([network, ammSource, token0Address, token1Address, timeframe, timestamp])
+}
+
+model GroupConfiguration {
+    chatId BigInt @id
+    spikeMonitorEnabled   Boolean @default(false)
+    spikeMonitorTokenId   Int?
+    spikeMonitorThreadId  String?
+    spikeMonitorGifUrl    String?
+    spikeMonitorTimeframe Int?    @default(2)
+    spikeMonitorInterval  Int?    @default(30)
+    spikeMonitorToken Token? @relation(fields: [spikeMonitorTokenId], references: [id])
+}

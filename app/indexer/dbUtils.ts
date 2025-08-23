@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
 import { createLogger } from './utils';
 import { callViewFunction } from '../../lib/viewFunction/useView';
 import { RpcEvent, TransactionClient } from './types';
@@ -11,7 +10,7 @@ export async function getOrCreateToken(
   tokenAddress: string,
   network: string,
   tx: TransactionClient
-): Promise<import('@prisma/client').tokens> {
+): Promise<import('../../prisma/generated/main_db').tokens> {
   if (!tokenAddress) {
     logger.error(`[${network}] Attempted to get or create token with null or undefined address.`);
     throw new Error(`Token address cannot be null or undefined for network ${network}`);
@@ -182,7 +181,7 @@ export async function getOrCreateMinimalUser(
   address: string,
   network: string,
   tx: TransactionClient
-): Promise<import('@prisma/client').users> {
+): Promise<import('../../prisma/generated/main_db').users> {
   if (!address) {
     logger.error(`[${network}] Attempted to get or create minimal user with null or undefined address.`);
     throw new Error(`User address cannot be null or undefined for network ${network}`);

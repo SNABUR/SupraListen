@@ -1,0 +1,494 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/main_db"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum AmmVersion {
+  V1 // Para versiones antiguas, no se usa actualmente
+  V2 // Para pools de liquidez estándar x*y=k
+  V3 // Para pools de liquidez concentrada
+  V4 // Para pools de liquidez con múltiples activos
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Ammpair {
+  id               Int        @id @default(autoincrement())
+  pair             String
+  creator          String
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @default(now())
+  version          AmmVersion @default(V2) // Asumimos que todos los pools existentes y los nuevos por defecto son V2
+  token0Address    String
+  token1Address    String
+  network          String
+  token0Network    String
+  token1Network    String
+  verified         Boolean    @default(false)
+  displayOrder     Int?
+  apr24h           String?
+  apr7d            String?
+  apyCalculated    String?
+  lastStatsUpdate  DateTime?
+  lpFeePercent     String?
+  reserve0         String?
+  reserve1         String?
+  tvlUsd           String?
+  volumeToken0_24h String?
+  volumeToken1_24h String?
+  volumeUsd24h     String?
+  volumeUsd7d      String? // NUEVO: Volumen últimos 7 días
+  volumeUsd30d     String? // NUEVO: Volumen últimos 30 días
+  feesUsd24h       String?
+  feesUsd7d        String? // NUEVO: Comisiones últimos 7 días
+  feesUsd30d       String? // NUEVO: Comisiones últimos 30 días
+
+  token0 tokens @relation("AmmpairToToken0", fields: [token0Network, token0Address], references: [network, id])
+  token1 tokens @relation("AmmpairToToken1", fields: [token1Network, token1Address], references: [network, id])
+
+  @@unique([network, pair])
+  @@index([network, version])
+  @@index([network, apr24h])
+  @@index([network, creator])
+  @@index([network, displayOrder])
+  @@index([network])
+  @@index([network, tvlUsd])
+  @@index([network, verified, displayOrder])
+  @@index([network, volumeUsd24h])
+  @@index([network, volumeUsd7d]) // Añadir índices para los nuevos campos
+  @@index([network, volumeUsd30d])
+  @@index([network, apr7d])
+  @@index([token0Network, token0Address])
+  @@index([token1Network, token1Address])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model EventTracking {
+  id              Int      @id @default(autoincrement())
+  eventType       String
+  blockHeight     BigInt
+  transactionHash String
+  processed       Boolean  @default(false)
+  error           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
+  network         String
+  sequenceNumber  String?
+
+  @@unique([network, transactionHash, sequenceNumber, eventType])
+  @@index([network, blockHeight])
+  @@index([network, eventType])
+  @@index([network])
+  @@index([network, processed])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model GameResult {
+  id           Int      @id @default(autoincrement())
+  nonce        BigInt
+  player       String
+  playerMove   Int
+  houseMove    Int
+  betAmount    BigInt
+  outcome      Int
+  payoutAmount BigInt
+  coinTypeName String
+  season       BigInt
+  timestamp    BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  network      String
+
+  @@unique([network, nonce])
+  @@index([network])
+  @@index([network, player])
+  @@index([network, season])
+  @@index([network, timestamp])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model PoolsDB {
+  id                          Int             @id @default(autoincrement())
+  description                 String
+  dev                         String
+  initialVirtualSupraReserves BigInt
+  initialVirtualTokenReserves BigInt
+  name                        String
+  platformFee                 Int
+  pool                        String
+  symbol                      String
+  telegram                    String
+  tokenAddress                String
+  tokenDecimals               Int
+  twitter                     String
+  uri                         String
+  website                     String
+  createdAt                   DateTime        @default(now())
+  updatedAt                   DateTime        @default(now())
+  network                     String
+  displayOrder                Int?
+  github                      String?
+  stream                      String?
+  unstakePeriodSeconds        BigInt?
+  project_type                String?
+  comments                    comments[]
+  trust_pools                 trust_pools?
+  holders                     token_holders[]
+
+  @@unique([network, id])
+  @@unique([network, tokenAddress])
+  @@index([network, dev])
+  @@index([network, displayOrder])
+  @@index([network])
+  @@index([network, name])
+  @@index([network, pool])
+  @@index([network, symbol])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model TradeEvent {
+  id                   Int      @id @default(autoincrement())
+  type                 String
+  creationNumber       String
+  accountAddress       String
+  sequenceNumber       String
+  timestamp            BigInt
+  isBuy                Boolean
+  supraAmount          BigInt
+  tokenAddress         String
+  tokenAmount          BigInt
+  user                 String
+  virtualSupraReserves BigInt
+  virtualTokenReserves BigInt
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @default(now())
+  network              String
+  processedForOHLC     Boolean  @default(false)
+
+  @@unique([network, creationNumber, sequenceNumber, type])
+  @@index([network, accountAddress])
+  @@index([network])
+  @@index([network, timestamp])
+  @@index([network, tokenAddress])
+  @@index([network, type])
+  @@index([network, user])
+  @@index([network, processedForOHLC])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model VRFCallback {
+  id            Int      @id @default(autoincrement())
+  callerAddress String
+  nonce         String
+  randomNumbers String[]
+  timestamp     BigInt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+  network       String
+
+  @@unique([network, callerAddress, nonce])
+  @@index([network, callerAddress])
+  @@index([network])
+  @@index([network, nonce])
+  @@index([network, timestamp])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model block_progress {
+  network         String   @id
+  lastBlockHeight BigInt
+  updatedAt       DateTime @default(now())
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model comments {
+  id                Int      @id @default(autoincrement())
+  text              String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+  poolId            Int
+  network           String
+  userNetwork       String
+  userWalletAddress String
+  displayOrder      Int?
+  likeCount         Int      @default(0)
+  poolNetwork       String
+  PoolsDB           PoolsDB  @relation(fields: [poolNetwork, poolId], references: [network, id], onDelete: Cascade)
+  users             users    @relation(fields: [userNetwork, userWalletAddress], references: [network, walletAddress], onDelete: Cascade)
+  images            images[]
+  likes             likes[]
+
+  @@index([network, createdAt])
+  @@index([network, displayOrder])
+  @@index([network])
+  @@index([poolId, displayOrder])
+  @@index([poolNetwork, poolId, createdAt(sort: Desc)])
+  @@index([userNetwork, userWalletAddress])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model images {
+  id        Int      @id @default(autoincrement())
+  url       String
+  altText   String?
+  createdAt DateTime @default(now())
+  commentId Int
+  comments  comments @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([commentId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model likes {
+  id                Int      @id @default(autoincrement())
+  createdAt         DateTime @default(now())
+  commentId         Int
+  network           String
+  userNetwork       String
+  userWalletAddress String
+  comments          comments @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  users             users    @relation(fields: [userNetwork, userWalletAddress], references: [network, walletAddress], onDelete: Cascade)
+
+  @@unique([userNetwork, userWalletAddress, commentId])
+  @@index([commentId])
+  @@index([network])
+}
+
+model migration_events {
+  id                     Int      @id @default(autoincrement())
+  network                String
+  transactionHash        String
+  sequenceNumber         String
+  token_address          String
+  migrator               String
+  supra_sent_to_lp       BigInt
+  tokens_sent_to_lp      BigInt
+  dev_reward_staked      BigInt
+  staking_pool_reward    BigInt
+  migrator_reward        BigInt
+  excess_supra_collected BigInt
+  createdAt              DateTime @default(now())
+
+  @@unique([network, transactionHash, sequenceNumber])
+  @@index([network, migrator])
+  @@index([network, token_address])
+}
+
+model protocol_stats {
+  id                    Int      @id @default(autoincrement())
+  network               String
+  timestamp             DateTime
+  totalTvlUsd           Decimal? @db.Decimal(36, 6)
+  ammTvlUsd             Decimal? @db.Decimal(36, 6)
+  virtualPoolsTvlUsd    Decimal? @db.Decimal(36, 6)
+  stakingTvlUsd         Decimal? @db.Decimal(36, 6)
+  totalVolume24hUsd     Decimal? @db.Decimal(36, 6)
+  ammVolume24hUsd       Decimal? @db.Decimal(36, 6)
+  totalUniqueUsers      Int?
+  totalFeesEarnedUsd24h Decimal? @db.Decimal(36, 6)
+
+  @@unique([network, timestamp])
+  @@index([network, timestamp])
+}
+
+enum PoolType {
+  MEME
+  LP
+  DAO
+  BIG_DAO
+  GENERAL
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model staking_pools {
+  id                                                                 Int           @id @default(autoincrement())
+  creatorAddress                                                     String
+  stakeTokenAddress                                                  String
+  rewardTokenAddress                                                 String
+  isDynamicPool                                                      Boolean
+  rewardPerSec                                                       String
+  accumReward                                                        String        @default("0")
+  lastUpdatedTimestamp                                               BigInt
+  startTimestamp                                                     BigInt
+  endTimestamp                                                       BigInt
+  emergencyLocked                                                    Boolean       @default(false)
+  stakesClosed                                                       Boolean       @default(false)
+  createdAt                                                          DateTime      @default(now())
+  updatedAt                                                          DateTime      @default(now())
+  creatorNetwork                                                     String
+  network                                                            String
+  rewardTokenNetwork                                                 String
+  stakeTokenNetwork                                                  String
+  boostEnabled                                                       Boolean
+  initialEndTimestamp                                                BigInt
+  initialRewardPerSec                                                String
+  verified                                                           Boolean       @default(false)
+  totalBoosted                                                       String        @default("0")
+  displayOrder                                                       Int?
+  cachedApy                                                          String?
+  cachedStakerCount                                                  Int?
+  cachedTvlUsd                                                       String?
+  poolType                                                           PoolType      @default(MEME)
+  totalStakedAmount                                                  String        @default("0")
+  boostConfigCollectionName                                          String?
+  boostConfigCollectionOwner                                         String?
+  boostConfigPercent                                                 String?
+  users                                                              users         @relation(fields: [creatorNetwork, creatorAddress], references: [network, walletAddress])
+  tokens_staking_pools_rewardTokenNetwork_rewardTokenAddressTotokens tokens        @relation("staking_pools_rewardTokenNetwork_rewardTokenAddressTotokens", fields: [rewardTokenNetwork, rewardTokenAddress], references: [network, id])
+  tokens_staking_pools_stakeTokenNetwork_stakeTokenAddressTotokens   tokens        @relation("staking_pools_stakeTokenNetwork_stakeTokenAddressTotokens", fields: [stakeTokenNetwork, stakeTokenAddress], references: [network, id])
+  user_stakes                                                        user_stakes[]
+
+  @@unique([network, creatorAddress, stakeTokenAddress, rewardTokenAddress])
+  @@index([network, boostConfigCollectionOwner])
+  @@index([network, boostEnabled])
+  @@index([network, cachedApy])
+  @@index([network, displayOrder])
+  @@index([network, totalStakedAmount])
+  @@index([network, verified, displayOrder])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model token_price_history {
+  id           Int      @id @default(autoincrement())
+  network      String
+  tokenAddress String
+  timestamp    BigInt
+  granularity  String
+  open         Decimal? @db.Decimal(36, 18)
+  high         Decimal? @db.Decimal(36, 18)
+  low          Decimal? @db.Decimal(36, 18)
+  close        Decimal? @db.Decimal(36, 18)
+  volume       Decimal? @db.Decimal(36, 6)
+
+  @@unique([network, tokenAddress, timestamp, granularity])
+  @@index([network, tokenAddress, granularity, timestamp])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model token_prices {
+  id            Int      @id @default(autoincrement())
+  network       String
+  tokenAddress  String
+  priceUsd      Decimal? @db.Decimal(36, 18)
+  priceAnchor   Decimal? @db.Decimal(36, 18)
+  source        String?
+  lastUpdatedAt DateTime
+
+  @@unique([network, tokenAddress])
+  @@index([network, lastUpdatedAt])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tokens {
+  id                                                                        String
+  name                                                                      String?
+  symbol                                                                    String?
+  decimals                                                                  Int?
+  iconUri                                                                   String?
+  projectUri                                                                String?
+  network                                                                   String
+  lastMetadataAttempt                                                       DateTime?
+  metadataFetched                                                           Boolean         @default(false)
+  metadataStandard                                                          String?
+  verified                                                                  Boolean         @default(false)
+  displayOrder                                                              Int?
+  originalCoinType                                                          String?
+  circulatingSupply                                                         String?
+  createdAt                                                                 DateTime        @default(now())
+  marketCapUsd                                                              String?
+  priceChange24hPercent                                                     Decimal?        @db.Decimal(18, 4)
+  priceUsdCurrent                                                           Decimal?        @db.Decimal(36, 18)
+  totalSupply                                                               String?
+  updatedAt                                                                 DateTime        @default(now())
+  volume24hUsd                                                              String?
+  ammpairsAsToken0                                                          Ammpair[]       @relation("AmmpairToToken0")
+  ammpairsAsToken1                                                          Ammpair[]       @relation("AmmpairToToken1")
+  staking_pools_staking_pools_rewardTokenNetwork_rewardTokenAddressTotokens staking_pools[] @relation("staking_pools_rewardTokenNetwork_rewardTokenAddressTotokens")
+  staking_pools_staking_pools_stakeTokenNetwork_stakeTokenAddressTotokens   staking_pools[] @relation("staking_pools_stakeTokenNetwork_stakeTokenAddressTotokens")
+
+  @@id([network, id])
+  @@index([network, marketCapUsd])
+  @@index([network, metadataFetched])
+  @@index([network, priceChange24hPercent])
+  @@index([network, verified, displayOrder])
+  @@index([network, volume24hUsd])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model trust_pools {
+  id                Int      @id @default(autoincrement())
+  network           String
+  poolDbId          Int      @unique
+  tokenAddress      String
+  isActive          Boolean  @default(true)
+  totalStakedAmount String   @default("0")
+  stakerCount       Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+  PoolsDB           PoolsDB  @relation(fields: [poolDbId], references: [id], onDelete: Cascade)
+
+  @@index([network, tokenAddress])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user_stakes {
+  id                 Int           @id @default(autoincrement())
+  poolId             Int
+  userNetwork        String
+  userAddress        String
+  stakedAmount       String
+  rewardDebt         String        @default("0")
+  lastClaimTimestamp BigInt?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @default(now())
+  staking_pools      staking_pools @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  users              users         @relation(fields: [userNetwork, userAddress], references: [network, walletAddress], onDelete: Cascade)
+
+  @@unique([poolId, userNetwork, userAddress])
+  @@index([poolId])
+  @@index([poolId, userNetwork, userAddress, stakedAmount])
+  @@index([userNetwork, userAddress])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model users {
+  walletAddress  String
+  username       String?
+  avatarUrl      String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now())
+  nonce          Int?
+  network        String
+  comments       comments[]
+  likes          likes[]
+  staking_pools  staking_pools[]
+  user_stakes    user_stakes[]
+  token_balances token_holders[]
+
+  @@id([network, walletAddress])
+}
+
+model token_holders {
+
+  network           String
+  userWalletAddress String
+  tokenAddress      String
+
+  // El balance LÍQUIDO actual del usuario. Usamos String para manejar BigInt sin problemas.
+  balance BigInt @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones para facilitar las consultas
+  user users   @relation(fields: [network, userWalletAddress], references: [network, walletAddress], onDelete: Cascade)
+  pool PoolsDB @relation(fields: [network, tokenAddress], references: [network, tokenAddress], onDelete: Cascade)
+
+  // Clave primaria compuesta: Un usuario solo tiene un registro de balance por token.
+  @@id([network, userWalletAddress, tokenAddress])
+}
