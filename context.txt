@@ -1,48 +1,27 @@
-# Crystara Project Context
+Resumen de la Investigación: 7dAPR es nulo
 
-## 1. Project Purpose
+Problema Inicial:
+El campo `7dAPR` en la tabla `Ammpair` de la base de datos principal es `null` para todos los pares de `supra-mainnet`.
 
-Crystara is a decentralized application (DEX) and launchpad for memecoins, operating on the Supra blockchain. Its primary function is to allow users to trade tokens and to provide real-time and historical price charting for these assets.
+Pasos de la Investigación:
 
-## 2. Core Technologies
+1.  Análisis del Código:
+    - Se revisó `amm-pair-processor.ts`. La función `calculate7dApr` devuelve `null` si el `pairTvlUsd` (TVL del par) es cero o si `baseData.swapFeeBps` (comisión de swap) no está definido.
 
-- **Framework:** Next.js
-- **Language:** TypeScript
-- **ORM:** Prisma
-- **Database:** PostgreSQL (managed via Supabase)
-- **Real-time Functionality:** Supabase Realtime
+2.  Verificación de Datos:
+    - Se creó y ejecutó el script `scripts/verify-data.ts` para inspeccionar la base de datos directamente.
+    - El script confirmó que los tokens involucrados en los pares tienen definidos tanto los `decimals` como los `priceUsd`.
+    - También se confirmó que el `tvlUsd` se está calculando correctamente y no es cero.
 
-## 3. Key Architectural Concepts
+3.  Descubrimiento de la Causa Raíz:
+    - La función `fetch7dVolumeData` en `data-fetcher.ts` intenta obtener el volumen de los últimos 7 días de la tabla `OhlcData` filtrando por `ammSource: 'SpikeySwap'`.
+    - La salida del script de verificación mostró que los datos de volumen existentes en la tabla `OhlcData` tienen `ammSource: 'DexlynSwap'`.
+    - Esta discrepancia causa que la consulta no devuelva ningún dato de volumen para los pares de `SpikeySwap`, resultando en un `volumeUsd7d` de cero.
 
-The application is designed to efficiently handle both real-time data and historical data aggregation for charting purposes. The data flow is divided into three main stages:
+Conclusión Principal:
 
-### a. Data Ingestion (The Indexer)
+El problema de que el `7dAPR` sea nulo se origina porque el sistema no está encontrando datos de volumen para los pares de `SpikeySwap`. Esto se debe a que el indexador no está guardando los datos de `OhlcData` con el `ammSource` correcto ('SpikeySwap') o no los está guardando en absoluto.
 
-- **Location:** `app/indexer/`
-- **Function:** An indexer service continuously polls an RPC endpoint of the Supra blockchain to fetch new events, such as trades.
-- **Components:**
-    - `poller.ts`: The main loop that checks for new blocks.
-    - `rpcClient.ts`: Responsible for making the actual API calls to the RPC endpoint.
-    - `eventProcessor.ts`: Receives raw events from the poller and routes them to the appropriate handler.
-    - `handlers/*.ts`: Specific logic for each type of event. For example, `tradeEventHandler.ts` processes new trades.
-- **Outcome:** Raw, unprocessed event data is saved into the database. For trades, this is the `TradeEvent` table.
+Siguiente Paso para el Otro Repositorio:
 
-### b. Data Processing (Background Tasks)
-
-- **Location:** `lib/tasks/`
-- **Function:** These are scripts designed to run periodically in the background to process the raw data and convert it into an aggregated, more efficient format.
-- **Key Script:** `executeProcessOHLC.ts`
-    - This script reads new, unprocessed trades from the `TradeEvent` table.
-    - It groups these trades into time-based buckets (e.g., 1-minute intervals).
-    - It calculates the Open, High, Low, and Close (OHLC) values, as well as the total volume for each interval.
-- **Outcome:** The aggregated data is saved into the `token_price_history` table. This table is optimized for fast chart data queries.
-
-### c. Data Consumption (Frontend)
-
-- **Location:** `app/` (Next.js pages/components)
-- **Function:** The user interface consumes data from the database in two distinct ways:
-    - **Historical Chart Data:** When a user loads a price chart, the application performs a fast query on the `token_price_history` table to fetch the aggregated OHLC data. This is highly efficient as it avoids loading thousands of individual trades.
-    - **Real-time Updates:** The frontend uses **Supabase Realtime** to subscribe to changes in the `TradeEvent` table. This allows the UI to:
-        - Display a live feed of the latest trades.
-        - Update the current price in real-time.
-        - Dynamically update the most recent (currently forming) candle on the price chart without needing to reload all the historical data.
+Investigar por qué el indexer no está poblando la tabla `OhlcData` en la base de datos de OHLC con los datos de volumen de los pares provenientes de `SpikeySwap`.

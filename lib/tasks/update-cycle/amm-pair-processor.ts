@@ -129,6 +129,8 @@ export function processAmmPairs(ammPairs: Ammpair[], volumes24h: VolumeMap, volu
             feesUsd30d: feesUsd30d.toFixed(6),
         };
 
+        console.log('Update Data for Pair:', pair.pair, JSON.stringify(updateData, null, 2));
+
         if (baseData.swapFeeBps !== null) {
             updateData.lpFeePercent = baseData.swapFeeBps;
         }

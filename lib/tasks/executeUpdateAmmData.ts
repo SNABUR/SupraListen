@@ -1,7 +1,7 @@
 import { PrismaClient } from '../../prisma/generated/main_db';
 import ohlcDB from '../../lib/ohlc_prismadb'; // Importar la instancia singleton
 import { NetworkConfig } from '../TaskProcessor';
-import { createLogger } from '@/app/indexer/utils';
+import { createLogger } from '../../app/indexer/utils';
 
 // Importar los módulos del ciclo de actualización
 import { fetchBaseData, fetchAmmPairsToProcess, fetch24hVolumeData, fetch7dVolumeData, fetch30dVolumeData } from './update-cycle/data-fetcher';

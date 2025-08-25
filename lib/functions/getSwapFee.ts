@@ -1,6 +1,6 @@
 // src/lib/functions/getSwappFee.ts
 import { callViewFunction } from '../viewFunction/useView'; // Ajusta la ruta y el tipo Network si es necesario
-import { createLogger } from '@/app/indexer/utils'; // Para logging
+import { createLogger } from '../../app/indexer/utils'; // Para logging
 import { NetworkConfig } from '../TaskProcessor'; // Importa la interfaz
 
 const logger = createLogger('getSwapFee-hook');

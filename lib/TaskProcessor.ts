@@ -5,7 +5,7 @@ import { executeGetReservesForAllPairs } from './tasks/executeGetReserves';
 import { executeGetTotalStakedForAllPools } from './tasks/executeGetTotalStaked';
 import { executeUpdateAmmData } from './tasks/executeUpdateAmmData';
 import { executeProcessOHLC } from './tasks/executeProcessOHLC'; // IMPORTAMOS LA NUEVA TAREA
-import prismadb from '@/lib/prismadb';
+import prismadb from './prismadb';
 
 const logger = createLogger('scheduled-tasks');
 
@@ -22,7 +22,7 @@ interface SchedulerSetupConfig {
 
 let activeJobs: Map<string, ScheduledTask> = new Map();
 
-const DELAY_BETWEEN_SUB_TASKS_MS = 10000; // 10 segundos de delay entre sub-tareas
+const DELAY_BETWEEN_SUB_TASKS_MS = 1000; // 1 segundos de delay entre sub-tareas
 
 // Función helper para introducir delays
 function delay(ms: number) {
@@ -40,13 +40,13 @@ async function runUpdateCycleForNetwork(networkConfig: NetworkConfig) {
     await executeGetReservesForAllPairs(prismadb, networkConfig);
     logger.info(`[${networkConfig.networkName}] GetReservesForAllPairs COMPLETED.`);
 
-    await delay(DELAY_BETWEEN_SUB_TASKS_MS); // Espera 10 segundos
+    await delay(DELAY_BETWEEN_SUB_TASKS_MS); // Espera 1 segundos
 
     logger.info(`[${networkConfig.networkName}] Executing GetTotalStakedForAllPools...`);
     await executeGetTotalStakedForAllPools(prismadb, networkConfig);
     logger.info(`[${networkConfig.networkName}] GetTotalStakedForAllPools COMPLETED.`);
 
-    await delay(DELAY_BETWEEN_SUB_TASKS_MS); // Espera 10 segundos
+    await delay(DELAY_BETWEEN_SUB_TASKS_MS); // Espera 1 segundos
 
     logger.info(`[${networkConfig.networkName}] Executing UpdateAmmData (Sync, TVL, APR)...`);
     await executeUpdateAmmData(prismadb, networkConfig);

@@ -1,5 +1,5 @@
 // Constantes de configuración
-import { createLogger } from '@/app/indexer/utils'; // Para logging
+import { createLogger } from '../../app/indexer/utils' // Para logging
 const logger = createLogger('executeGetReserves-task');
 
 const SUPRA_RPC_URL_TESTNET = process.env.NEXT_PUBLIC_SUPRA_RPC_URL_TESTNET || '';

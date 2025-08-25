@@ -1,6 +1,6 @@
 // D:\Crystara\lib\tasks\executeProcessOHLC.ts
 import { PrismaClient } from '../../prisma/generated/main_db';
-import { createLogger } from '@/app/indexer/utils';
+import { createLogger } from '../../app/indexer/utils';
 import { NetworkConfig } from '../TaskProcessor';
 import { signalDB } from '../signalDB'; // Re-importamos el gestor de señales
 

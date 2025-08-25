@@ -2,7 +2,7 @@
 import { PrismaClient } from '../../prisma/generated/main_db';
 import { NetworkConfig } from '../TaskProcessor';
 import { getPoolTotalStaked } from '../functions/getTotalStaked'; // Importa la función correcta
-import { createLogger } from '@/app/indexer/utils';
+import { createLogger } from '../../app/indexer/utils';
 
 const logger = createLogger('executeGetTotalStaked-task');
 
