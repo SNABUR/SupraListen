@@ -20703,6 +20703,7 @@ export namespace Prisma {
     displayOrder: number | null
     priceChange24hPercent: Decimal | null
     priceUsdCurrent: Decimal | null
+    priceAnchor: Decimal | null
   }
 
   export type TokensSumAggregateOutputType = {
@@ -20710,6 +20711,7 @@ export namespace Prisma {
     displayOrder: number | null
     priceChange24hPercent: Decimal | null
     priceUsdCurrent: Decimal | null
+    priceAnchor: Decimal | null
   }
 
   export type TokensMinAggregateOutputType = {
@@ -20731,6 +20733,8 @@ export namespace Prisma {
     marketCapUsd: string | null
     priceChange24hPercent: Decimal | null
     priceUsdCurrent: Decimal | null
+    priceAnchor: Decimal | null
+    lastPriceUpdate: Date | null
     totalSupply: string | null
     updatedAt: Date | null
     volume24hUsd: string | null
@@ -20755,6 +20759,8 @@ export namespace Prisma {
     marketCapUsd: string | null
     priceChange24hPercent: Decimal | null
     priceUsdCurrent: Decimal | null
+    priceAnchor: Decimal | null
+    lastPriceUpdate: Date | null
     totalSupply: string | null
     updatedAt: Date | null
     volume24hUsd: string | null
@@ -20779,6 +20785,8 @@ export namespace Prisma {
     marketCapUsd: number
     priceChange24hPercent: number
     priceUsdCurrent: number
+    priceAnchor: number
+    lastPriceUpdate: number
     totalSupply: number
     updatedAt: number
     volume24hUsd: number
@@ -20791,6 +20799,7 @@ export namespace Prisma {
     displayOrder?: true
     priceChange24hPercent?: true
     priceUsdCurrent?: true
+    priceAnchor?: true
   }
 
   export type TokensSumAggregateInputType = {
@@ -20798,6 +20807,7 @@ export namespace Prisma {
     displayOrder?: true
     priceChange24hPercent?: true
     priceUsdCurrent?: true
+    priceAnchor?: true
   }
 
   export type TokensMinAggregateInputType = {
@@ -20819,6 +20829,8 @@ export namespace Prisma {
     marketCapUsd?: true
     priceChange24hPercent?: true
     priceUsdCurrent?: true
+    priceAnchor?: true
+    lastPriceUpdate?: true
     totalSupply?: true
     updatedAt?: true
     volume24hUsd?: true
@@ -20843,6 +20855,8 @@ export namespace Prisma {
     marketCapUsd?: true
     priceChange24hPercent?: true
     priceUsdCurrent?: true
+    priceAnchor?: true
+    lastPriceUpdate?: true
     totalSupply?: true
     updatedAt?: true
     volume24hUsd?: true
@@ -20867,6 +20881,8 @@ export namespace Prisma {
     marketCapUsd?: true
     priceChange24hPercent?: true
     priceUsdCurrent?: true
+    priceAnchor?: true
+    lastPriceUpdate?: true
     totalSupply?: true
     updatedAt?: true
     volume24hUsd?: true
@@ -20978,6 +20994,8 @@ export namespace Prisma {
     marketCapUsd: string | null
     priceChange24hPercent: Decimal | null
     priceUsdCurrent: Decimal | null
+    priceAnchor: Decimal | null
+    lastPriceUpdate: Date | null
     totalSupply: string | null
     updatedAt: Date
     volume24hUsd: string | null
@@ -21021,6 +21039,8 @@ export namespace Prisma {
     marketCapUsd?: boolean
     priceChange24hPercent?: boolean
     priceUsdCurrent?: boolean
+    priceAnchor?: boolean
+    lastPriceUpdate?: boolean
     totalSupply?: boolean
     updatedAt?: boolean
     volume24hUsd?: boolean
@@ -21050,6 +21070,8 @@ export namespace Prisma {
     marketCapUsd?: boolean
     priceChange24hPercent?: boolean
     priceUsdCurrent?: boolean
+    priceAnchor?: boolean
+    lastPriceUpdate?: boolean
     totalSupply?: boolean
     updatedAt?: boolean
     volume24hUsd?: boolean
@@ -21074,6 +21096,8 @@ export namespace Prisma {
     marketCapUsd?: boolean
     priceChange24hPercent?: boolean
     priceUsdCurrent?: boolean
+    priceAnchor?: boolean
+    lastPriceUpdate?: boolean
     totalSupply?: boolean
     updatedAt?: boolean
     volume24hUsd?: boolean
@@ -21098,12 +21122,14 @@ export namespace Prisma {
     marketCapUsd?: boolean
     priceChange24hPercent?: boolean
     priceUsdCurrent?: boolean
+    priceAnchor?: boolean
+    lastPriceUpdate?: boolean
     totalSupply?: boolean
     updatedAt?: boolean
     volume24hUsd?: boolean
   }
 
-  export type tokensOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "symbol" | "decimals" | "iconUri" | "projectUri" | "network" | "lastMetadataAttempt" | "metadataFetched" | "metadataStandard" | "verified" | "displayOrder" | "originalCoinType" | "circulatingSupply" | "createdAt" | "marketCapUsd" | "priceChange24hPercent" | "priceUsdCurrent" | "totalSupply" | "updatedAt" | "volume24hUsd", ExtArgs["result"]["tokens"]>
+  export type tokensOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "symbol" | "decimals" | "iconUri" | "projectUri" | "network" | "lastMetadataAttempt" | "metadataFetched" | "metadataStandard" | "verified" | "displayOrder" | "originalCoinType" | "circulatingSupply" | "createdAt" | "marketCapUsd" | "priceChange24hPercent" | "priceUsdCurrent" | "priceAnchor" | "lastPriceUpdate" | "totalSupply" | "updatedAt" | "volume24hUsd", ExtArgs["result"]["tokens"]>
   export type tokensInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     ammpairsAsToken0?: boolean | tokens$ammpairsAsToken0Args<ExtArgs>
     ammpairsAsToken1?: boolean | tokens$ammpairsAsToken1Args<ExtArgs>
@@ -21141,6 +21167,8 @@ export namespace Prisma {
       marketCapUsd: string | null
       priceChange24hPercent: Prisma.Decimal | null
       priceUsdCurrent: Prisma.Decimal | null
+      priceAnchor: Prisma.Decimal | null
+      lastPriceUpdate: Date | null
       totalSupply: string | null
       updatedAt: Date
       volume24hUsd: string | null
@@ -21589,6 +21617,8 @@ export namespace Prisma {
     readonly marketCapUsd: FieldRef<"tokens", 'String'>
     readonly priceChange24hPercent: FieldRef<"tokens", 'Decimal'>
     readonly priceUsdCurrent: FieldRef<"tokens", 'Decimal'>
+    readonly priceAnchor: FieldRef<"tokens", 'Decimal'>
+    readonly lastPriceUpdate: FieldRef<"tokens", 'DateTime'>
     readonly totalSupply: FieldRef<"tokens", 'String'>
     readonly updatedAt: FieldRef<"tokens", 'DateTime'>
     readonly volume24hUsd: FieldRef<"tokens", 'String'>
@@ -27083,6 +27113,8 @@ export namespace Prisma {
     marketCapUsd: 'marketCapUsd',
     priceChange24hPercent: 'priceChange24hPercent',
     priceUsdCurrent: 'priceUsdCurrent',
+    priceAnchor: 'priceAnchor',
+    lastPriceUpdate: 'lastPriceUpdate',
     totalSupply: 'totalSupply',
     updatedAt: 'updatedAt',
     volume24hUsd: 'volume24hUsd'
@@ -28810,6 +28842,8 @@ export namespace Prisma {
     marketCapUsd?: StringNullableFilter<"tokens"> | string | null
     priceChange24hPercent?: DecimalNullableFilter<"tokens"> | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: DecimalNullableFilter<"tokens"> | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: DecimalNullableFilter<"tokens"> | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: DateTimeNullableFilter<"tokens"> | Date | string | null
     totalSupply?: StringNullableFilter<"tokens"> | string | null
     updatedAt?: DateTimeFilter<"tokens"> | Date | string
     volume24hUsd?: StringNullableFilter<"tokens"> | string | null
@@ -28838,6 +28872,8 @@ export namespace Prisma {
     marketCapUsd?: SortOrderInput | SortOrder
     priceChange24hPercent?: SortOrderInput | SortOrder
     priceUsdCurrent?: SortOrderInput | SortOrder
+    priceAnchor?: SortOrderInput | SortOrder
+    lastPriceUpdate?: SortOrderInput | SortOrder
     totalSupply?: SortOrderInput | SortOrder
     updatedAt?: SortOrder
     volume24hUsd?: SortOrderInput | SortOrder
@@ -28870,6 +28906,8 @@ export namespace Prisma {
     marketCapUsd?: StringNullableFilter<"tokens"> | string | null
     priceChange24hPercent?: DecimalNullableFilter<"tokens"> | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: DecimalNullableFilter<"tokens"> | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: DecimalNullableFilter<"tokens"> | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: DateTimeNullableFilter<"tokens"> | Date | string | null
     totalSupply?: StringNullableFilter<"tokens"> | string | null
     updatedAt?: DateTimeFilter<"tokens"> | Date | string
     volume24hUsd?: StringNullableFilter<"tokens"> | string | null
@@ -28898,6 +28936,8 @@ export namespace Prisma {
     marketCapUsd?: SortOrderInput | SortOrder
     priceChange24hPercent?: SortOrderInput | SortOrder
     priceUsdCurrent?: SortOrderInput | SortOrder
+    priceAnchor?: SortOrderInput | SortOrder
+    lastPriceUpdate?: SortOrderInput | SortOrder
     totalSupply?: SortOrderInput | SortOrder
     updatedAt?: SortOrder
     volume24hUsd?: SortOrderInput | SortOrder
@@ -28930,6 +28970,8 @@ export namespace Prisma {
     marketCapUsd?: StringNullableWithAggregatesFilter<"tokens"> | string | null
     priceChange24hPercent?: DecimalNullableWithAggregatesFilter<"tokens"> | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: DecimalNullableWithAggregatesFilter<"tokens"> | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: DecimalNullableWithAggregatesFilter<"tokens"> | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: DateTimeNullableWithAggregatesFilter<"tokens"> | Date | string | null
     totalSupply?: StringNullableWithAggregatesFilter<"tokens"> | string | null
     updatedAt?: DateTimeWithAggregatesFilter<"tokens"> | Date | string
     volume24hUsd?: StringNullableWithAggregatesFilter<"tokens"> | string | null
@@ -30914,6 +30956,8 @@ export namespace Prisma {
     marketCapUsd?: string | null
     priceChange24hPercent?: Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: Date | string | null
     totalSupply?: string | null
     updatedAt?: Date | string
     volume24hUsd?: string | null
@@ -30942,6 +30986,8 @@ export namespace Prisma {
     marketCapUsd?: string | null
     priceChange24hPercent?: Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: Date | string | null
     totalSupply?: string | null
     updatedAt?: Date | string
     volume24hUsd?: string | null
@@ -30970,6 +31016,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30998,6 +31046,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31026,6 +31076,8 @@ export namespace Prisma {
     marketCapUsd?: string | null
     priceChange24hPercent?: Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: Date | string | null
     totalSupply?: string | null
     updatedAt?: Date | string
     volume24hUsd?: string | null
@@ -31050,6 +31102,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31074,6 +31128,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null
@@ -32849,6 +32905,8 @@ export namespace Prisma {
     marketCapUsd?: SortOrder
     priceChange24hPercent?: SortOrder
     priceUsdCurrent?: SortOrder
+    priceAnchor?: SortOrder
+    lastPriceUpdate?: SortOrder
     totalSupply?: SortOrder
     updatedAt?: SortOrder
     volume24hUsd?: SortOrder
@@ -32859,6 +32917,7 @@ export namespace Prisma {
     displayOrder?: SortOrder
     priceChange24hPercent?: SortOrder
     priceUsdCurrent?: SortOrder
+    priceAnchor?: SortOrder
   }
 
   export type tokensMaxOrderByAggregateInput = {
@@ -32880,6 +32939,8 @@ export namespace Prisma {
     marketCapUsd?: SortOrder
     priceChange24hPercent?: SortOrder
     priceUsdCurrent?: SortOrder
+    priceAnchor?: SortOrder
+    lastPriceUpdate?: SortOrder
     totalSupply?: SortOrder
     updatedAt?: SortOrder
     volume24hUsd?: SortOrder
@@ -32904,6 +32965,8 @@ export namespace Prisma {
     marketCapUsd?: SortOrder
     priceChange24hPercent?: SortOrder
     priceUsdCurrent?: SortOrder
+    priceAnchor?: SortOrder
+    lastPriceUpdate?: SortOrder
     totalSupply?: SortOrder
     updatedAt?: SortOrder
     volume24hUsd?: SortOrder
@@ -32914,6 +32977,7 @@ export namespace Prisma {
     displayOrder?: SortOrder
     priceChange24hPercent?: SortOrder
     priceUsdCurrent?: SortOrder
+    priceAnchor?: SortOrder
   }
 
   export type trust_poolsCountOrderByAggregateInput = {
@@ -34349,6 +34413,8 @@ export namespace Prisma {
     marketCapUsd?: string | null
     priceChange24hPercent?: Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: Date | string | null
     totalSupply?: string | null
     updatedAt?: Date | string
     volume24hUsd?: string | null
@@ -34376,6 +34442,8 @@ export namespace Prisma {
     marketCapUsd?: string | null
     priceChange24hPercent?: Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: Date | string | null
     totalSupply?: string | null
     updatedAt?: Date | string
     volume24hUsd?: string | null
@@ -34408,6 +34476,8 @@ export namespace Prisma {
     marketCapUsd?: string | null
     priceChange24hPercent?: Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: Date | string | null
     totalSupply?: string | null
     updatedAt?: Date | string
     volume24hUsd?: string | null
@@ -34435,6 +34505,8 @@ export namespace Prisma {
     marketCapUsd?: string | null
     priceChange24hPercent?: Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: Date | string | null
     totalSupply?: string | null
     updatedAt?: Date | string
     volume24hUsd?: string | null
@@ -34478,6 +34550,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34505,6 +34579,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34543,6 +34619,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34570,6 +34648,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35321,6 +35401,8 @@ export namespace Prisma {
     marketCapUsd?: string | null
     priceChange24hPercent?: Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: Date | string | null
     totalSupply?: string | null
     updatedAt?: Date | string
     volume24hUsd?: string | null
@@ -35348,6 +35430,8 @@ export namespace Prisma {
     marketCapUsd?: string | null
     priceChange24hPercent?: Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: Date | string | null
     totalSupply?: string | null
     updatedAt?: Date | string
     volume24hUsd?: string | null
@@ -35380,6 +35464,8 @@ export namespace Prisma {
     marketCapUsd?: string | null
     priceChange24hPercent?: Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: Date | string | null
     totalSupply?: string | null
     updatedAt?: Date | string
     volume24hUsd?: string | null
@@ -35407,6 +35493,8 @@ export namespace Prisma {
     marketCapUsd?: string | null
     priceChange24hPercent?: Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: Date | string | null
     totalSupply?: string | null
     updatedAt?: Date | string
     volume24hUsd?: string | null
@@ -35519,6 +35607,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35546,6 +35636,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35584,6 +35676,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35611,6 +35705,8 @@ export namespace Prisma {
     marketCapUsd?: NullableStringFieldUpdateOperationsInput | string | null
     priceChange24hPercent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceUsdCurrent?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceAnchor?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lastPriceUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalSupply?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     volume24hUsd?: NullableStringFieldUpdateOperationsInput | string | null

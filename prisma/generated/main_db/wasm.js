@@ -383,6 +383,8 @@ exports.Prisma.TokensScalarFieldEnum = {
   marketCapUsd: 'marketCapUsd',
   priceChange24hPercent: 'priceChange24hPercent',
   priceUsdCurrent: 'priceUsdCurrent',
+  priceAnchor: 'priceAnchor',
+  lastPriceUpdate: 'lastPriceUpdate',
   totalSupply: 'totalSupply',
   updatedAt: 'updatedAt',
   volume24hUsd: 'volume24hUsd'

@@ -7,8 +7,8 @@ declare global {
 const prismadb = globalThis.prisma || new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
   transactionOptions: {
-    maxWait: 15000, // 15 segundos
-    timeout: 15000, // 15 segundos
+    maxWait: 30000, // 30 segundos
+    timeout: 30000, // 30 segundos
   },
 });
 

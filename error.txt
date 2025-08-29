@@ -1,318 +1,330 @@
-rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-[scheduled-tasks] INFO: Triggering OHLC Processing for supra-mainnet (cron: * * * * *)
-[scheduled-tasks] INFO: Triggering Master Update Cycle for supra-testnet (cron: * * * * *)
-[scheduled-tasks] INFO: Starting update cycle for supra-testnet...
-[scheduled-tasks] INFO: [supra-testnet] Executing UpdateAmmData (Sync, TVL, APR)...
-[update-amm-data-task] INFO: [supra-testnet] Iniciando ciclo de actualización modular...
-[scheduled-tasks] INFO: Triggering OHLC Processing for supra-testnet (cron: * * * * *)
-[scheduled-tasks] INFO: Triggering Master Update Cycle for supra-mainnet (cron: * * * * *)
-[scheduled-tasks] INFO: Starting update cycle for supra-mainnet...
-[scheduled-tasks] INFO: [supra-mainnet] Executing UpdateAmmData (Sync, TVL, APR)...
-[update-amm-data-task] INFO: [supra-mainnet] Iniciando ciclo de actualización modular...
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076084
-[poller] INFO: [supra-mainnet] Updated latest block height from 21076080 to 21076084
-[poller] INFO: [supra-mainnet] Processing blocks 21076081 to 21076084 (Latest: 21076084)
-[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30140544
-[poller] INFO: [supra-testnet] Updated latest block height from 30140540 to 30140544
-[poller] INFO: [supra-testnet] Processing blocks 30130572 to 30130581 (Latest: 30140544)
-prisma:query SELECT 1
-prisma:query BEGIN
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21076081-21076085
+5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC: {
+  "result": [
+    {
+      "decimals": 6,
+      "name": "DexlynUSDC",
+      "supply": {
+        "vec": [
+          {
+            "aggregator": {
+              "vec": []
+            },
+            "integer": {
+              "vec": [
+                {
+                  "limit": "340282366920938463463374607431768211455",
+                  "value": "327448357029"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "symbol": "dexUSDC"
+    }
+  ]
+}
+[dbUtils] INFO: [supra-mainnet] Successfully fetched Coin-Legacy metadata for primary 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC: Name=DexlynUSDC, Symbol=dexUSDC, Decimals=6
+[dbUtils] INFO: [getOrCreateToken] Searching for token in DB with primary address: 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC
+[dexlynSwapHandler] INFO: Successfully created DexlynSwapEvent.
+[eventProcessor] INFO: Successfully processed and committed transaction for event Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365399 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet.
+[eventProcessor] INFO: Finished processing batch of 1 events.
+[eventProcessor] DEBUG: Debug: processEvents returning createdNewData: false
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846187
+[poller] INFO: [supra-testnet] Updated latest block height from 30846182 to 30846187
+[poller] INFO: [supra-testnet] Processing blocks 30846183 to 30846187 (Latest: 30846187)
 [rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-prisma:query DEALLOCATE ALL
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076085
-[poller] INFO: [supra-mainnet] Updated latest block height from 21076084 to 21076085
-[poller] INFO: [supra-mainnet] Processing blocks 21076085 to 21076085 (Latest: 21076085)
-prisma:query SELECT "public"."tokens"."network", "public"."tokens"."id", "public"."tokens"."name", "public"."tokens"."symbol", "public"."tokens"."decimals", "public"."tokens"."iconUri", "public"."tokens"."projectUri", "public"."tokens"."lastMetadataAttempt", "public"."tokens"."metadataFetched", "public"."tokens"."metadataStandard", "public"."tokens"."verified", "public"."tokens"."displayOrder", "public"."tokens"."originalCoinType", "public"."tokens"."circulatingSupply", "public"."tokens"."createdAt", "public"."tokens"."marketCapUsd", "public"."tokens"."priceChange24hPercent", "public"."tokens"."priceUsdCurrent", "public"."tokens"."totalSupply", "public"."tokens"."updatedAt", "public"."tokens"."volume24hUsd" FROM "public"."tokens" WHERE "public"."tokens"."network" = $1 OFFSET $2
-prisma:query COMMIT
-prisma:query BEGIN
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30130572-30130582
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846183-30846188
 [rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
-prisma:query DEALLOCATE ALL
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21076085-21076086
-[rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-prisma:query SELECT "public"."tokens"."network", "public"."tokens"."id", "public"."tokens"."name", "public"."tokens"."symbol", "public"."tokens"."decimals", "public"."tokens"."iconUri", "public"."tokens"."projectUri", "public"."tokens"."lastMetadataAttempt", "public"."tokens"."metadataFetched", "public"."tokens"."metadataStandard", "public"."tokens"."verified", "public"."tokens"."displayOrder", "public"."tokens"."originalCoinType", "public"."tokens"."circulatingSupply", "public"."tokens"."createdAt", "public"."tokens"."marketCapUsd", "public"."tokens"."priceChange24hPercent", "public"."tokens"."priceUsdCurrent", "public"."tokens"."totalSupply", "public"."tokens"."updatedAt", "public"."tokens"."volume24hUsd" FROM "public"."tokens" WHERE "public"."tokens"."network" = $1 OFFSET $2
-prisma:query BEGIN
-prisma:query COMMIT
-prisma:query DEALLOCATE ALL
-[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30140548
-[poller] INFO: [supra-testnet] Updated latest block height from 30140544 to 30140548
-[poller] INFO: [supra-testnet] Processing blocks 30130582 to 30130591 (Latest: 30140548)
-prisma:query BEGIN
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076086
-[poller] INFO: [supra-mainnet] Updated latest block height from 21076085 to 21076086
-[poller] INFO: [supra-mainnet] Processing blocks 21076086 to 21076086 (Latest: 21076086)
-prisma:query DEALLOCATE ALL
-prisma:query SELECT "public"."token_prices"."id", "public"."token_prices"."network", "public"."token_prices"."tokenAddress", "public"."token_prices"."priceUsd", "public"."token_prices"."priceAnchor", "public"."token_prices"."source", "public"."token_prices"."lastUpdatedAt" FROM "public"."token_prices" WHERE "public"."token_prices"."network" = $1 OFFSET $2
-prisma:query SELECT "public"."token_prices"."id", "public"."token_prices"."network", "public"."token_prices"."tokenAddress", "public"."token_prices"."priceUsd", "public"."token_prices"."priceAnchor", "public"."token_prices"."source", "public"."token_prices"."lastUpdatedAt" FROM "public"."token_prices" WHERE "public"."token_prices"."network" = $1 OFFSET $2
-prisma:query COMMIT
-[getSwapFee-hook] INFO: Fetching Staked for pair on supra-testnet via 0x3045d27b5fada1e30897a741fb184e48ef0bff3717aea23918ebc1e5c7153083::amm_controller::get_swap_fee
-prisma:query COMMIT
-[getSwapFee-hook] INFO: Fetching Staked for pair on supra-mainnet via 0x3045d27b5fada1e30897a741fb184e48ef0bff3717aea23918ebc1e5c7153083::amm_controller::get_swap_fee
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21076086-21076087
-[rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30130582-30130592
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846192
+[poller] INFO: [supra-testnet] Updated latest block height from 30846187 to 30846192
+[poller] INFO: [supra-testnet] Processing blocks 30846188 to 30846192 (Latest: 30846192)
+[ohlc-aggregator-1h] INFO: [supra-mainnet] Upserted 1 1h OHLC records to Supabase for pair 0x1::supra_coin::SupraCoin/0x8fd1550a61055c1406e04d1a0ddf7049d00c889b59f6823f21ca7d842e1eaf3c.
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846188-30846193
 [rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
-[executeGetReserves-task] DEBUG: this is the data!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {"result":[25]}
-[getSwapFee-hook] DEBUG: this is the response from call view function [object Object]
-[getSwapFee-hook] DEBUG: Swap Fee in BPS: [25]
-[executeGetReserves-task] DEBUG: this is the data!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {"result":[25]}
-[getSwapFee-hook] DEBUG: this is the response from call view function [object Object]
-[getSwapFee-hook] DEBUG: Swap Fee in BPS: [25]
-prisma:info Starting a postgresql pool with 13 connections in PgBouncer mode.
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076089
-[poller] INFO: [supra-mainnet] Updated latest block height from 21076086 to 21076089
-[poller] INFO: [supra-mainnet] Processing blocks 21076087 to 21076089 (Latest: 21076089)
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21076087-21076090
-[rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30140554
-[poller] INFO: [supra-testnet] Updated latest block height from 30140548 to 30140554
-[poller] INFO: [supra-testnet] Processing blocks 30130592 to 30130601 (Latest: 30140554)
-prisma:query BEGIN
-prisma:query DEALLOCATE ALL
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076090
-[poller] INFO: [supra-mainnet] Updated latest block height from 21076089 to 21076090
-[poller] INFO: [supra-mainnet] Processing blocks 21076090 to 21076090 (Latest: 21076090)
-prisma:query SELECT "public"."Pair"."id", "public"."Pair"."network", "public"."Pair"."token0Id", "public"."Pair"."token1Id", "public"."Pair"."spikeyAmmPairAddress", "public"."Pair"."spikeyAmmReserve0", "public"."Pair"."spikeyAmmReserve1", "public"."Pair"."lastStatsUpdate", "public"."Pair"."createdAt" FROM "public"."Pair" WHERE ("public"."Pair"."network" = $1 AND "public"."Pair"."spikeyAmmReserve0" IS NOT NULL AND "public"."Pair"."spikeyAmmReserve1" IS NOT NULL) OFFSET $2
-prisma:query COMMIT
-prisma:query BEGIN
-prisma:query DEALLOCATE ALL
-prisma:query BEGIN
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30130592-30130602
+[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21365406
+[poller] INFO: [supra-mainnet] Updated latest block height from 21365401 to 21365406
+[poller] INFO: [supra-mainnet] Processing blocks 21365402 to 21365406 (Latest: 21365406)
+[task-processor] INFO: Finished 1-hour remote aggregation for supra-mainnet
+[task-processor] INFO: Finished 5-minute remote aggregation for supra-mainnet
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846196
+[poller] INFO: [supra-testnet] Updated latest block height from 30846192 to 30846196
+[poller] INFO: [supra-testnet] Processing blocks 30846193 to 30846196 (Latest: 30846196)
+[rpcClient] DEBUG: Fetched 2 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21365402-21365407
+[poller] INFO: [supra-mainnet] Fetched 2 events from blocks 21365402-21365406.
+[eventProcessor] DEBUG: Processing 2 RpcEvents in current batch.
+[eventProcessor] DEBUG: Starting transaction for event: Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet
+[dexlynSwapHandler] DEBUG: Processing DexlynSwapEvent {"curve":"0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::curves::Uncorrelated","pair_x":"0x1::supra_coin::SupraCoin","pair_y":"0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC","reserve_x":"4738488476373982","reserve_y":"168653346598","timestamp":"1756270824","x_in":"0","x_out":"5000000000","y_in":"178497","y_out":"0"}
+[dexlynSwapHandler] INFO: New DexlynSwapEvent found. Creating...
+[dbUtils] INFO: [getOrCreateToken] Starting for address: 0x1::supra_coin::SupraCoin
+[dbUtils] DEBUG: [supra-mainnet] Token 0x1::supra_coin::SupraCoin is Coin-Legacy. Treating as primary.
+[dbUtils] INFO: [supra-mainnet] Primary token 0x1::supra_coin::SupraCoin appears to be Coin-Legacy. Attempting to fetch Coin-Legacy specific info using fetchCoinInfoResource.
+[fetchResource] DEBUG: Fetching resource from: https://rpc-mainnet.supra.com/rpc/v1/accounts/0x1/resources/0x1%3A%3Acoin%3A%3ACoinInfo%3C0x1%3A%3Asupra_coin%3A%3ASupraCoin%3E
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846193-30846197
 [rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21076090-21076091
-[rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-prisma:query DEALLOCATE ALL
-prisma:query SELECT "public"."OhlcData"."id", "public"."OhlcData"."timestamp" FROM "public"."OhlcData" WHERE ("public"."OhlcData"."network" = $1 AND "public"."OhlcData"."timeframe" = $2 AND "public"."OhlcData"."ammSource" = $3) ORDER BY "public"."OhlcData"."timestamp" DESC LIMIT $4 OFFSET $5
-prisma:query COMMIT
-prisma:query SELECT "public"."Pair"."id", "public"."Pair"."network", "public"."Pair"."token0Id", "public"."Pair"."token1Id", "public"."Pair"."spikeyAmmPairAddress", "public"."Pair"."spikeyAmmReserve0", "public"."Pair"."spikeyAmmReserve1", "public"."Pair"."lastStatsUpdate", "public"."Pair"."createdAt" FROM "public"."Pair" WHERE ("public"."Pair"."network" = $1 AND "public"."Pair"."spikeyAmmReserve0" IS NOT NULL AND "public"."Pair"."spikeyAmmReserve1" IS NOT NULL) OFFSET $2
-prisma:query BEGIN
-prisma:query DEALLOCATE ALL
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076091
-[poller] INFO: [supra-mainnet] Updated latest block height from 21076090 to 21076091
-[poller] INFO: [supra-mainnet] Processing blocks 21076091 to 21076091 (Latest: 21076091)
-prisma:query SELECT "public"."Token"."id", "public"."Token"."network", "public"."Token"."address", "public"."Token"."wrappedAddress", "public"."Token"."symbol", "public"."Token"."name", "public"."Token"."decimals", "public"."Token"."maxSupply", "public"."Token"."circulatingSupply", "public"."Token"."createdAt" FROM "public"."Token" WHERE "public"."Token"."id" IN ($1,$2) OFFSET $3
-prisma:query SELECT SUM("public"."OhlcData"."volume"), "public"."OhlcData"."token0Address", "public"."OhlcData"."token1Address" FROM "public"."OhlcData" WHERE ("public"."OhlcData"."network" = $1 AND "public"."OhlcData"."timeframe" = $2 AND "public"."OhlcData"."ammSource" = $3 AND "public"."OhlcData"."timestamp" >= $4) GROUP BY "public"."OhlcData"."token0Address", "public"."OhlcData"."token1Address" OFFSET $5
-prisma:query SELECT "public"."Token"."id", "public"."Token"."network", "public"."Token"."address", "public"."Token"."wrappedAddress", "public"."Token"."symbol", "public"."Token"."name", "public"."Token"."decimals", "public"."Token"."maxSupply", "public"."Token"."circulatingSupply", "public"."Token"."createdAt" FROM "public"."Token" WHERE "public"."Token"."id" IN ($1,$2) OFFSET $3
-prisma:query COMMIT
-prisma:query COMMIT
-prisma:query BEGIN
-prisma:query BEGIN
-prisma:query DEALLOCATE ALL
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21076091-21076092
-[rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30140558
-[poller] INFO: [supra-testnet] Updated latest block height from 30140554 to 30140558
-[poller] INFO: [supra-testnet] Processing blocks 30130602 to 30130611 (Latest: 30140558)
-prisma:query DEALLOCATE ALL
-prisma:query SELECT SUM("public"."OhlcData"."volume"), "public"."OhlcData"."token0Address", "public"."OhlcData"."token1Address" FROM "public"."OhlcData" WHERE ("public"."OhlcData"."network" = $1 AND "public"."OhlcData"."timeframe" = $2 AND "public"."OhlcData"."ammSource" = $3 AND "public"."OhlcData"."timestamp" >= $4) GROUP BY "public"."OhlcData"."token0Address", "public"."OhlcData"."token1Address" OFFSET $5
-prisma:query COMMIT
-[update-amm-data-task] INFO: [supra-testnet] Datos base cargados, 0 pares con reservas, 0 volúmenes de 24h, 0 volúmenes de 7d y 0 volúmenes de 30d encontrados.
-[update-amm-data-task] INFO: [supra-testnet] 0 actualizaciones de pares AMM preparadas.
-[LOG] processStakingPools: Iniciando para la red supra-testnet
-prisma:query SELECT "public"."OhlcData"."id", "public"."OhlcData"."timestamp" FROM "public"."OhlcData" WHERE ("public"."OhlcData"."network" = $1 AND "public"."OhlcData"."timeframe" = $2 AND "public"."OhlcData"."ammSource" = $3) ORDER BY "public"."OhlcData"."timestamp" DESC LIMIT $4 OFFSET $5
-prisma:query COMMIT
-prisma:query BEGIN
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076092
-[poller] INFO: [supra-mainnet] Updated latest block height from 21076091 to 21076092
-[poller] INFO: [supra-mainnet] Processing blocks 21076092 to 21076092 (Latest: 21076092)
-prisma:query BEGIN
-prisma:query DEALLOCATE ALL
-prisma:query DEALLOCATE ALL
-prisma:query SELECT "public"."OhlcData"."id", "public"."OhlcData"."network", "public"."OhlcData"."ammSource", "public"."OhlcData"."timeframe", "public"."OhlcData"."timestamp", "public"."OhlcData"."open", "public"."OhlcData"."high", "public"."OhlcData"."low", "public"."OhlcData"."close", "public"."OhlcData"."volume", "public"."OhlcData"."tradeCount", "public"."OhlcData"."createdAt", "public"."OhlcData"."updatedAt", "public"."OhlcData"."token0Address", "public"."OhlcData"."token1Address" FROM "public"."OhlcData" WHERE ("public"."OhlcData"."network" = $1 AND "public"."OhlcData"."timeframe" = $2 AND "public"."OhlcData"."ammSource" = $3 AND "public"."OhlcData"."timestamp" = $4) OFFSET $5
-prisma:query COMMIT
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21076092-21076093
-[rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-prisma:query SELECT "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent" FROM "public"."staking_pools" WHERE "public"."staking_pools"."network" = $1 OFFSET $2
-prisma:query BEGIN
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30130602-30130612
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846202
+[poller] INFO: [supra-testnet] Updated latest block height from 30846196 to 30846202
+[poller] INFO: [supra-testnet] Processing blocks 30846197 to 30846202 (Latest: 30846202)
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846197-30846203
 [rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
-prisma:query COMMIT
-[LOG] processStakingPools: 8 pools de staking encontrados.
-[LOG] processStakingPools: Pool 2756 - TVL calculado: 2.09 USD
-[LOG] calculateStakingPoolApr: Faltan datos para el pool 2756. Omitiendo cálculo de APR.
-[LOG] processStakingPools: Pool 95 - TVL calculado: 0.00 USD
-[LOG] calculateStakingPoolApr: Datos cero para el pool 95 (rewardPerSec, totalStakedAmount, o priceStakeTokenUsd). Retornando 0.00.
-[LOG] processStakingPools: Pool 275 - TVL calculado: 0.00 USD
-[LOG] calculateStakingPoolApr: Pool 275 - APR calculado: 1.78
-[LOG] processStakingPools: Pool 5247 - TVL calculado: 0.01 USD
-[LOG] calculateStakingPoolApr: Faltan datos para el pool 5247. Omitiendo cálculo de APR.
-[LOG] processStakingPools: Pool 97 - TVL calculado: 0.00 USD
-[LOG] calculateStakingPoolApr: Pool 97 - APR calculado: 312334.21
-[LOG] processStakingPools: Pool 96 - TVL calculado: 0.03 USD
-[LOG] calculateStakingPoolApr: Pool 96 - APR calculado: 53637.03
-[LOG] processStakingPools: Pool 3245 - TVL calculado: 0.00 USD
-[LOG] calculateStakingPoolApr: Faltan datos para el pool 3245. Omitiendo cálculo de APR.
-[LOG] processStakingPools: Pool 3020 - TVL calculado: 0.00 USD
-[LOG] calculateStakingPoolApr: Faltan datos para el pool 3020. Omitiendo cálculo de APR.
-[LOG] processStakingPools: Finalizado. TVL total de Staking: 2.13 USD
-[update-amm-data-task] INFO: [supra-testnet] 8 actualizaciones de pools de staking preparadas.
-[LOG] prepareProtocolStatsUpdate: Preparando estadísticas para la red supra-testnet en el timestamp 2025-08-23T20:00:00.000Z
-[LOG] prepareProtocolStatsUpdate: TVL Total de la Plataforma: 2.126644 USD
-[LOG] prepareProtocolStatsUpdate: TVL de AMM: 0.000000 USD
-[LOG] prepareProtocolStatsUpdate: TVL de Staking: 2.126644 USD
-[update-amm-data-task] INFO: [supra-testnet] Actualización de estadísticas del protocolo preparada.
-[update-amm-data-task] INFO: [supra-testnet] Ejecutando 9 operaciones en una transacción...
-prisma:query DEALLOCATE ALL
-prisma:query BEGIN
-prisma:query SELECT SUM("public"."OhlcData"."volume"), "public"."OhlcData"."token0Address", "public"."OhlcData"."token1Address" FROM "public"."OhlcData" WHERE ("public"."OhlcData"."network" = $1 AND "public"."OhlcData"."timeframe" = $2 AND "public"."OhlcData"."ammSource" = $3 AND "public"."OhlcData"."timestamp" >= $4) GROUP BY "public"."OhlcData"."token0Address", "public"."OhlcData"."token1Address" OFFSET $5
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076094
-[poller] INFO: [supra-mainnet] Updated latest block height from 21076092 to 21076094
-[poller] INFO: [supra-mainnet] Processing blocks 21076093 to 21076094 (Latest: 21076094)
-prisma:query DEALLOCATE ALL
-prisma:query COMMIT
-prisma:query BEGIN
-prisma:query DEALLOCATE ALL
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query SELECT SUM("public"."OhlcData"."volume"), "public"."OhlcData"."token0Address", "public"."OhlcData"."token1Address" FROM "public"."OhlcData" WHERE ("public"."OhlcData"."network" = $1 AND "public"."OhlcData"."timeframe" = $2 AND "public"."OhlcData"."ammSource" = $3 AND "public"."OhlcData"."timestamp" >= $4) GROUP BY "public"."OhlcData"."token0Address", "public"."OhlcData"."token1Address" OFFSET $5
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21076093-21076095
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846208
+[poller] INFO: [supra-testnet] Updated latest block height from 30846202 to 30846208
+[poller] INFO: [supra-testnet] Processing blocks 30846203 to 30846208 (Latest: 30846208)
+[fetchResource] DEBUG: Successfully fetched resource data: {"result":[{"decimals":8,"name":"Supra Coin","supply":{"vec":[{"aggregator":{"vec":[{"handle":"0x9115cf36a1bc37ccc0e3d1ceadcb72adddc65b19021dbd0623c06ce039e74fc1","key":"0x46ee43b58627dff22544be91ddce928242ede01f52a281da8b372813a683abd6","limit":"10000000000000000000"}]},"integer":{"vec":[]}}]},"symbol":"SUPRA"}]}
+[dbUtils] DEBUG: [supra-mainnet] Raw CoinInfo resource for 0x1::supra_coin::SupraCoin: {
+  "result": [
+    {
+      "decimals": 8,
+      "name": "Supra Coin",
+      "supply": {
+        "vec": [
+          {
+            "aggregator": {
+              "vec": [
+                {
+                  "handle": "0x9115cf36a1bc37ccc0e3d1ceadcb72adddc65b19021dbd0623c06ce039e74fc1",
+                  "key": "0x46ee43b58627dff22544be91ddce928242ede01f52a281da8b372813a683abd6",
+                  "limit": "10000000000000000000"
+                }
+              ]
+            },
+            "integer": {
+              "vec": []
+            }
+          }
+        ]
+      },
+      "symbol": "SUPRA"
+    }
+  ]
+}
+[dbUtils] INFO: [supra-mainnet] Successfully fetched Coin-Legacy metadata for primary 0x1::supra_coin::SupraCoin: Name=Supra Coin, Symbol=SUPRA, Decimals=8
+[dbUtils] INFO: [getOrCreateToken] Searching for token in DB with primary address: 0x1::supra_coin::SupraCoin
+[dbUtils] INFO: [getOrCreateToken] Starting for address: 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC
+[dbUtils] DEBUG: [supra-mainnet] Token 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC is Coin-Legacy. Treating as primary.
+[dbUtils] INFO: [supra-mainnet] Primary token 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC appears to be Coin-Legacy. Attempting to fetch Coin-Legacy specific info using fetchCoinInfoResource.
+[fetchResource] DEBUG: Fetching resource from: https://rpc-mainnet.supra.com/rpc/v1/accounts/0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b/resources/0x1%3A%3Acoin%3A%3ACoinInfo%3C0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b%3A%3Ahyper_coin%3A%3ADexlynUSDC%3E
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846203-30846209
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846213
+[poller] INFO: [supra-testnet] Updated latest block height from 30846208 to 30846213
+[poller] INFO: [supra-testnet] Processing blocks 30846209 to 30846213 (Latest: 30846213)
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846209-30846214
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846218
+[poller] INFO: [supra-testnet] Updated latest block height from 30846213 to 30846218
+[poller] INFO: [supra-testnet] Processing blocks 30846214 to 30846218 (Latest: 30846218)
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846214-30846219
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[fetchResource] DEBUG: Successfully fetched resource data: {"result":[{"decimals":6,"name":"DexlynUSDC","supply":{"vec":[{"aggregator":{"vec":[]},"integer":{"vec":[{"limit":"340282366920938463463374607431768211455","value":"327448357029"}]}}]},"symbol":"dexUSDC"}]}
+[dbUtils] DEBUG: [supra-mainnet] Raw CoinInfo resource for 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC: {
+  "result": [
+    {
+      "decimals": 6,
+      "name": "DexlynUSDC",
+      "supply": {
+        "vec": [
+          {
+            "aggregator": {
+              "vec": []
+            },
+            "integer": {
+              "vec": [
+                {
+                  "limit": "340282366920938463463374607431768211455",
+                  "value": "327448357029"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "symbol": "dexUSDC"
+    }
+  ]
+}
+[dbUtils] INFO: [supra-mainnet] Successfully fetched Coin-Legacy metadata for primary 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC: Name=DexlynUSDC, Symbol=dexUSDC, Decimals=6
+[dbUtils] INFO: [getOrCreateToken] Searching for token in DB with primary address: 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC
+[dexlynSwapHandler] INFO: Successfully created DexlynSwapEvent.
+[eventProcessor] INFO: Successfully processed and committed transaction for event Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet.
+[eventProcessor] DEBUG: Starting transaction for event: Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet
+[dexlynSwapHandler] DEBUG: Processing DexlynSwapEvent {"curve":"0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::curves::Uncorrelated","pair_x":"0x635f53147391781c93bf3e1c68dcea5e2f7234ec371b0f241d150465606a9007::ROBBIE::ROBBIE","pair_y":"0x1::supra_coin::SupraCoin","reserve_x":"254630546965562","reserve_y":"49061055261965","timestamp":"1756270827","x_in":"0","x_out":"10349009","y_in":"2000000","y_out":"0"}
+[dexlynSwapHandler] DEBUG: DexlynSwapEvent already exists. Skipping creation.
+[eventProcessor] INFO: Successfully processed and committed transaction for event Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet.
+[eventProcessor] INFO: Finished processing batch of 2 events.
+[eventProcessor] DEBUG: Debug: processEvents returning createdNewData: false
+[poller] ERROR: [supra-mainnet] Error processing batch 21365402-21365406: PrismaClientKnownRequestError: Transaction API error: Transaction already closed: A commit cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 8588 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+    at Qr.transaction (webpack-internal:///(rsc)/./prisma/dist/generated/supabase/runtime/library.js:6414:33)
+    at async Proxy._transactionWithCallback (webpack-internal:///(rsc)/./prisma/dist/generated/supabase/runtime/library.js:7713:56)
+    at async EventPoller.processBatch (webpack-internal:///(rsc)/./app/indexer/poller.ts:166:37)
+    at async EventPoller.start (webpack-internal:///(rsc)/./app/indexer/poller.ts:90:21)
+    at async Promise.all (index 1)
+    at async startIndexer (webpack-internal:///(rsc)/./app/indexer/index.ts:98:13)
+    at async GET (webpack-internal:///(rsc)/./app/api/indexer/route.ts:16:9)
+    at async AppRouteRouteModule.do (/home/winnie/amm_indexer/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:10:32804)
+    at async AppRouteRouteModule.handle (/home/winnie/amm_indexer/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:10:39825)
+    at async doRender (/home/winnie/amm_indexer/node_modules/next/dist/server/base-server.js:1452:42)
+    at async responseGenerator (/home/winnie/amm_indexer/node_modules/next/dist/server/base-server.js:1822:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/home/winnie/amm_indexer/node_modules/next/dist/server/base-server.js:1832:28)
+    at async DevServer.renderPageComponent (/home/winnie/amm_indexer/node_modules/next/dist/server/base-server.js:2259:24)
+    at async DevServer.renderToResponseImpl (/home/winnie/amm_indexer/node_modules/next/dist/server/base-server.js:2297:32)
+    at async DevServer.pipeImpl (/home/winnie/amm_indexer/node_modules/next/dist/server/base-server.js:959:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/home/winnie/amm_indexer/node_modules/next/dist/server/next-server.js:281:17)
+    at async DevServer.handleRequestImpl (/home/winnie/amm_indexer/node_modules/next/dist/server/base-server.js:853:17)
+    at async /home/winnie/amm_indexer/node_modules/next/dist/server/dev/next-dev-server.js:371:20
+    at async Span.traceAsyncFn (/home/winnie/amm_indexer/node_modules/next/dist/trace/trace.js:153:20)
+    at async DevServer.handleRequest (/home/winnie/amm_indexer/node_modules/next/dist/server/dev/next-dev-server.js:368:24)
+    at async invokeRender (/home/winnie/amm_indexer/node_modules/next/dist/server/lib/router-server.js:230:21)
+    at async handleRequest (/home/winnie/amm_indexer/node_modules/next/dist/server/lib/router-server.js:408:24)
+    at async requestHandlerImpl (/home/winnie/amm_indexer/node_modules/next/dist/server/lib/router-server.js:432:13)
+    at async Server.requestListener (/home/winnie/amm_indexer/node_modules/next/dist/server/lib/start-server.js:146:13)
+[poller] ERROR: [supra-mainnet] Error in polling loop: Transaction API error: Transaction already closed: A commit cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 8588 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846223
+[poller] INFO: [supra-testnet] Updated latest block height from 30846218 to 30846223
+[poller] INFO: [supra-testnet] Processing blocks 30846219 to 30846223 (Latest: 30846223)
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846219-30846224
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846229
+[poller] INFO: [supra-testnet] Updated latest block height from 30846223 to 30846229
+[poller] INFO: [supra-testnet] Processing blocks 30846224 to 30846229 (Latest: 30846229)
 [rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-prisma:query COMMIT
-[update-amm-data-task] INFO: [supra-mainnet] Datos base cargados, 3 pares con reservas, 2 volúmenes de 24h, 7 volúmenes de 7d y 8 volúmenes de 30d encontrados.
-[update-amm-data-task] INFO: [supra-mainnet] 3 actualizaciones de pares AMM preparadas.
-[LOG] processStakingPools: Iniciando para la red supra-mainnet
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30140564
-[poller] INFO: [supra-testnet] Updated latest block height from 30140558 to 30140564
-[poller] INFO: [supra-testnet] Processing blocks 30130612 to 30130621 (Latest: 30140564)
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076095
-[poller] INFO: [supra-mainnet] Updated latest block height from 21076094 to 21076095
-[poller] INFO: [supra-mainnet] Processing blocks 21076095 to 21076095 (Latest: 21076095)
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query BEGIN
-prisma:query DEALLOCATE ALL
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21076095-21076096
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846224-30846230
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21365416
+[poller] INFO: [supra-mainnet] Updated latest block height from 21365406 to 21365416
+[poller] INFO: [supra-mainnet] Processing blocks 21365402 to 21365411 (Latest: 21365416)
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846232
+[poller] INFO: [supra-testnet] Updated latest block height from 30846229 to 30846232
+[poller] INFO: [supra-testnet] Processing blocks 30846230 to 30846232 (Latest: 30846232)
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846230-30846233
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846239
+[poller] INFO: [supra-testnet] Updated latest block height from 30846232 to 30846239
+[poller] INFO: [supra-testnet] Processing blocks 30846233 to 30846239 (Latest: 30846239)
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846233-30846240
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846240
+[poller] INFO: [supra-testnet] Updated latest block height from 30846239 to 30846240
+[poller] INFO: [supra-testnet] Processing blocks 30846240 to 30846240 (Latest: 30846240)
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846240-30846241
+[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
+[rpcClient] DEBUG: Fetched 4 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21365402-21365412
+[poller] INFO: [supra-mainnet] Fetched 4 events from blocks 21365402-21365411.
+[eventProcessor] DEBUG: Processing 4 RpcEvents in current batch.
+[eventProcessor] DEBUG: Starting transaction for event: Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet
+[dexlynSwapHandler] DEBUG: Processing DexlynSwapEvent {"curve":"0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::curves::Uncorrelated","pair_x":"0x1::supra_coin::SupraCoin","pair_y":"0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC","reserve_x":"4738488476373982","reserve_y":"168653346598","timestamp":"1756270824","x_in":"0","x_out":"5000000000","y_in":"178497","y_out":"0"}
+[dexlynSwapHandler] DEBUG: DexlynSwapEvent already exists. Skipping creation.
+[eventProcessor] INFO: Successfully processed and committed transaction for event Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet.
+[eventProcessor] DEBUG: Starting transaction for event: Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet
+[dexlynSwapHandler] DEBUG: Processing DexlynSwapEvent {"curve":"0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::curves::Uncorrelated","pair_x":"0x635f53147391781c93bf3e1c68dcea5e2f7234ec371b0f241d150465606a9007::ROBBIE::ROBBIE","pair_y":"0x1::supra_coin::SupraCoin","reserve_x":"254630546965562","reserve_y":"49061055261965","timestamp":"1756270827","x_in":"0","x_out":"10349009","y_in":"2000000","y_out":"0"}
+[dexlynSwapHandler] DEBUG: DexlynSwapEvent already exists. Skipping creation.
+[eventProcessor] INFO: Successfully processed and committed transaction for event Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet.
+[eventProcessor] DEBUG: Starting transaction for event: Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet
+[dexlynSwapHandler] DEBUG: Processing DexlynSwapEvent {"curve":"0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::curves::Uncorrelated","pair_x":"0x9176f70f125199a3e3d5549ce795a8e906eed75901d535ded623802f15ae3637::cdp_multi::CASH","pair_y":"0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC","reserve_x":"53433640102","reserve_y":"405831913","timestamp":"1756270829","x_in":"0","x_out":"186980619","y_in":"1419426","y_out":"0"}
+[dexlynSwapHandler] DEBUG: DexlynSwapEvent already exists. Skipping creation.
+[eventProcessor] INFO: Successfully processed and committed transaction for event Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet.
+[eventProcessor] DEBUG: Starting transaction for event: Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet
+[dexlynSwapHandler] DEBUG: Processing DexlynSwapEvent {"curve":"0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::curves::Uncorrelated","pair_x":"0x1::supra_coin::SupraCoin","pair_y":"0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC","reserve_x":"4738488376373982","reserve_y":"168653350165","timestamp":"1756270829","x_in":"0","x_out":"100000000","y_in":"3570","y_out":"0"}
+[dexlynSwapHandler] DEBUG: DexlynSwapEvent already exists. Skipping creation.
+[eventProcessor] INFO: Successfully processed and committed transaction for event Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365402 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet.
+[eventProcessor] INFO: Finished processing batch of 4 events.
+[eventProcessor] DEBUG: Debug: processEvents returning createdNewData: false
 [rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query SELECT "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent" FROM "public"."staking_pools" WHERE "public"."staking_pools"."network" = $1 OFFSET $2
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30130612-30130622
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846246
+[poller] INFO: [supra-testnet] Updated latest block height from 30846240 to 30846246
+[poller] INFO: [supra-testnet] Processing blocks 30846241 to 30846246 (Latest: 30846246)
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846241-30846247
 [rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
-prisma:query COMMIT
-[LOG] processStakingPools: 22 pools de staking encontrados.
-[LOG] processStakingPools: Pool 5231 - TVL calculado: 390.17 USD
-[LOG] calculateStakingPoolApr: Pool 5231 - APR calculado: 5.37
-[LOG] processStakingPools: Pool 5240 - TVL calculado: 2871.31 USD
-[LOG] calculateStakingPoolApr: Pool 5240 - APR calculado: 7.47
-[LOG] processStakingPools: Pool 5229 - TVL calculado: 189.93 USD
-[LOG] calculateStakingPoolApr: Pool 5229 - APR calculado: 15.53
-[LOG] processStakingPools: Pool 5242 - TVL calculado: 121.75 USD
-[LOG] calculateStakingPoolApr: Pool 5242 - APR calculado: 1.64
-[LOG] processStakingPools: Pool 5234 - TVL calculado: 0.00 USD
-[LOG] calculateStakingPoolApr: Faltan datos para el pool 5234. Omitiendo cálculo de APR.
-[LOG] processStakingPools: Pool 5220 - TVL calculado: 1196.35 USD
-[LOG] calculateStakingPoolApr: Pool 5220 - APR calculado: 8.75
-[LOG] processStakingPools: Pool 5218 - TVL calculado: 0.02 USD
-[LOG] calculateStakingPoolApr: Pool 5218 - APR calculado: 2923773.58
-[LOG] processStakingPools: Pool 5236 - TVL calculado: 6021.54 USD
-[LOG] calculateStakingPoolApr: Pool 5236 - APR calculado: 11.33
-[LOG] processStakingPools: Pool 5216 - TVL calculado: 0.00 USD
-[LOG] calculateStakingPoolApr: Pool 5216 - APR calculado: 3807831199.07
-[LOG] processStakingPools: Pool 5238 - TVL calculado: 56.61 USD
-[LOG] calculateStakingPoolApr: Pool 5238 - APR calculado: 69.32
-[LOG] processStakingPools: Pool 5214 - TVL calculado: 0.00 USD
-[LOG] calculateStakingPoolApr: Pool 5214 - APR calculado: 8496210341028.57
-[LOG] processStakingPools: Pool 5232 - TVL calculado: 2358.06 USD
-[LOG] calculateStakingPoolApr: Pool 5232 - APR calculado: 1.66
-[LOG] processStakingPools: Pool 5215 - TVL calculado: 0.00 USD
-[LOG] calculateStakingPoolApr: Pool 5215 - APR calculado: 451378815.93
-[LOG] processStakingPools: Pool 5243 - TVL calculado: 1291.29 USD
-[LOG] calculateStakingPoolApr: Pool 5243 - APR calculado: 1.55
-[LOG] processStakingPools: Pool 5223 - TVL calculado: 404.19 USD
-[LOG] calculateStakingPoolApr: Pool 5223 - APR calculado: 19.42
-[LOG] processStakingPools: Pool 5230 - TVL calculado: 1294.60 USD
-[LOG] calculateStakingPoolApr: Pool 5230 - APR calculado: 19.60
-[LOG] processStakingPools: Pool 5222 - TVL calculado: 3401.50 USD
-[LOG] calculateStakingPoolApr: Pool 5222 - APR calculado: 12.31
-[LOG] processStakingPools: Pool 5217 - TVL calculado: 6827.77 USD
-[LOG] calculateStakingPoolApr: Pool 5217 - APR calculado: 28.73
-[LOG] processStakingPools: Pool 5224 - TVL calculado: 5661.68 USD
-[LOG] calculateStakingPoolApr: Pool 5224 - APR calculado: 1.88
-[LOG] processStakingPools: Pool 5245 - TVL calculado: 6640.25 USD
-[LOG] calculateStakingPoolApr: Pool 5245 - APR calculado: 21.35
-[LOG] processStakingPools: Pool 5227 - TVL calculado: 2230.64 USD
-[LOG] calculateStakingPoolApr: Pool 5227 - APR calculado: 66.57
-[LOG] processStakingPools: Pool 5225 - TVL calculado: 554.07 USD
-[LOG] calculateStakingPoolApr: Pool 5225 - APR calculado: 28.53
-[LOG] processStakingPools: Finalizado. TVL total de Staking: 41511.73 USD
-[update-amm-data-task] INFO: [supra-mainnet] 22 actualizaciones de pools de staking preparadas.
-[LOG] prepareProtocolStatsUpdate: Preparando estadísticas para la red supra-mainnet en el timestamp 2025-08-23T20:00:00.000Z
-[LOG] prepareProtocolStatsUpdate: TVL Total de la Plataforma: 42950.574058 USD
-[LOG] prepareProtocolStatsUpdate: TVL de AMM: 1438.839186 USD
-[LOG] prepareProtocolStatsUpdate: TVL de Staking: 41511.734872 USD
-[update-amm-data-task] INFO: [supra-mainnet] Actualización de estadísticas del protocolo preparada.
-[update-amm-data-task] INFO: [supra-mainnet] Ejecutando 26 operaciones en una transacción...
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076095
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query BEGIN
-prisma:query DEALLOCATE ALL
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."Ammpair" SET "reserve0" = $1, "reserve1" = $2, "tvlUsd" = $3, "lastStatsUpdate" = $4, "apr24h" = $5, "volumeUsd24h" = $6, "apr7d" = $7, "volumeUsd7d" = $8, "volumeUsd30d" = $9, "apyCalculated" = $10, "feesUsd24h" = $11, "feesUsd7d" = $12, "feesUsd30d" = $13, "lpFeePercent" = $14 WHERE (("public"."Ammpair"."network" = $15 AND "public"."Ammpair"."pair" = $16) AND 1=1) RETURNING "public"."Ammpair"."id", "public"."Ammpair"."pair", "public"."Ammpair"."creator", "public"."Ammpair"."createdAt", "public"."Ammpair"."updatedAt", "public"."Ammpair"."version"::text, "public"."Ammpair"."token0Address", "public"."Ammpair"."token1Address", "public"."Ammpair"."network", "public"."Ammpair"."token0Network", "public"."Ammpair"."token1Network", "public"."Ammpair"."verified", "public"."Ammpair"."displayOrder", "public"."Ammpair"."apr24h", "public"."Ammpair"."apr7d", "public"."Ammpair"."apyCalculated", "public"."Ammpair"."lastStatsUpdate", "public"."Ammpair"."lpFeePercent", "public"."Ammpair"."reserve0", "public"."Ammpair"."reserve1", "public"."Ammpair"."tvlUsd", "public"."Ammpair"."volumeToken0_24h", "public"."Ammpair"."volumeToken1_24h", "public"."Ammpair"."volumeUsd24h", "public"."Ammpair"."volumeUsd7d", "public"."Ammpair"."volumeUsd30d", "public"."Ammpair"."feesUsd24h", "public"."Ammpair"."feesUsd7d", "public"."Ammpair"."feesUsd30d"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30140568
-[poller] INFO: [supra-testnet] Updated latest block height from 30140564 to 30140568
-[poller] INFO: [supra-testnet] Processing blocks 30130622 to 30130631 (Latest: 30140568)
-prisma:query UPDATE "public"."Ammpair" SET "reserve0" = $1, "reserve1" = $2, "tvlUsd" = $3, "lastStatsUpdate" = $4, "apr24h" = $5, "volumeUsd24h" = $6, "apr7d" = $7, "volumeUsd7d" = $8, "volumeUsd30d" = $9, "apyCalculated" = $10, "feesUsd24h" = $11, "feesUsd7d" = $12, "feesUsd30d" = $13, "lpFeePercent" = $14 WHERE (("public"."Ammpair"."network" = $15 AND "public"."Ammpair"."pair" = $16) AND 1=1) RETURNING "public"."Ammpair"."id", "public"."Ammpair"."pair", "public"."Ammpair"."creator", "public"."Ammpair"."createdAt", "public"."Ammpair"."updatedAt", "public"."Ammpair"."version"::text, "public"."Ammpair"."token0Address", "public"."Ammpair"."token1Address", "public"."Ammpair"."network", "public"."Ammpair"."token0Network", "public"."Ammpair"."token1Network", "public"."Ammpair"."verified", "public"."Ammpair"."displayOrder", "public"."Ammpair"."apr24h", "public"."Ammpair"."apr7d", "public"."Ammpair"."apyCalculated", "public"."Ammpair"."lastStatsUpdate", "public"."Ammpair"."lpFeePercent", "public"."Ammpair"."reserve0", "public"."Ammpair"."reserve1", "public"."Ammpair"."tvlUsd", "public"."Ammpair"."volumeToken0_24h", "public"."Ammpair"."volumeToken1_24h", "public"."Ammpair"."volumeUsd24h", "public"."Ammpair"."volumeUsd7d", "public"."Ammpair"."volumeUsd30d", "public"."Ammpair"."feesUsd24h", "public"."Ammpair"."feesUsd7d", "public"."Ammpair"."feesUsd30d"
-prisma:query INSERT INTO "public"."protocol_stats" ("network","timestamp","totalTvlUsd","ammTvlUsd","stakingTvlUsd") VALUES ($1,$2,$3,$4,$5) ON CONFLICT ("network","timestamp") DO UPDATE SET "totalTvlUsd" = $6, "ammTvlUsd" = $7, "stakingTvlUsd" = $8 WHERE (("public"."protocol_stats"."network" = $9 AND "public"."protocol_stats"."timestamp" = $10) AND 1=1) RETURNING "public"."protocol_stats"."id", "public"."protocol_stats"."network", "public"."protocol_stats"."timestamp", "public"."protocol_stats"."totalTvlUsd", "public"."protocol_stats"."ammTvlUsd", "public"."protocol_stats"."virtualPoolsTvlUsd", "public"."protocol_stats"."stakingTvlUsd", "public"."protocol_stats"."totalVolume24hUsd", "public"."protocol_stats"."ammVolume24hUsd", "public"."protocol_stats"."totalUniqueUsers", "public"."protocol_stats"."totalFeesEarnedUsd24h"
-prisma:query COMMIT
-[update-amm-data-task] INFO: [supra-testnet] Ciclo de actualización modular completado con éxito.
-[scheduled-tasks] INFO: [supra-testnet] UpdateAmmData COMPLETED.
-[scheduled-tasks] INFO: Update cycle for supra-testnet FINISHED successfully.
-prisma:query UPDATE "public"."Ammpair" SET "reserve0" = $1, "reserve1" = $2, "tvlUsd" = $3, "lastStatsUpdate" = $4, "apr24h" = $5, "volumeUsd24h" = $6, "apr7d" = $7, "volumeUsd7d" = $8, "volumeUsd30d" = $9, "apyCalculated" = $10, "feesUsd24h" = $11, "feesUsd7d" = $12, "feesUsd30d" = $13, "lpFeePercent" = $14 WHERE (("public"."Ammpair"."network" = $15 AND "public"."Ammpair"."pair" = $16) AND 1=1) RETURNING "public"."Ammpair"."id", "public"."Ammpair"."pair", "public"."Ammpair"."creator", "public"."Ammpair"."createdAt", "public"."Ammpair"."updatedAt", "public"."Ammpair"."version"::text, "public"."Ammpair"."token0Address", "public"."Ammpair"."token1Address", "public"."Ammpair"."network", "public"."Ammpair"."token0Network", "public"."Ammpair"."token1Network", "public"."Ammpair"."verified", "public"."Ammpair"."displayOrder", "public"."Ammpair"."apr24h", "public"."Ammpair"."apr7d", "public"."Ammpair"."apyCalculated", "public"."Ammpair"."lastStatsUpdate", "public"."Ammpair"."lpFeePercent", "public"."Ammpair"."reserve0", "public"."Ammpair"."reserve1", "public"."Ammpair"."tvlUsd", "public"."Ammpair"."volumeToken0_24h", "public"."Ammpair"."volumeToken1_24h", "public"."Ammpair"."volumeUsd24h", "public"."Ammpair"."volumeUsd7d", "public"."Ammpair"."volumeUsd30d", "public"."Ammpair"."feesUsd24h", "public"."Ammpair"."feesUsd7d", "public"."Ammpair"."feesUsd30d"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30130622-30130632
+[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21365428
+[poller] INFO: [supra-mainnet] Updated latest block height from 21365416 to 21365428
+[poller] INFO: [supra-mainnet] Processing blocks 21365412 to 21365421 (Latest: 21365428)
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846252
+[poller] INFO: [supra-testnet] Updated latest block height from 30846246 to 30846252
+[poller] INFO: [supra-testnet] Processing blocks 30846247 to 30846252 (Latest: 30846252)
+[rpcClient] DEBUG: Fetched 1 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21365412-21365422
+[poller] INFO: [supra-mainnet] Fetched 1 events from blocks 21365412-21365421.
+[eventProcessor] DEBUG: Processing 1 RpcEvents in current batch.
+[eventProcessor] DEBUG: Starting transaction for event: Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365412 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet
+[dexlynSwapHandler] DEBUG: Processing DexlynSwapEvent {"curve":"0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::curves::Uncorrelated","pair_x":"0x1::supra_coin::SupraCoin","pair_y":"0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC","reserve_x":"4738488276373982","reserve_y":"168653353732","timestamp":"1756270839","x_in":"0","x_out":"100000000","y_in":"3570","y_out":"0"}
+[dexlynSwapHandler] INFO: New DexlynSwapEvent found. Creating...
+[dbUtils] INFO: [getOrCreateToken] Starting for address: 0x1::supra_coin::SupraCoin
+[dbUtils] DEBUG: [supra-mainnet] Token 0x1::supra_coin::SupraCoin is Coin-Legacy. Treating as primary.
+[dbUtils] INFO: [supra-mainnet] Primary token 0x1::supra_coin::SupraCoin appears to be Coin-Legacy. Attempting to fetch Coin-Legacy specific info using fetchCoinInfoResource.
+[fetchResource] DEBUG: Fetching resource from: https://rpc-mainnet.supra.com/rpc/v1/accounts/0x1/resources/0x1%3A%3Acoin%3A%3ACoinInfo%3C0x1%3A%3Asupra_coin%3A%3ASupraCoin%3E
+[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30846247-30846253
 [rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
+[fetchResource] DEBUG: Successfully fetched resource data: {"result":[{"decimals":8,"name":"Supra Coin","supply":{"vec":[{"aggregator":{"vec":[{"handle":"0x9115cf36a1bc37ccc0e3d1ceadcb72adddc65b19021dbd0623c06ce039e74fc1","key":"0x46ee43b58627dff22544be91ddce928242ede01f52a281da8b372813a683abd6","limit":"10000000000000000000"}]},"integer":{"vec":[]}}]},"symbol":"SUPRA"}]}
+[dbUtils] DEBUG: [supra-mainnet] Raw CoinInfo resource for 0x1::supra_coin::SupraCoin: {
+  "result": [
+    {
+      "decimals": 8,
+      "name": "Supra Coin",
+      "supply": {
+        "vec": [
+          {
+            "aggregator": {
+              "vec": [
+                {
+                  "handle": "0x9115cf36a1bc37ccc0e3d1ceadcb72adddc65b19021dbd0623c06ce039e74fc1",
+                  "key": "0x46ee43b58627dff22544be91ddce928242ede01f52a281da8b372813a683abd6",
+                  "limit": "10000000000000000000"
+                }
+              ]
+            },
+            "integer": {
+              "vec": []
+            }
+          }
+        ]
+      },
+      "symbol": "SUPRA"
+    }
+  ]
+}
+[dbUtils] INFO: [supra-mainnet] Successfully fetched Coin-Legacy metadata for primary 0x1::supra_coin::SupraCoin: Name=Supra Coin, Symbol=SUPRA, Decimals=8
+[dbUtils] INFO: [getOrCreateToken] Searching for token in DB with primary address: 0x1::supra_coin::SupraCoin
+[dbUtils] INFO: [getOrCreateToken] Starting for address: 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC
+[dbUtils] DEBUG: [supra-mainnet] Token 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC is Coin-Legacy. Treating as primary.
+[dbUtils] INFO: [supra-mainnet] Primary token 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC appears to be Coin-Legacy. Attempting to fetch Coin-Legacy specific info using fetchCoinInfoResource.
+[fetchResource] DEBUG: Fetching resource from: https://rpc-mainnet.supra.com/rpc/v1/accounts/0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b/resources/0x1%3A%3Acoin%3A%3ACoinInfo%3C0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b%3A%3Ahyper_coin%3A%3ADexlynUSDC%3E
+[fetchResource] DEBUG: Successfully fetched resource data: {"result":[{"decimals":6,"name":"DexlynUSDC","supply":{"vec":[{"aggregator":{"vec":[]},"integer":{"vec":[{"limit":"340282366920938463463374607431768211455","value":"327448357029"}]}}]},"symbol":"dexUSDC"}]}
+[dbUtils] DEBUG: [supra-mainnet] Raw CoinInfo resource for 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC: {
+  "result": [
+    {
+      "decimals": 6,
+      "name": "DexlynUSDC",
+      "supply": {
+        "vec": [
+          {
+            "aggregator": {
+              "vec": []
+            },
+            "integer": {
+              "vec": [
+                {
+                  "limit": "340282366920938463463374607431768211455",
+                  "value": "327448357029"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "symbol": "dexUSDC"
+    }
+  ]
+}
+[dbUtils] INFO: [supra-mainnet] Successfully fetched Coin-Legacy metadata for primary 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC: Name=DexlynUSDC, Symbol=dexUSDC, Decimals=6
+[dbUtils] INFO: [getOrCreateToken] Searching for token in DB with primary address: 0x8f7d16ade319b0fce368ca6cdb98589c4527ce7f5b51e544a9e68e719934458b::hyper_coin::DexlynUSDC
+[dexlynSwapHandler] INFO: Successfully created DexlynSwapEvent.
+[eventProcessor] INFO: Successfully processed and committed transaction for event Tx:unknown_tx_for_0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent_block_21365412 Seq:0 Type:0xdc694898dff98a1b0447e0992d0413e123ea80da1021d464a4fbaf0265870d8::liquidity_pool::SwapEvent Net:supra-mainnet.
+[eventProcessor] INFO: Finished processing batch of 1 events.
+[eventProcessor] DEBUG: Debug: processEvents returning createdNewData: false
 [rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30140572
-[poller] INFO: [supra-testnet] Updated latest block height from 30140568 to 30140572
-[poller] INFO: [supra-testnet] Processing blocks 30130632 to 30130641 (Latest: 30140572)
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30130632-30130642
-[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30140577
-[poller] INFO: [supra-testnet] Updated latest block height from 30140572 to 30140577
-[poller] INFO: [supra-testnet] Processing blocks 30130642 to 30130651 (Latest: 30140577)
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076105
-[poller] INFO: [supra-mainnet] Updated latest block height from 21076095 to 21076105
-[poller] INFO: [supra-mainnet] Processing blocks 21076096 to 21076105 (Latest: 21076105)
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30130642-30130652
-[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30140581
-[poller] INFO: [supra-testnet] Updated latest block height from 30140577 to 30140581
-[poller] INFO: [supra-testnet] Processing blocks 30130652 to 30130661 (Latest: 30140581)
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30130652-30130662
-[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30140587
-[poller] INFO: [supra-testnet] Updated latest block height from 30140581 to 30140587
-[poller] INFO: [supra-testnet] Processing blocks 30130662 to 30130671 (Latest: 30140587)
-prisma:query UPDATE "public"."staking_pools" SET "cachedTvlUsd" = $1, "cachedApy" = $2 WHERE ("public"."staking_pools"."id" = $3 AND 1=1) RETURNING "public"."staking_pools"."id", "public"."staking_pools"."creatorAddress", "public"."staking_pools"."stakeTokenAddress", "public"."staking_pools"."rewardTokenAddress", "public"."staking_pools"."isDynamicPool", "public"."staking_pools"."rewardPerSec", "public"."staking_pools"."accumReward", "public"."staking_pools"."lastUpdatedTimestamp", "public"."staking_pools"."startTimestamp", "public"."staking_pools"."endTimestamp", "public"."staking_pools"."emergencyLocked", "public"."staking_pools"."stakesClosed", "public"."staking_pools"."createdAt", "public"."staking_pools"."updatedAt", "public"."staking_pools"."creatorNetwork", "public"."staking_pools"."network", "public"."staking_pools"."rewardTokenNetwork", "public"."staking_pools"."stakeTokenNetwork", "public"."staking_pools"."boostEnabled", "public"."staking_pools"."initialEndTimestamp", "public"."staking_pools"."initialRewardPerSec", "public"."staking_pools"."verified", "public"."staking_pools"."totalBoosted", "public"."staking_pools"."displayOrder", "public"."staking_pools"."cachedApy", "public"."staking_pools"."cachedStakerCount", "public"."staking_pools"."cachedTvlUsd", "public"."staking_pools"."poolType"::text, "public"."staking_pools"."totalStakedAmount", "public"."staking_pools"."boostConfigCollectionName", "public"."staking_pools"."boostConfigCollectionOwner", "public"."staking_pools"."boostConfigPercent"
-prisma:query INSERT INTO "public"."protocol_stats" ("network","timestamp","totalTvlUsd","ammTvlUsd","stakingTvlUsd") VALUES ($1,$2,$3,$4,$5) ON CONFLICT ("network","timestamp") DO UPDATE SET "totalTvlUsd" = $6, "ammTvlUsd" = $7, "stakingTvlUsd" = $8 WHERE (("public"."protocol_stats"."network" = $9 AND "public"."protocol_stats"."timestamp" = $10) AND 1=1) RETURNING "public"."protocol_stats"."id", "public"."protocol_stats"."network", "public"."protocol_stats"."timestamp", "public"."protocol_stats"."totalTvlUsd", "public"."protocol_stats"."ammTvlUsd", "public"."protocol_stats"."virtualPoolsTvlUsd", "public"."protocol_stats"."stakingTvlUsd", "public"."protocol_stats"."totalVolume24hUsd", "public"."protocol_stats"."ammVolume24hUsd", "public"."protocol_stats"."totalUniqueUsers", "public"."protocol_stats"."totalFeesEarnedUsd24h"
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-mainnet.supra.com/rpc/v1 for blocks 21076096-21076106
-[rpcClient] DEBUG: Fetching latest block height from https://rpc-mainnet.supra.com/rpc/v1/block
-prisma:query COMMIT
-[update-amm-data-task] INFO: [supra-mainnet] Ciclo de actualización modular completado con éxito.
-[scheduled-tasks] INFO: [supra-mainnet] UpdateAmmData COMPLETED.
-[scheduled-tasks] INFO: Update cycle for supra-mainnet FINISHED successfully.
-[rpcClient] DEBUG: Fetched 0 events in total from https://rpc-testnet.supra.com/rpc/v1 for blocks 30130662-30130672
-[rpcClient] DEBUG: Fetching latest block height from https://rpc-testnet.supra.com/rpc/v1/block
-[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21076106
-[poller] INFO: [supra-mainnet] Updated latest block height from 21076105 to 21076106
+[rpcClient] DEBUG: Latest block height from https://rpc-testnet.supra.com/rpc/v1: 30846256
+[poller] INFO: [supra-testnet] Updated latest block height from 30846252 to 30846256
+[poller] INFO: [supra-testnet] Processing blocks 30846253 to 30846256 (Latest: 30846256)
+[rpcClient] DEBUG: Latest block height from https://rpc-mainnet.supra.com/rpc/v1: 21365432
+[poller] INFO: [supra-mainnet] Updated latest block height from 21365428 to 21365432
+[poller] INFO: [supra-mainnet] Processing blocks 21365422 to 21365431 (Latest: 21365432)
+^C

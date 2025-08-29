@@ -403,6 +403,8 @@ model tokens {
   marketCapUsd                                                              String?
   priceChange24hPercent                                                     Decimal?        @db.Decimal(18, 4)
   priceUsdCurrent                                                           Decimal?        @db.Decimal(36, 18)
+  priceAnchor                                                               Decimal?        @db.Decimal(36, 18)
+  lastPriceUpdate                                                           DateTime?
   totalSupply                                                               String?
   updatedAt                                                                 DateTime        @default(now())
   volume24hUsd                                                              String?

@@ -199,9 +199,7 @@ export class EventPoller {
         logger.info(`[${this.pollerId}] Fetched ${events.length} events from blocks ${this.currentBlockHeight}-${endBlock}.`);
         // processEvents is wrapped in a transaction by its caller if needed, or handles its own.
         // Here, we are not saving progress block by block, so the transaction for processEvents is self-contained.
-        await prismadb.$transaction(async (tx) => { // Transaction for processing events
-            await processEvents(events, this.network, tx);
-        });
+        await processEvents(events, this.network, prismadb);
         // logger.info(`[${this.pollerId}] Successfully processed events for blocks up to ${endBlock}.`);
       }
       // Whether events were found or not, this range of blocks is considered "processed" for this interval.
