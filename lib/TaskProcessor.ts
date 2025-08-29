@@ -36,7 +36,7 @@ async function runUpdateCycleForNetwork(networkConfig: NetworkConfig) {
   logger.info(`Starting update cycle for ${networkConfig.networkName}...`);
 
   try {
-    /*
+    
     logger.info(`[${networkConfig.networkName}] Executing GetReservesForAllPairs...`);
     await executeGetReservesForAllPairs(prismadb, networkConfig);
     logger.info(`[${networkConfig.networkName}] GetReservesForAllPairs COMPLETED.`);
@@ -48,7 +48,7 @@ async function runUpdateCycleForNetwork(networkConfig: NetworkConfig) {
     logger.info(`[${networkConfig.networkName}] GetTotalStakedForAllPools COMPLETED.`);
 
     await delay(DELAY_BETWEEN_SUB_TASKS_MS); // Espera 1 segundos
-*/
+
     logger.info(`[${networkConfig.networkName}] Executing UpdateAmmData (Sync, TVL, APR)...`);
     await executeUpdateAmmData(prismadb, networkConfig);
     logger.info(`[${networkConfig.networkName}] UpdateAmmData COMPLETED.`);
@@ -87,8 +87,8 @@ export function startScheduledTasks(setupConfig: SchedulerSetupConfig): void {
     const masterUpdateTaskKey = `${networkConfig.networkName}-MasterUpdateCycle`;
     if (!activeJobs.has(masterUpdateTaskKey)) {
       logger.info(`Setting up Master Update Cycle task for ${networkConfig.networkName}`);
-      const schedule = '* * * * *'; // CADA MINUTO PARA DEBUG
-      //const schedule = '0 0 * * *'; // todos los días a las 00:00
+      //const schedule = '* * * * *'; // CADA MINUTO PARA DEBUG
+      const schedule = '0 0 * * *'; // todos los días a las 00:00
       const job: ScheduledTask = cron.schedule(schedule, async () => {
         logger.info(`Triggering Master Update Cycle for ${networkConfig.networkName} (cron: ${schedule})`);
         await runUpdateCycleForNetwork(networkConfig);
