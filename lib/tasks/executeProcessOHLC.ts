@@ -1,5 +1,6 @@
 // D:\Crystara\lib\tasks\executeProcessOHLC.ts
 import { PrismaClient } from '../../prisma/generated/main_db';
+import { Decimal } from '../../prisma/generated/main_db/runtime/library';
 import { createLogger } from '../../app/indexer/utils';
 import { NetworkConfig } from '../TaskProcessor';
 import { signalDB } from '../signalDB'; // Re-importamos el gestor de señales
@@ -57,6 +58,15 @@ export async function executeProcessOHLC(prismadb: PrismaClient, networkConfig: 
         // 3. Agrupar y procesar
         const tradesGrouped = groupTradesByInterval(unprocessedTrades);
 
+        // Obtener mapa de decimales
+        const pools = await prismadb.poolsDB.findMany({
+            select: { tokenAddress: true, tokenDecimals: true },
+        });
+        const decimalsMap = new Map<string, number>();
+        for (const pool of pools) {
+            decimalsMap.set(pool.tokenAddress, pool.tokenDecimals);
+        }
+
         for (const [key, trades] of tradesGrouped.entries()) {
             if (trades.length === 0) continue;
 
@@ -64,22 +74,36 @@ export async function executeProcessOHLC(prismadb: PrismaClient, networkConfig: 
             const intervalTimestamp = BigInt(timestampStr);
             const granularity = '1m';
 
-            const tradesWithPrice = trades.map(t => {
-                const tokenAmount = BigInt(t.tokenAmount);
-                if (tokenAmount === 0n) return null;
-                const price = (BigInt(t.supraAmount) * 10n**8n) / tokenAmount;
-                return { ...t, price };
-            }).filter(t => t !== null);
+            // Lógica de cálculo de precio corregida
+            const prices = trades.map(t => {
+                const tokenDecimals = decimalsMap.get(t.tokenAddress);
+                const supraDecimals = 8; // Estándar para Move
 
-            if (tradesWithPrice.length === 0) continue;
+                if (tokenDecimals === undefined) return null;
 
-            const open = tradesWithPrice[0].price;
-            const close = tradesWithPrice[tradesWithPrice.length - 1].price;
-            const high = tradesWithPrice.reduce((max, t) => t.price > max ? t.price : max, 0n);
-            const low = tradesWithPrice.reduce((min, t) => t.price < min ? t.price : min, open);
-            const volume = tradesWithPrice.reduce((sum, t) => sum + BigInt(t.supraAmount), 0n);
+                const supraAmount = new Decimal(t.supraAmount.toString());
+                const tokenAmount = new Decimal(t.tokenAmount.toString());
 
-            // 4. Escribir en la DB con los nombres de columna correctos
+                if (tokenAmount.isZero()) return null;
+
+                const adjustedSupra = supraAmount.div(new Decimal(10).pow(supraDecimals));
+                const adjustedToken = tokenAmount.div(new Decimal(10).pow(tokenDecimals));
+
+                if (adjustedToken.isZero()) return null;
+
+                return adjustedSupra.div(adjustedToken);
+            }).filter((p): p is Decimal => p !== null);
+
+            if (prices.length === 0) continue;
+
+            const open = prices[0];
+            const close = prices[prices.length - 1];
+            const high = Decimal.max(...prices);
+            const low = Decimal.min(...prices);
+            const volumeInSupra = trades.reduce((sum, t) => sum + BigInt(t.supraAmount), 0n);
+            const volume = new Decimal(volumeInSupra.toString()).div(new Decimal(10).pow(8)); // Ajuste de volumen
+
+            // 4. Escribir en la DB con el tipo de dato correcto (Decimal)
             await prismadb.token_price_history.upsert({
                 where: {
                     network_tokenAddress_timestamp_granularity: {
@@ -90,21 +114,21 @@ export async function executeProcessOHLC(prismadb: PrismaClient, networkConfig: 
                     }
                 },
                 update: {
-                    high: high.toString(),
-                    low: low.toString(),
-                    close: close.toString(),
-                    volume: volume.toString(),
+                    high: high,
+                    low: low,
+                    close: close,
+                    volume: volume,
                 },
                 create: {
                     network: networkConfig.networkName,
                     tokenAddress: tokenAddress,
                     timestamp: intervalTimestamp,
                     granularity: granularity,
-                    open: open.toString(),
-                    high: high.toString(),
-                    low: low.toString(),
-                    close: close.toString(),
-                    volume: volume.toString(),
+                    open: open,
+                    high: high,
+                    low: low,
+                    close: close,
+                    volume: volume,
                 }
             });
         }
